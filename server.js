@@ -64,11 +64,23 @@ app.post("/api/scan", async (req, res) => {
       }
     );
     const data = await r.json();
-    const raw = data.candidates[0].content.parts[0].text;
+    if (!r.ok || !data.candidates) {
+      const detail = JSON.stringify(data).slice(0, 600);
+      console.error("[scan] Vertex AI error:", detail);
+      throw new Error("Vertex AI error: " + detail);
+    }
+    const candidate = data.candidates[0];
+    if (!candidate.content || !candidate.content.parts) {
+      const detail = JSON.stringify(candidate).slice(0, 400);
+      console.error("[scan] no content in candidate:", detail);
+      throw new Error("no content (finishReason=" + candidate.finishReason + "): " + detail);
+    }
+    const raw = candidate.content.parts[0].text;
     const m = raw.match(/\{[\s\S]*\}/);
     if (!m) throw new Error("no json in response: " + raw.slice(0, 300));
     res.json(JSON.parse(m[0]));
   } catch (e) {
+    console.error("[scan] error:", e.message);
     res.status(500).json({ error: String(e) });
   }
 });
