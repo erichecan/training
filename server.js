@@ -26,35 +26,18 @@ app.put("/api/kv/:k", async (req, res) => {
   res.json({ ok: true });
 });
 
-async function gcpToken() {
-  const r = await fetch(
-    "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token",
-    { headers: { "Metadata-Flavor": "Google" } }
-  );
-  return (await r.json()).access_token;
-}
-
-async function gcpProject() {
-  if (process.env.GOOGLE_CLOUD_PROJECT) return process.env.GOOGLE_CLOUD_PROJECT;
-  const r = await fetch(
-    "http://metadata.google.internal/computeMetadata/v1/project/project-id",
-    { headers: { "Metadata-Flavor": "Google" } }
-  );
-  return r.text();
-}
-
 app.post("/api/scan", async (req, res) => {
   try {
     const { image, media_type } = req.body;
-    const [token, project] = await Promise.all([gcpToken(), gcpProject()]);
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) throw new Error("GEMINI_API_KEY not configured");
     const r = await fetch(
-      `https://us-central1-aiplatform.googleapis.com/v1/projects/${project}/locations/us-central1/publishers/google/models/gemini-2.0-flash-001:generateContent`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
       {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           contents: [{
-            role: "user",
             parts: [
               { inline_data: { mime_type: media_type, data: image } },
               { text: 'Read this golf scorecard photo. For holes 1-18 return ONLY compact JSON, no markdown: {"t":["TeeName"],"h":[[holeNo,par,yd], ...18]} aligned to t, null for missing. Numbers only.' },
@@ -66,8 +49,8 @@ app.post("/api/scan", async (req, res) => {
     const data = await r.json();
     if (!r.ok || !data.candidates) {
       const detail = JSON.stringify(data).slice(0, 600);
-      console.error("[scan] Vertex AI error:", detail);
-      throw new Error("Vertex AI error: " + detail);
+      console.error("[scan] Gemini API error:", detail);
+      throw new Error("Gemini API error: " + detail);
     }
     const candidate = data.candidates[0];
     if (!candidate.content || !candidate.content.parts) {

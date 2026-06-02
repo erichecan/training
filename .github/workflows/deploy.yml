@@ -41,7 +41,7 @@ jobs:
             --max-instances=3 \
             --cpu=0.5 \
             --memory=256Mi \
-            --set-secrets=DATABASE_URL=DATABASE_URL:latest \
+            --set-secrets=DATABASE_URL=DATABASE_URL:latest,GEMINI_API_KEY=GEMINI_API_KEY:latest \
             --quiet
 
       - name: Verify
