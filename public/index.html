@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>袋中球童 · Yardage Caddie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#1E5631">
+<style>
+  :root{--paper:#F4F0E4;--paper-2:#EBE6D6;--ink:#1C2A1F;--ink-soft:#4A5A4C;--rule:#C9C0A6;
+    --green:#1E5631;--green-2:#2E7D46;--flag:#C0392B;--flag-soft:#E07A5F;--wind:#3C7A8C;--shadow:rgba(28,42,31,.12);}
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+  html,body{background:var(--paper);}
+  body{font-family:"Hanken Grotesk","PingFang SC","Microsoft YaHei",system-ui,sans-serif;color:var(--ink);
+    max-width:560px;margin:0 auto;padding:0 0 80px;min-height:100vh;
+    background-image:linear-gradient(var(--paper-2) 1px,transparent 1px);background-size:100% 30px;}
+  .wrap{padding:0 18px;}
+  header{background:var(--green);color:var(--paper);padding:16px 18px 14px;border-bottom:3px solid var(--ink);position:relative;overflow:hidden;}
+  header::after{content:"⛳";position:absolute;right:-6px;bottom:-14px;font-size:84px;opacity:.13;transform:rotate(-12deg);}
+  .kicker{font-size:11px;letter-spacing:.28em;text-transform:uppercase;opacity:.8;font-weight:600;}
+  header h1{font-family:"Fraunces",serif;font-weight:600;font-size:25px;line-height:1;margin-top:5px;}
+  .tabbar{position:fixed;bottom:0;left:0;right:0;max-width:560px;margin:0 auto;display:flex;background:var(--ink);border-top:2px solid var(--green-2);z-index:50;}
+  .tabbar button{flex:1;background:none;border:none;color:var(--paper);opacity:.55;font-family:inherit;font-size:13px;font-weight:600;padding:11px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;}
+  .tabbar button .ic{font-size:18px;} .tabbar button.on{opacity:1;}
+  .view{display:none;} .view.on{display:block;}
+  section.card{background:var(--paper);border:1.5px solid var(--ink);border-radius:4px;margin-top:16px;box-shadow:4px 4px 0 var(--shadow);}
+  .card-body{padding:15px;} .card-head{padding:12px 15px;border-bottom:1.5px dashed var(--rule);}
+  .card-head h2{font-family:"Fraunces",serif;font-size:17px;font-weight:600;}
+  label{display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:6px;}
+  input,select{width:100%;font-family:inherit;font-size:16px;color:var(--ink);background:var(--paper);border:1.5px solid var(--rule);border-radius:4px;padding:10px 11px;outline:none;}
+  input:focus,select:focus{border-color:var(--green-2);}
+  .field{margin-bottom:13px;}.row{display:flex;gap:10px;}.row>div{flex:1;}
+  .small{font-size:11.5px;color:var(--ink-soft);line-height:1.5;}
+  button.primary{width:100%;font-family:"Fraunces",serif;font-weight:600;font-size:17px;background:var(--flag);color:var(--paper);border:1.5px solid var(--ink);padding:13px;cursor:pointer;box-shadow:3px 3px 0 var(--ink);transition:transform .1s,box-shadow .1s;border-radius:4px;}
+  button.primary:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink);}
+  button.ghost{background:var(--paper);color:var(--green);border:1.5px solid var(--green);padding:9px 13px;font-size:13px;font-weight:700;border-radius:4px;cursor:pointer;font-family:inherit;}
+  button.ghost.full{width:100%;}
+  .bag-grid{display:grid;grid-template-columns:1fr 78px 78px 28px;gap:8px 9px;align-items:center;}
+  .bag-grid .h{font-size:9.5px;font-weight:700;text-transform:uppercase;color:var(--ink-soft);text-align:center;}
+  .bag-grid .h:first-child{text-align:left;}.bag-grid input{padding:8px;font-size:15px;text-align:center;}
+  .bag-grid .clubname{text-align:left;font-weight:600;font-size:14px;}
+  .del{background:none;border:none;color:var(--flag);font-size:18px;cursor:pointer;padding:4px;}
+  .add-club{margin-top:11px;display:grid;grid-template-columns:1fr 78px 78px auto;gap:9px;}
+  .add-club input{padding:8px;font-size:14px;text-align:center;}.add-club input:first-child{text-align:left;}
+  .import-box{border:2px dashed var(--rule);border-radius:6px;padding:24px 16px;text-align:center;}
+  .import-box .big{font-size:38px;}.import-box h3{font-family:"Fraunces";font-size:18px;margin:8px 0 4px;}
+  .scan-btn{display:inline-block;margin-top:13px;background:var(--green);color:var(--paper);border:1.5px solid var(--ink);padding:12px 22px;border-radius:4px;font-weight:700;font-size:15px;cursor:pointer;box-shadow:3px 3px 0 var(--ink);}
+  .scan-btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink);}
+  .sc-table{width:100%;border-collapse:collapse;margin-top:6px;}
+  .sc-table th{font-size:10px;text-transform:uppercase;color:var(--ink-soft);padding:6px 4px;border-bottom:1.5px solid var(--ink);}
+  .sc-table td{padding:3px;border-bottom:1px solid var(--rule);}
+  .sc-table td input{padding:6px 4px;font-size:14px;text-align:center;border-color:transparent;background:transparent;}
+  .sc-table td input:focus{border-color:var(--green-2);background:var(--paper);}
+  .sc-table .hno{font-weight:700;font-family:"Fraunces";text-align:center;font-size:14px;}
+  .holenav{display:flex;gap:5px;overflow-x:auto;padding:6px 0 10px;margin-top:6px;}
+  .holenav button{flex:none;width:32px;height:32px;border-radius:50%;border:1.5px solid var(--rule);background:var(--paper);font-weight:700;font-size:13px;font-family:"Fraunces";cursor:pointer;color:var(--ink-soft);position:relative;}
+  .holenav button.on{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+  .holenav button .dot{position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:var(--flag);}
+  .holecard{background:var(--paper);border:2px solid var(--ink);border-radius:5px;box-shadow:5px 5px 0 var(--shadow);overflow:hidden;animation:rise .35s ease both;}
+  @keyframes rise{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
+  .hc-top{background:var(--ink);color:var(--paper);padding:13px 15px;display:flex;align-items:baseline;justify-content:space-between;}
+  .hc-top .hole{font-family:"Fraunces",serif;font-size:14px;}.hc-top .hole b{font-size:24px;}
+  .hc-top .meta{font-size:12px;text-align:right;opacity:.9;line-height:1.5;}
+  .hc-top .meta .sc{font-family:"Fraunces";font-size:18px;}
+  .hc-ctrl{padding:10px 15px;background:var(--paper-2);border-bottom:1.5px solid var(--rule);display:flex;flex-wrap:wrap;gap:14px;}
+  .ctrl-grp{display:flex;flex-direction:column;gap:5px;}.ctrl-grp .lab{font-size:9.5px;font-weight:700;text-transform:uppercase;color:var(--ink-soft);}
+  .ctrl-grp .pills{display:flex;gap:5px;}
+  .mini{border:1.5px solid var(--rule);background:var(--paper);border-radius:3px;padding:5px 9px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--ink);}
+  .mini.on{background:var(--green);color:var(--paper);border-color:var(--green);}.mini.wind.on{background:var(--wind);border-color:var(--wind);}
+  .hc-body{padding:4px 15px 14px;}
+  .section-label{display:flex;align-items:center;gap:9px;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin:14px 0 6px;}
+  .section-label::before,.section-label::after{content:"";flex:1;height:1.5px;background:var(--rule);}
+  .section-label.plan{color:var(--green-2);}.section-label.act{color:var(--flag);}
+  .shot{padding:11px 0;border-bottom:1.5px dashed var(--rule);}.shot:last-child{border-bottom:none;}
+  .shot-head{display:flex;align-items:center;gap:9px;margin-bottom:6px;}
+  .shot-no{width:24px;height:24px;flex:none;border-radius:50%;background:var(--green);color:var(--paper);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;font-family:"Fraunces";}
+  .shot-label{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-soft);}
+  .shot-club{font-family:"Fraunces",serif;font-size:21px;font-weight:600;display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;}
+  .shot-club .yd{font-size:13px;font-family:"Hanken Grotesk";color:var(--green-2);font-weight:700;}
+  .tag{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 6px;border-radius:3px;}
+  .tag.warn{background:var(--flag-soft);color:#5c1d12;}.tag.safe{background:#cfe3d2;color:var(--green);}.tag.wind{background:#bcd9e0;color:#16454f;}
+  .shot-detail{font-size:12.5px;color:var(--ink-soft);margin-top:4px;line-height:1.5;padding-left:33px;}
+  .shot-detail b{color:var(--ink);}
+  .notes{background:var(--paper-2);border-top:1.5px solid var(--rule);padding:11px 15px;margin:10px -15px 0;}
+  .notes h3{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:6px;}
+  .notes li{font-size:12.5px;line-height:1.5;margin-left:16px;margin-bottom:4px;}.notes li::marker{color:var(--flag);}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;}
+  .chip{border:1.5px solid var(--rule);background:var(--paper);border-radius:13px;padding:5px 10px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;color:var(--ink);}
+  .chip.on{background:var(--green);color:var(--paper);border-color:var(--green);}
+  .chip.bad.on{background:var(--flag);border-color:var(--flag);}.chip.pen.on{background:#7a1f15;border-color:#7a1f15;color:var(--paper);}
+  .chip.dir.on{background:var(--wind);border-color:var(--wind);color:var(--paper);}
+  .shotrow{border:1.5px solid var(--rule);border-radius:5px;padding:9px 10px;margin-bottom:8px;background:var(--paper);}
+  .shotrow .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
+  .shotrow .sn{font-family:"Fraunces";font-weight:700;font-size:13px;color:var(--ink-soft);}
+  .rowlab{font-size:9.5px;font-weight:700;text-transform:uppercase;color:var(--ink-soft);margin:7px 0 4px;}
+  .stepper{display:flex;align-items:center;border:1.5px solid var(--rule);border-radius:5px;overflow:hidden;width:max-content;}
+  .stepper button{border:none;background:var(--paper-2);width:36px;height:34px;font-size:19px;cursor:pointer;color:var(--ink);}
+  .stepper span{min-width:40px;text-align:center;font-weight:700;font-size:15px;}
+  .badges{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px;}
+  .badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:4px;background:var(--paper-2);color:var(--ink-soft);}
+  .badge.hit{background:#cfe3d2;color:var(--green);}.badge.miss{background:var(--flag-soft);color:#5c1d12;}
+  .ydinput{width:72px;padding:7px;font-size:14px;text-align:center;}
+  .statgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .statbox{border:1.5px solid var(--rule);border-radius:5px;padding:10px 12px;}
+  .statbox .v{font-family:"Fraunces";font-size:21px;font-weight:700;line-height:1.1;}
+  .statbox .l{font-size:10.5px;color:var(--ink-soft);text-transform:uppercase;margin-top:3px;}
+  .disp{border:1.5px solid var(--rule);border-radius:5px;padding:10px 12px;margin-bottom:9px;}
+  .disp .ch{font-family:"Fraunces";font-weight:700;font-size:15px;}
+  .bar{height:9px;border-radius:5px;background:var(--paper-2);position:relative;margin:8px 0 4px;overflow:hidden;}
+  .bar .mid{position:absolute;left:50%;top:0;bottom:0;width:1.5px;background:var(--ink-soft);}
+  .bar .fill{position:absolute;top:0;bottom:0;background:var(--wind);opacity:.8;}
+  .empty{text-align:center;color:var(--ink-soft);font-size:13px;padding:24px 10px;}
+  .navbtns{display:flex;gap:10px;margin-top:12px;}.navbtns button{flex:1;}
+  .footnote{font-size:11px;color:var(--ink-soft);text-align:center;margin:18px 0 4px;line-height:1.6;}
+  .saved{font-size:11px;color:var(--green-2);font-weight:700;opacity:0;transition:opacity .3s;}.saved.show{opacity:1;}
+  .overlay{position:fixed;inset:0;background:rgba(28,42,31,.55);display:none;align-items:center;justify-content:center;z-index:99;}
+  .overlay.on{display:flex;}
+  .spinner{background:var(--paper);border:2px solid var(--ink);border-radius:6px;padding:24px 30px;text-align:center;box-shadow:5px 5px 0 var(--shadow);}
+  .spinner .dot{width:32px;height:32px;border:4px solid var(--rule);border-top-color:var(--green);border-radius:50%;margin:0 auto 12px;animation:spin 1s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+  /* ---- play mode: full-screen, no page scroll ---- */
+  body.play-mode{padding:0!important;height:100dvh;overflow:hidden;background-image:none;}
+  body.play-mode .tabbar,body.play-mode header{display:none!important;}
+  body.play-mode #playView{position:fixed;inset:0;display:flex;flex-direction:column;overflow:hidden;}
+  body.play-mode #playWrap{flex:1;display:flex;flex-direction:column;overflow:hidden;padding:0;}
+  .pm-header{display:flex;align-items:center;gap:10px;padding:10px 15px;flex:none;background:var(--ink);color:var(--paper);}
+  .pm-back{background:none;border:1.5px solid rgba(255,255,255,.35);border-radius:4px;color:rgba(255,255,255,.85);font-size:12px;font-weight:700;padding:5px 10px;cursor:pointer;font-family:inherit;}
+  .pm-title{font-family:"Fraunces",serif;font-size:17px;font-weight:700;flex:1;color:var(--paper);}
+  .pm-prog{font-size:12px;color:rgba(255,255,255,.65);font-weight:700;}
+  .pm-scroll{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;}
+  .pm-holecard{margin:12px 14px 4px;border:2px solid var(--ink);border-radius:5px;box-shadow:4px 4px 0 var(--shadow);overflow:hidden;background:var(--paper);}
+  .pm-nav{flex:none;display:flex;background:var(--ink);border-top:2px solid var(--green-2);}
+  .pm-nav button{flex:1;background:none;border:none;color:var(--paper);font-family:"Fraunces",serif;font-size:15px;font-weight:600;padding:13px;cursor:pointer;}
+  .pm-nav button:disabled{opacity:.3;cursor:default;}
+  .pm-nav .pm-dot{color:var(--paper);font-size:12px;font-weight:700;padding:0 14px;display:flex;align-items:center;opacity:.65;white-space:nowrap;}
+  /* ---- compact hole card (play mode only) ---- */
+  .pm-meta{display:flex;align-items:center;gap:5px;flex-wrap:wrap;padding:6px 13px;background:var(--paper-2);border-bottom:1px solid var(--rule);font-size:11px;font-weight:700;}
+  .pm-meta .mini{padding:3px 7px;font-size:11px;}
+  .pm-meta .sep{color:var(--rule);margin:0 2px;}
+  .pm-plan-bar{padding:5px 13px;border-bottom:1px dashed var(--rule);font-size:11.5px;color:var(--ink-soft);line-height:1.6;}
+  .pm-plan-bar b{color:var(--green-2);}
+  .pm-prev{display:flex;align-items:center;gap:8px;padding:5px 13px;border-bottom:1px dashed var(--rule);}
+  .pm-prev .sn{width:19px;height:19px;border-radius:50%;background:var(--ink);color:var(--paper);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:"Fraunces";flex:none;}
+  .pm-prev .pi{flex:1;font-size:12px;color:var(--ink-soft);}
+  .pm-cur{padding:7px 13px 4px;}
+  .pm-cur-title{font-family:"Fraunces";font-weight:700;font-size:13px;color:var(--ink-soft);margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+  .pm-hchips{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:5px;}
+  .pm-hchips .chip{padding:4px 9px;font-size:12px;}
+  /* plan section */
+  .pm-plan{border-bottom:1px solid var(--rule);}
+  .pm-plan-hd{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--green-2);padding:5px 13px 2px;}
+  .pm-pshot{display:flex;align-items:flex-start;gap:7px;padding:4px 13px;}
+  .pm-psn{width:18px;height:18px;border-radius:50%;background:var(--green);color:var(--paper);font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:"Fraunces";flex:none;margin-top:1px;}
+  .pm-pinfo{flex:1;min-width:0;}
+  .pm-pclub{font-family:"Fraunces";font-weight:700;font-size:13px;}
+  .pm-pyd{font-size:11px;color:var(--green-2);font-weight:700;margin-left:4px;}
+  .pm-pdet{font-size:11px;color:var(--ink-soft);line-height:1.4;margin-top:1px;}
+  .pm-notes{padding:3px 13px 6px;display:flex;flex-wrap:wrap;gap:4px;}
+  .pm-note{font-size:10.5px;color:var(--ink-soft);background:var(--paper-2);border-radius:3px;padding:2px 6px;}
+  .pm-rl{font-size:9px;font-weight:700;text-transform:uppercase;color:var(--ink-soft);margin:4px 0 3px;letter-spacing:.06em;}
+  .pm-dist{display:flex;align-items:center;gap:8px;margin-top:4px;}
+  .pm-footer{display:flex;align-items:center;justify-content:space-between;padding:8px 13px;border-top:1.5px solid var(--rule);background:var(--paper);flex:none;}
+  .pm-slab{font-size:10px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;margin-right:6px;}
+  .pm-footer .stepper button{width:30px;height:28px;font-size:16px;}
+  .pm-footer .stepper span{min-width:28px;font-size:13px;}
+  .pm-next{background:var(--green);color:var(--paper);border:none;border-radius:4px;font-family:"Fraunces";font-weight:700;font-size:14px;padding:8px 15px;cursor:pointer;}
+  .pm-badges{display:flex;gap:5px;flex-wrap:wrap;padding:4px 13px 8px;}
+</style>
+</head>
+<body>
+<header><div class="kicker">Yardage Caddie · 我的私用版</div><h1>袋中球童</h1></header>
+
+<div class="view on" id="playView"><div class="wrap" id="playWrap"></div></div>
+<div class="view" id="statsView"><div class="wrap" id="statsWrap"></div></div>
+<div class="view" id="bagView"><div class="wrap">
+  <section class="card"><div class="card-head"><h2>我的球包 · 配一次就行</h2></div><div class="card-body">
+    <p class="small" style="margin-bottom:12px;"><b>Total</b>=落地+滚动总距离（开球用）。<b>Carry</b>=飞行落地距离（攻果岭定落点用）。</p>
+    <div class="bag-grid" id="bagGrid"><div class="h">球杆</div><div class="h">Total</div><div class="h">Carry</div><div></div></div>
+    <div class="add-club"><input id="newClub" placeholder="杆名"><input id="newTotal" type="number" inputmode="numeric" placeholder="total"><input id="newCarry" type="number" inputmode="numeric" placeholder="carry"><button class="ghost" onclick="addClub()">+</button></div>
+    <div style="display:flex;align-items:center;gap:12px;margin-top:14px;"><button class="ghost full" onclick="saveBag(true)">保存球包</button><span class="saved" id="savedMsg">✓ 已保存</span></div>
+  </div></section>
+  <p class="footnote">球包、球场、记录都存在本设备；放到 Claude 外自托管时自动用浏览器本地存储。</p>
+</div></div>
+
+<div class="tabbar">
+  <button class="on" id="tabPlay" onclick="switchView('play')"><span class="ic">⛳</span>打球</button>
+  <button id="tabStats" onclick="switchView('stats')"><span class="ic">📊</span>数据</button>
+  <button id="tabBag" onclick="switchView('bag')"><span class="ic">🎒</span>球包</button>
+</div>
+<input type="file" id="fileInput" accept="image/*" capture="environment" style="display:none">
+<div class="overlay" id="overlay"><div class="spinner"><div class="dot"></div><p class="small">正在识别记分卡…</p></div></div>
+
+<script>
+/* ===== portable storage (Claude artifact OR self-hosted PWA) ===== */
+const store={
+  async get(k){ try{ const r=await fetch("/api/kv/"+encodeURIComponent(k)); const j=await r.json();
+    if(j) localStorage.setItem(k,j.value); return j; }
+    catch(e){ const v=localStorage.getItem(k); return v==null?null:{value:v}; } },
+  async set(k,v){ try{ localStorage.setItem(k,v); }catch(e){}
+    try{ await fetch("/api/kv/"+encodeURIComponent(k),{method:"PUT",headers:{"content-type":"application/json"},body:JSON.stringify({value:v})}); }catch(e){} }
+};
+
+/* ===== data ===== */
+const DEFAULT_BAG=[
+ {name:"Driver",total:220,carry:195},{name:"3W",total:200,carry:182},{name:"5W",total:185,carry:170},
+ {name:"Hybrid",total:170,carry:158},{name:"5i",total:160,carry:150},{name:"6i",total:150,carry:141},
+ {name:"7i",total:140,carry:132},{name:"8i",total:130,carry:123},{name:"9i",total:120,carry:115},
+ {name:"PW",total:108,carry:104},{name:"GW",total:95,carry:92},{name:"SW",total:80,carry:78},{name:"LW",total:65,carry:63}];
+const PRELOAD_COURSE={name:"Spring Valley Country Club (USGA Tees)",tees:["USGA"],holes:[
+ {no:1,par:4,yards:{USGA:364}},{no:2,par:5,yards:{USGA:416}},{no:3,par:3,yards:{USGA:154}},
+ {no:4,par:4,yards:{USGA:378}},{no:5,par:4,yards:{USGA:365}},{no:6,par:4,yards:{USGA:332}},
+ {no:7,par:3,yards:{USGA:166}},{no:8,par:4,yards:{USGA:380}},{no:9,par:5,yards:{USGA:452}},
+ {no:10,par:4,yards:{USGA:357}},{no:11,par:4,yards:{USGA:382}},{no:12,par:5,yards:{USGA:458}},
+ {no:13,par:3,yards:{USGA:141}},{no:14,par:4,yards:{USGA:406}},{no:15,par:4,yards:{USGA:347}},
+ {no:16,par:3,yards:{USGA:133}},{no:17,par:4,yards:{USGA:270}},{no:18,par:5,yards:{USGA:520}}]};
+const RESULTS=[{k:"fairway",t:"球道",g:"good"},{k:"rough",t:"长草",g:"meh"},{k:"fbunker",t:"球道沙坑",g:"bad"},
+ {k:"fringe",t:"果岭边缘",g:"meh"},{k:"green",t:"果岭",g:"good"},{k:"gbunker",t:"果岭沙坑",g:"bad"},
+ {k:"water",t:"水",g:"pen"},{k:"ob",t:"OB",g:"pen"},{k:"other",t:"其它",g:"meh"}];
+const DIRS=[{k:"left",t:"左"},{k:"short",t:"短"},{k:"on",t:"准"},{k:"long",t:"长"},{k:"right",t:"右"}];
+
+let bag=[];
+let S={course:null,tee:null,windMph:0,firm:"medium",plans:[],current:0,holePin:[],holeWind:[],playMode:false};
+let R=null, rounds=[];
+
+/* ===== load/save ===== */
+async function loadAll(){
+  let r=await store.get("golf:bag2"); bag=r&&r.value?JSON.parse(r.value):JSON.parse(JSON.stringify(DEFAULT_BAG));
+  let c=await store.get("golf:course2"); if(c&&c.value){const d=JSON.parse(c.value);S.course=d.course;S.tee=d.tee;}
+  if(!S.course){S.course=JSON.parse(JSON.stringify(PRELOAD_COURSE));S.tee=PRELOAD_COURSE.tees[0];}
+  let rr=await store.get("golf:rounds"); rounds=rr&&rr.value?JSON.parse(rr.value):[];
+  let cr=await store.get("golf:curRound"); if(cr&&cr.value&&cr.value!=="null")R=JSON.parse(cr.value);
+  renderBag(); renderPlay();
+}
+async function saveBag(msg){collectBag();await store.set("golf:bag2",JSON.stringify(bag));
+  if(msg){const m=document.getElementById("savedMsg");m.classList.add("show");setTimeout(()=>m.classList.remove("show"),1300);}}
+async function saveCourse(){await store.set("golf:course2",JSON.stringify({course:S.course,tee:S.tee}));}
+async function saveCur(){await store.set("golf:curRound",R?JSON.stringify(R):"null");}
+async function saveRounds(){await store.set("golf:rounds",JSON.stringify(rounds));}
+
+/* ===== bag ===== */
+function renderBag(){const g=document.getElementById("bagGrid");
+  g.innerHTML='<div class="h">球杆</div><div class="h">Total</div><div class="h">Carry</div><div></div>';
+  bag.forEach((c,i)=>g.insertAdjacentHTML("beforeend",
+    `<input class="clubname" value="${c.name}" data-i="${i}" data-k="name"><input type="number" inputmode="numeric" value="${c.total}" data-i="${i}" data-k="total"><input type="number" inputmode="numeric" value="${c.carry}" data-i="${i}" data-k="carry"><button class="del" onclick="delClub(${i})">×</button>`));}
+function collectBag(){document.querySelectorAll('#bagGrid input').forEach(inp=>{const i=+inp.dataset.i,k=inp.dataset.k;
+  if(k==="name")bag[i].name=inp.value.trim()||"杆";else bag[i][k]=+inp.value||0;});}
+function addClub(){collectBag();const n=document.getElementById("newClub").value.trim(),t=+document.getElementById("newTotal").value,c=+document.getElementById("newCarry").value;
+  if(n&&t){bag.push({name:n,total:t,carry:c||t-5});bag.sort((a,b)=>b.total-a.total);renderBag();saveBag();}
+  ["newClub","newTotal","newCarry"].forEach(id=>document.getElementById(id).value="");}
+function delClub(i){collectBag();bag.splice(i,1);renderBag();saveBag();}
+
+/* ===== view switch ===== */
+function switchView(v){["play","stats","bag"].forEach(x=>document.getElementById(x+"View").classList.toggle("on",v===x));
+  document.getElementById("tabPlay").classList.toggle("on",v==="play");
+  document.getElementById("tabStats").classList.toggle("on",v==="stats");
+  document.getElementById("tabBag").classList.toggle("on",v==="bag");
+  if(v==="bag")collectBag(); if(v==="stats")renderStats(); if(v==="play")renderPlay();}
+
+/* ===== scorecard input ===== */
+document.getElementById("fileInput").addEventListener("change",handleScan);
+function triggerScan(){document.getElementById("fileInput").click();}
+function manualCourse(){S.course={name:"",tees:["默认"],holes:Array.from({length:18},(_,i)=>({no:i+1,par:4,yards:{"默认":null}}))};S.tee="默认";S.plans=[];S.showScorecard=true;renderPlay();}
+async function handleScan(e){const f=e.target.files[0];if(!f)return;
+  document.getElementById("overlay").classList.add("on");
+  try{
+    const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(",")[1]);r.onerror=rej;r.readAsDataURL(f);});
+    const resp=await fetch("/api/scan",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({image:b64,media_type:f.type||"image/jpeg"})});
+    const J=await resp.json(); if(J.error)throw new Error(J.error); const tees=J.t&&J.t.length?J.t:["默认"];
+    S.course={name:"",tees,holes:J.h.map(row=>{const y={};tees.forEach((tn,k)=>y[tn]=row[2+k]??null);return{no:row[0],par:row[1]||4,yards:y};})};
+    S.tee=tees[0];S.plans=[];S.showScorecard=true;saveCourse();renderPlay();
+  }catch(err){const net=/fetch/i.test(err.message||"");
+    alert(net?"拍照识别需在 claude.ai 的 artifact 里联网运行；本地预览会被浏览器拦掉(Failed to fetch)，跟图片清不清楚无关。\n已预填球场，点开「记分卡数据」核对即可。换球场把记分卡发到聊天我帮你填。":"识别失败："+(err.message||""));
+    renderPlay();}
+  finally{document.getElementById("overlay").classList.remove("on");e.target.value="";}}
+
+/* ===== STRATEGY ENGINE ===== */
+const PIN_OFF={front:-6,mid:0,back:6}, FIRM_ROLL={soft:-3,medium:0,firm:5};
+function sb(){return [...bag].filter(c=>c.total>0).sort((a,b)=>b.total-a.total);}
+function nearestTotal(b,t){let best=b[0],g=Infinity;for(const c of b){const d=Math.abs(c.total-t);if(d<g){g=d;best=c;}}return best;}
+function windAdj(D,type,mph){if(!mph||!type||type==="cross"||type==="none")return 0;const f=type==="into"?1:type==="down"?-.6:0;return Math.round(f*mph*D/150);}
+function gapNote(club,t){const g=club.total-t;if(Math.abs(g)<=4)return"满杆";return g>0?`比满杆多约${g}码，收着打`:`比满杆少约${-g}码，可大半号`;}
+function approachShot(no,label,b,remaining,pin,firm,wt,mph){
+  const eff=remaining+PIN_OFF[pin], plays=eff+windAdj(eff,wt,mph), club=nearestTotal(b,plays);
+  const t=clubTendency(club.name);
+  let land=Math.max(club.carry+FIRM_ROLL[firm],0);
+  const windTxt=plays!==eff?`，风修正按 <b>${plays}码</b>`:"";
+  let detail=`本距离 <b>${eff}码</b>${windTxt}。${gapNote(club,plays)}，落点约 <b>${land}码</b>借滚动到旗。`;
+  return {no,label,clubName:club.name,clubYd:club.total,detail,
+    tag:Math.abs(club.total-plays)<=4?{t:"safe",x:"满杆"}:{t:"warn",x:"非满杆"},
+    wind:plays!==eff?{t:"wind",x:wt==="into"?"逆风+":"顺风−"}:null};
+}
+function pickTee(b,hole,wt,mph){let cands=b.filter(c=>c.total>=150);if(!cands.length)cands=[b[0]];const longest=b[0];
+  return cands.map(c=>{const eff=c.total-windAdj(c.total,wt,mph),remaining=hole-eff;let score=0;
+    if(remaining<=0)score+=Math.abs(remaining)*4+30;else{const ap=nearestTotal(b,remaining);score+=Math.abs(ap.total-remaining);if(remaining>longest.total)score+=(remaining-longest.total)*5;score+=remaining*.03;}
+    return{club:c,landing:Math.round(eff),remaining:Math.round(remaining),score};}).sort((x,y)=>x.score-y.score);}
+function computePlan(h,pin,firm,wt,mph){
+  const b=sb(),par=h.par,hole=h.yards[S.tee],shots=[],notes=[];
+  const pinTxt={front:"前旗",mid:"中旗",back:"后旗"}[pin];
+  if(!hole)return{par,hole:null,shots:[],notes:["这洞没码数，去『记分卡数据』补上。"]};
+  if(par===3){shots.push(approachShot(1,"开球·攻果岭",b,hole,pin,firm,wt,mph));if(pin==="front")notes.push("前旗别冲，落果岭中部更稳。");}
+  else{const rank=pickTee(b,hole,wt,mph),best=rank[0],longest=b[0];
+    if(best.club.name!==longest.name)notes.push(`收着用 ${best.club.name}（非 ${longest.name}），留个更顺的进攻距离 ~${best.remaining}码。`);
+    if(par===4){shots.push({no:1,label:"开球",clubName:best.club.name,clubYd:best.club.total,detail:`预计到 <b>${best.landing}码</b>，还剩 <b>${best.remaining>0?best.remaining:0}码</b>。`,wind:mph&&wt!=="none"&&wt!=="cross"?{t:"wind",x:wt==="into"?"逆风":"顺风"}:null});
+      if(best.remaining<=0)notes.push("这杆够得着果岭，无碍可冲，求稳就换短杆放球道。");else shots.push(approachShot(2,"第二杆·攻果岭",b,best.remaining,pin,firm,wt,mph));}
+    else{const rem2=Math.round(hole-best.landing);
+      shots.push({no:1,label:"开球",clubName:best.club.name,clubYd:best.club.total,detail:`预计到 <b>${best.landing}码</b>，还剩 <b>${rem2}码</b>到果岭。`,wind:null});
+      if(b[0].total>=rem2&&rem2>0){const go=nearestTotal(b,rem2);shots.push({no:2,label:"第二杆·可两上",clubName:go.name,clubYd:go.total,detail:`想两上：${go.name} 够 ${rem2}码，风险高就放球道。`,tag:{t:"warn",x:"高风险"},wind:null});
+        const wedge=b.filter(c=>c.total<=110).sort((x,y)=>y.total-x.total)[0]||b[b.length-1];const lay=nearestTotal(b,rem2-wedge.total);const r3=Math.max(rem2-lay.total,40);
+        shots.push(Object.assign(approachShot(3,"x",b,r3,pin,firm,wt,mph),{label:`或：${lay.name}放球道→第三杆`}));}
+      else{const wedge=b.filter(c=>c.total>=85&&c.total<=115).sort((x,y)=>y.total-x.total)[0]||b[b.length-1];const lay=nearestTotal(b,rem2-wedge.total);const r3=Math.max(Math.round(rem2-lay.total),0);
+        shots.push({no:2,label:"第二杆·放球道",clubName:lay.name,clubYd:lay.total,detail:`放到剩约 <b>${r3}码</b>，留个顺手攻击距离。`,wind:null});
+        shots.push(approachShot(3,"第三杆·攻果岭",b,r3,pin,firm,wt,mph));}}}
+  if(mph&&wt==="cross")notes.push(`侧风 ${mph}mph：距离基本不变，瞄上风一侧让球飘回。`);
+  if(firm==="firm")notes.push("果岭偏硬，宁可落短半号让球滚上去。");
+  // tendency-aware notes
+  [...new Set(shots.map(s=>s.clubName))].forEach(cn=>{const tn=tendencyNote(cn,par,pin);if(tn)notes.unshift(tn);});
+  if(!notes.length)notes.push("按上面距离正常打；失误优先保住下一杆是平地满杆距离。");
+  return{par,hole,pinTxt,firm,shots,notes};
+}
+
+/* ===== plan generation / per-hole controls ===== */
+function generateAll(){collectBag();if(sb().length<2){alert("先去『球包』填几支杆");switchView("bag");return;}
+  readScorecardInputs();
+  S.holePin=S.course.holes.map((_,i)=>S.holePin[i]||"mid");
+  S.holeWind=S.course.holes.map((_,i)=>S.holeWind[i]||"none");
+  S.plans=S.course.holes.map((h,i)=>computePlan(h,S.holePin[i],S.firm,S.holeWind[i],S.windMph));
+  startRoundIfNeeded();S.current=0;S.playMode=true;saveCourse();renderPlay();}
+function exitPlayMode(){S.playMode=false;renderPlay();}
+function recomputeHole(i){S.plans[i]=computePlan(S.course.holes[i],S.holePin[i],S.firm,S.holeWind[i],S.windMph);renderPlay();}
+function ensureFirstShot(i){startRoundIfNeeded();if(R&&R.holes[i].shots.length===0){R.holes[i].shots.push({club:suggestedClub(i),dist:null,result:"",dir:[],note:""});saveCur();}}
+function setHole(i){S.current=i;window.scrollTo(0,0);if(S.playMode)ensureFirstShot(i);renderPlay();}
+function setPin(p){S.holePin[S.current]=p;recomputeHole(S.current);}
+function setWind(w){S.holeWind[S.current]=w;recomputeHole(S.current);}
+function readScorecardInputs(){if(!document.getElementById("scBody"))return;
+  document.querySelectorAll("#scBody tr").forEach((tr,i)=>{S.course.holes[i].par=+tr.querySelector(".scPar").value||4;
+    const yd=tr.querySelector(".scYd").value;S.course.holes[i].yards[S.tee]=yd?+yd:null;});
+  const nm=document.getElementById("courseName");if(nm)S.course.name=nm.value;}
+
+/* ===== ROUND / LOGGING ===== */
+function courseKey(){return (S.course.name||"")+"|"+S.tee;}
+function startRoundIfNeeded(){if(!S.course)return;
+  if(R&&R.courseKey===courseKey())return;
+  if(R&&R.holes.some(h=>h.shots.length)){rounds.push(R);saveRounds();}
+  R={id:Date.now(),date:new Date().toISOString().slice(0,10),courseName:S.course.name||"球场",courseKey:courseKey(),tee:S.tee,
+     holes:S.course.holes.map(h=>({no:h.no,par:h.par,yards:h.yards[S.tee],shots:[],putts:2,note:""}))};saveCur();}
+function suggestedClub(i){const p=S.plans[i],n=R.holes[i].shots.length;if(p&&p.shots&&p.shots[n])return p.shots[n].clubName;return"";}
+function addShot(i){startRoundIfNeeded();R.holes[i].shots.push({club:suggestedClub(i),dist:null,result:"",dir:[],note:""});saveCur();renderPlay();}
+function delShot(i,j){R.holes[i].shots.splice(j,1);saveCur();renderPlay();}
+function setShotClub(i,j,c){R.holes[i].shots[j].club=c;saveCur();renderPlay();}
+function setShotRes(i,j,k){R.holes[i].shots[j].result=k;saveCur();renderPlay();}
+function nd(d){return Array.isArray(d)?d:(d?[d]:[]);}
+function setShotNote(i,j,v){if(R)R.holes[i].shots[j].note=v;saveCur();}
+function setHoleNote(i,v){if(R)R.holes[i].note=v;saveCur();}
+function setShotDir(i,j,k){const s=R.holes[i].shots[j];const d=[...nd(s.dir)];const idx=d.indexOf(k);if(idx>=0)d.splice(idx,1);else d.push(k);s.dir=d;saveCur();renderPlay();}
+function setShotDist(i,j,v){R.holes[i].shots[j].dist=v?+v:null;saveCur();}
+function setShotRem(i,j,v){
+  const shots=R.holes[i].shots,p=S.plans[i];
+  shots[j].rem=v?+v:null;
+  const prevRem=j===0?(p.hole||null):(shots[j-1].rem??null);
+  shots[j].dist=(prevRem!==null&&shots[j].rem!==null)?prevRem-shots[j].rem:null;
+  saveCur();renderPlay();
+}
+function setPutts(i,d){startRoundIfNeeded();R.holes[i].putts=Math.max(0,R.holes[i].putts+d);saveCur();renderPlay();}
+function finishRound(){if(!R)return;if(R.holes.some(h=>h.shots.length)){rounds.push(R);saveRounds();}R=null;saveCur();startRoundIfNeeded();renderPlay();alert("本轮已存档，可继续新的一轮。");}
+function abandonRound(){if(!R)return;if(!confirm("放弃本轮？所有已记录的杆数将被清除，不存入统计。"))return;R=null;saveCur();startRoundIfNeeded();renderPlay();renderStats();}
+function deleteRound(idx){if(!confirm("删除这场记录？该场的杆数数据将从统计中移除。"))return;rounds.splice(idx,1);saveRounds();renderStats();}
+function holeStats(h){const pen=h.shots.filter(s=>s.result==="water"||s.result==="ob").length;const score=h.shots.length+pen+h.putts;
+  let reach=null,acc=0;for(const s of h.shots){acc++;if(s.result==="water"||s.result==="ob")acc++;if(s.result==="green"){reach=acc;break;}}
+  const gir=reach!==null&&reach<=h.par-2,fir=h.par>3&&h.shots[0]&&h.shots[0].result==="fairway",firElig=h.par>3,onGreen=h.shots.some(s=>s.result==="green");
+  const scrOpp=onGreen&&!gir,scrOk=scrOpp&&score<=h.par,sandOpp=h.shots.some(s=>s.result==="gbunker"),sandOk=sandOpp&&score<=h.par;
+  return{score,pen,gir,fir,firElig,putts:h.putts,scrOpp,scrOk,sandOpp,sandOk,played:h.shots.length>0};}
+
+/* ===== DISPERSION / TENDENCY ===== */
+function allShots(){const rs=[...rounds];if(R)rs.push(R);const out=[];
+  rs.forEach(rd=>rd.holes.forEach(h=>h.shots.forEach((s,j)=>out.push({...s,par:h.par,idx:j}))));return out;}
+function clubTendency(club){const shots=allShots().filter(s=>s.club===club);
+  const dirs=shots.filter(s=>nd(s.dir).length>0),cnt=t=>shots.filter(s=>nd(s.dir).includes(t)).length;
+  const dist=shots.filter(s=>s.dist).map(s=>s.dist);
+  const avg=dist.length?Math.round(dist.reduce((a,b)=>a+b,0)/dist.length):null;
+  const spread=dist.length>1?Math.round((Math.max(...dist)-Math.min(...dist))/2):null;
+  return{samples:shots.length,dirN:dirs.length,left:cnt("left"),right:cnt("right"),shortN:cnt("short"),longN:cnt("long"),onN:cnt("on"),avg,spread};}
+function tendencyNote(club,par,pin){const t=clubTendency(club);if(t.dirN<4&&!(t.spread&&t.samples>=4))return null;
+  const side=t.right>t.left*1.5?"偏右":t.left>t.right*1.5?"偏左":null;
+  const lng=t.longN>t.shortN*1.5?"偏长":t.shortN>t.longN*1.5?"偏短":null;
+  if(!side&&!lng&&!t.spread)return null;
+  let s=`📈 ${club}`;const bits=[];
+  if(side)bits.push(`${side}(${side==="偏右"?t.right:t.left}/${t.dirN})`);
+  if(lng)bits.push(lng);
+  if(t.spread)bits.push(`离散±${t.spread}码`);
+  s+=" "+bits.join("、");const adv=[];
+  if(side)adv.push(`瞄${side==="偏右"?"左":"右"}一点`);
+  if(lng==="偏短")adv.push("宁可大半号");
+  if(t.spread&&t.spread>=8)adv.push("攻果岭打中心、别冲边旗");
+  if(adv.length)s+="；"+adv.join("，");return s;}
+
+/* ===== PLAY VIEW (plan + actual unified) ===== */
+function renderPlay(){const w=document.getElementById("playWrap");
+  // ---- no course: import screen ----
+  if(!S.course){
+    document.body.classList.remove("play-mode");
+    w.innerHTML=`<div class="import-box"><div class="big">📷</div><h3>拍一张记分卡</h3><p class="small">自动读出 18 洞 Par 和码数</p><div class="scan-btn" onclick="triggerScan()">拍照 / 选图片</div></div><button class="ghost full" style="margin-top:14px;" onclick="manualCourse()">或 手动输入 18 洞</button>`;
+    return;}
+  // ---- play mode: full-screen, one hole at a time ----
+  if(S.plans.length&&S.playMode){
+    document.body.classList.add("play-mode");
+    ensureFirstShot(S.current);
+    const h=S.course.holes[S.current],p=S.plans[S.current];
+    w.innerHTML=
+      `<div class="pm-header">
+        <button class="pm-back" onclick="exitPlayMode()">← 返回</button>
+        <span class="pm-title">第 ${h.no} 洞 · Par${p.par} · ${p.hole||"?"}码</span>
+        <span class="pm-prog">${S.current+1}/${S.plans.length}</span>
+      </div>
+      <div class="pm-scroll">${renderHole(S.current)}</div>
+      <div class="pm-nav">
+        <button onclick="setHole(${S.current-1})" ${S.current===0?"disabled":""}>‹ 上一洞</button>
+        <span class="pm-dot">${S.current+1} / ${S.plans.length}</span>
+        <button onclick="setHole(${S.current+1})" ${S.current===S.plans.length-1?"disabled":""}>下一洞 ›</button>
+      </div>`;
+    return;}
+  // ---- setup view ----
+  document.body.classList.remove("play-mode");
+  let html=`<section class="card"><div class="card-body">
+    <div class="field"><label>球场</label><input id="courseName" value="${S.course.name||""}" placeholder="球场名 (可选)"></div>
+    <div class="row"><div class="field"><label>Tee 台</label><select onchange="S.tee=this.value;S.plans=[];renderPlay()">${S.course.tees.map(t=>`<option ${t===S.tee?"selected":""}>${t}</option>`).join("")}</select></div>
+      <div class="field"><label>风速 mph</label><input type="number" inputmode="numeric" value="${S.windMph}" onchange="S.windMph=+this.value||0"></div></div>
+    <div class="field"><label>果岭软硬 (整场默认)</label><div style="display:flex;gap:6px;">${["soft","medium","firm"].map(f=>`<button class="mini ${S.firm===f?"on":""}" onclick="S.firm='${f}';renderPlay()">${{soft:"软",medium:"中",firm:"硬"}[f]}</button>`).join("")}</div></div>
+    <details${S.showScorecard?" open":""} ontoggle="S.showScorecard=this.open"><summary class="small" style="cursor:pointer;font-weight:700;">记分卡数据 (点开核对/修改)</summary>
+      <table class="sc-table"><thead><tr><th>洞</th><th>Par</th><th>码数(${S.tee})</th></tr></thead><tbody id="scBody">
+      ${S.course.holes.map(h=>`<tr><td class="hno">${h.no}</td><td><input class="scPar" type="number" inputmode="numeric" value="${h.par}"></td><td><input class="scYd" type="number" inputmode="numeric" value="${h.yards[S.tee]??""}"></td></tr>`).join("")}
+      </tbody></table></details>
+    <button class="primary" style="margin-top:14px;" onclick="generateAll()">⛳ 生成 18 洞策略</button>
+    ${S.plans.length?`<button class="ghost full" style="margin-top:10px;" onclick="S.playMode=true;renderPlay()">继续打球 › 第 ${S.course.holes[S.current].no} 洞</button>`:""}
+    <button class="ghost full" style="margin-top:10px;" onclick="S.course=null;S.plans=[];renderPlay()">重新导入记分卡</button>
+  </div></section>`;
+  html+=`<p class="footnote">上半=计划/目标，下半=实际完成。数据攒多了，策略提醒会带上你的偏向与离散。</p>`;
+  w.innerHTML=html;}
+function renderHoleCompact(i){
+  const h=S.course.holes[i],p=S.plans[i];
+  const rh=R?R.holes[i]:null,st=rh?holeStats(rh):null;
+  const shots=rh?rh.shots:[],putts=rh?rh.putts:2;
+  let s='';
+  // meta: controls inline
+  s+=`<div class="pm-meta">
+    <span class="pm-meta-lab">旗</span>
+    <div style="display:flex;gap:3px;">${["front","mid","back"].map(x=>`<button class="mini ${S.holePin[i]===x?"on":""}" onclick="setPin('${x}')">${{front:"前",mid:"中",back:"后"}[x]}</button>`).join("")}</div>
+    <span class="sep">|</span>
+    <span class="pm-meta-lab">风</span>
+    <div style="display:flex;gap:3px;">${[["none","无"],["into","逆"],["down","顺"],["cross","侧"]].map(([x,t])=>`<button class="mini wind ${S.holeWind[i]===x?"on":""}" onclick="setWind('${x}')">${t}</button>`).join("")}</div>
+  </div>`;
+  // plan section with shot detail
+  s+=`<div class="pm-plan"><div class="pm-plan-hd">策略</div>`;
+  p.shots.forEach(sh=>{
+    const tags=(sh.tag?`<span class="tag ${sh.tag.t}" style="font-size:10px;padding:1px 5px;">${sh.tag.x}</span> `:"")+(sh.wind?`<span class="tag wind" style="font-size:10px;padding:1px 5px;">${sh.wind.x}</span>`:"");
+    s+=`<div class="pm-pshot"><div class="pm-psn">${sh.no}</div><div class="pm-pinfo"><span class="pm-pclub">${sh.clubName}<span class="pm-pyd">${sh.clubYd}码</span></span>${tags?`<span style="margin-left:4px;">${tags}</span>`:""}${sh.detail?`<div class="pm-pdet">${sh.detail}</div>`:""}</div></div>`;
+  });
+  if(p.notes&&p.notes.length)s+=`<div class="pm-notes">${p.notes.map(n=>`<span class="pm-note">${n}</span>`).join("")}</div>`;
+  s+=`</div>`;
+  // completed shots (all but last)
+  const active=shots.length-1;
+  shots.forEach((sh,j)=>{
+    if(j>=active)return;
+    const res=RESULTS.find(r=>r.k===sh.result)?.t||"";
+    const distInfo=sh.dist?` · 打${sh.dist}码`:"";const remInfo=sh.rem?` · 剩${sh.rem}码`:"";
+    s+=`<div class="pm-prev"><div class="sn">${j+1}</div><div class="pi">${sh.club||"—"}${distInfo}${remInfo}${res?` · ${res}`:""}${sh.note?` · <em>${sh.note}</em>`:""}</div><button class="del" onclick="delShot(${i},${j})">×</button></div>`;
+  });
+  // active shot
+  if(shots.length>0){
+    const j=active,sh=shots[j],sugg=p.shots[j];
+    s+=`<div class="pm-cur">
+      <div class="pm-cur-title"><span>第 ${j+1} 杆${sugg?` · 建议 ${sugg.clubName}`:""}</span><button class="del" onclick="delShot(${i},${j})">×</button></div>
+      <div class="pm-hchips">${bag.map(c=>`<button class="chip ${sh.club===c.name?"on":""}" onclick="setShotClub(${i},${j},'${c.name}')">${c.name}</button>`).join("")}</div>
+      <div class="pm-rl">落点</div>
+      <div class="pm-hchips">${RESULTS.map(r=>`<button class="chip ${r.g} ${sh.result===r.k?"on":""}" onclick="setShotRes(${i},${j},'${r.k}')">${r.t}</button>`).join("")}</div>
+      <div class="pm-rl">方向 (可多选)</div>
+      <div class="pm-hchips">${DIRS.map(d=>`<button class="chip dir ${nd(sh.dir).includes(d.k)?"on":""}" onclick="setShotDir(${i},${j},'${d.k}')">${d.t}</button>`).join("")}</div>
+      <div class="pm-dist">
+        <span class="pm-rl" style="margin:0 6px 0 0;">距旗</span>
+        <input class="ydinput" type="number" inputmode="numeric" value="${sh.rem??""}" placeholder="码" onchange="setShotRem(${i},${j},this.value)" style="padding:5px;font-size:14px;width:68px;">
+        ${sh.dist!=null?`<span style="font-size:11px;color:var(--ink-soft);margin-left:6px;">本杆 ${sh.dist}码</span>`:""}
+      </div>
+      <div style="margin-top:5px;"><div class="pm-rl">备注</div><input type="text" value="${(sh.note||"").replace(/"/g,"&quot;")}" placeholder="可选…" onblur="setShotNote(${i},${j},this.value)" style="display:block;width:100%;font-size:13px;padding:5px 8px;border:1.5px solid var(--rule);border-radius:4px;background:var(--paper);font-family:inherit;color:var(--ink);margin-top:3px;"></div>
+    </div>`;
+  }
+  // footer
+  s+=`<div class="pm-footer">
+    <div style="display:flex;align-items:center;">
+      <span class="pm-slab">推杆</span>
+      <div class="stepper"><button onclick="setPutts(${i},-1)">−</button><span>${putts}</span><button onclick="setPutts(${i},1)">＋</button></div>
+    </div>
+    <button class="pm-next" onclick="addShot(${i})">下一杆 ›</button>
+  </div>`;
+  const hn=rh?rh.note||"":"";
+  s+=`<div style="padding:4px 13px 9px;border-top:1px dashed var(--rule);"><div class="pm-rl">本洞备注</div><input type="text" value="${hn.replace(/"/g,"&quot;")}" placeholder="这洞心得，下次提醒自己…" onblur="setHoleNote(${i},this.value)" style="display:block;width:100%;font-size:12px;padding:5px 8px;border:1.5px solid var(--rule);border-radius:4px;background:var(--paper);font-family:inherit;color:var(--ink);margin-top:3px;"></div>`;
+  if(st&&st.played)s+=`<div class="pm-badges">
+    <span class="badge ${st.firElig?(st.fir?"hit":"miss"):""}">${st.firElig?(st.fir?"FIR✓":"未中球道"):"Par3"}</span>
+    <span class="badge ${st.gir?"hit":"miss"}">${st.gir?"GIR✓":"未GIR"}</span>
+    ${st.scrOpp?`<span class="badge ${st.scrOk?"hit":"miss"}">救球${st.scrOk?"✓":"✗"}</span>`:""}
+    ${st.pen?`<span class="badge miss">+${st.pen}罚</span>`:""}</div>`;
+  return `<div class="pm-holecard">${s}</div>`;
+}
+
+function renderHole(i){if(S.playMode)return renderHoleCompact(i);
+const h=S.course.holes[i],p=S.plans[i];const rh=R?R.holes[i]:null;const st=rh?holeStats(rh):null;
+  const firmTxt={soft:"软",medium:"中",firm:"硬"}[S.firm];
+  let s=`<div class="holecard"><div class="hc-top"><div class="hole">HOLE <b>${h.no}</b></div>
+    <div class="meta">Par ${p.par} · ${p.hole||"?"}码 · ${S.tee}<br>目标 <span class="sc">${p.par}</span> · 实际 <span class="sc">${st&&st.played?st.score:"–"}</span></div></div>
+    <div class="hc-ctrl">
+      <div class="ctrl-grp"><span class="lab">旗位</span><div class="pills">${["front","mid","back"].map(x=>`<button class="mini ${S.holePin[i]===x?"on":""}" onclick="setPin('${x}')">${{front:"前",mid:"中",back:"后"}[x]}</button>`).join("")}</div></div>
+      <div class="ctrl-grp"><span class="lab">本洞风向</span><div class="pills">${[["none","无"],["into","逆"],["down","顺"],["cross","侧"]].map(([x,t])=>`<button class="mini wind ${S.holeWind[i]===x?"on":""}" onclick="setWind('${x}')">${t}</button>`).join("")}</div></div>
+    </div><div class="hc-body">`;
+  // PLAN
+  s+=`<div class="section-label plan">计划 · 目标</div>`;
+  p.shots.forEach(sh=>{const tags=(sh.tag?`<span class="tag ${sh.tag.t}">${sh.tag.x}</span>`:"")+(sh.wind?`<span class="tag ${sh.wind.t}">${sh.wind.x}</span>`:"");
+    s+=`<div class="shot"><div class="shot-head"><div class="shot-no">${sh.no}</div><div class="shot-label">${sh.label}</div></div><div class="shot-club">${sh.clubName}<span class="yd">${sh.clubYd}码</span>${tags}</div><div class="shot-detail">${sh.detail}</div></div>`;});
+  s+=`<div class="notes"><h3>提醒</h3><ul>${p.notes.map(n=>`<li>${n}</li>`).join("")}</ul></div>`;
+  // ACTUAL
+  s+=`<div class="section-label act">实际 · 完成</div>`;
+  const shots=rh?rh.shots:[];
+  shots.forEach((sh,j)=>{s+=`<div class="shotrow"><div class="top"><span class="sn">第 ${j+1} 杆</span><button class="del" onclick="delShot(${i},${j})">×</button></div>
+    <div class="chips">${bag.map(c=>`<button class="chip ${sh.club===c.name?"on":""}" onclick="setShotClub(${i},${j},'${c.name}')">${c.name}</button>`).join("")}</div>
+    <div class="rowlab">落点</div><div class="chips">${RESULTS.map(r=>`<button class="chip ${r.g} ${sh.result===r.k?"on":""}" onclick="setShotRes(${i},${j},'${r.k}')">${r.t}</button>`).join("")}</div>
+    <div class="rowlab">方向 (可多选)</div><div class="chips">${DIRS.map(d=>`<button class="chip dir ${nd(sh.dir).includes(d.k)?"on":""}" onclick="setShotDir(${i},${j},'${d.k}')">${d.t}</button>`).join("")}</div>
+    <div style="margin-top:8px;display:flex;align-items:center;gap:8px;"><span class="small" style="margin-right:7px;">距离</span><input class="ydinput" type="number" inputmode="numeric" value="${sh.dist??""}" placeholder="码" onchange="setShotDist(${i},${j},this.value)"></div>
+    <div style="margin-top:6px;"><div class="rowlab">备注</div><input type="text" value="${(sh.note||"").replace(/"/g,"&quot;")}" placeholder="可选…" onblur="setShotNote(${i},${j},this.value)" style="width:100%;font-size:13px;padding:5px 8px;border:1.5px solid var(--rule);border-radius:4px;background:var(--paper);font-family:inherit;color:var(--ink);margin-top:2px;"></div></div>`;});
+  s+=`<button class="ghost full" style="margin:4px 0 12px;" onclick="addShot(${i})">＋ 加一杆</button>`;
+  s+=`<div style="display:flex;align-items:center;gap:14px;"><span class="shot-label">推杆</span><div class="stepper"><button onclick="setPutts(${i},-1)">−</button><span>${rh?rh.putts:2}</span><button onclick="setPutts(${i},1)">＋</button></div></div>`;
+  if(st&&st.played)s+=`<div class="badges">
+    <span class="badge ${st.firElig?(st.fir?"hit":"miss"):""}">${st.firElig?(st.fir?"球道命中":"未中球道"):"Par 3"}</span>
+    <span class="badge ${st.gir?"hit":"miss"}">${st.gir?"标准上果岭":"未达标 GIR"}</span>
+    ${st.scrOpp?`<span class="badge ${st.scrOk?"hit":"miss"}">救球${st.scrOk?"成功":"失败"}</span>`:""}
+    ${st.sandOpp?`<span class="badge ${st.sandOk?"hit":"miss"}">沙坑救球${st.sandOk?"成功":"失败"}</span>`:""}
+    ${st.pen?`<span class="badge miss">罚杆 ${st.pen}</span>`:""}</div>`;
+  s+=`</div></div>`;return s;}
+
+/* ===== STATS VIEW ===== */
+function renderStats(){const w=document.getElementById("statsWrap");let html="";
+  if(R&&R.holes.some(h=>h.shots.length)){html+=roundSummary()+`<div style="margin-top:10px;display:flex;gap:8px;">
+    <button class="ghost full" onclick="finishRound()">存档本轮</button>
+    <button class="ghost full" style="color:var(--flag);border-color:var(--flag);" onclick="abandonRound()">放弃本轮</button>
+  </div>`;}
+  html+=dispersionPanel()+clubAvgPanel();
+  if(rounds.length){html+=`<section class="card"><div class="card-head"><h2>历史轮次</h2></div><div class="card-body">`;
+    rounds.slice().reverse().forEach((rd,revIdx)=>{
+      const realIdx=rounds.length-1-revIdx;
+      const tot=rd.holes.reduce((a,h)=>a+holeStats(h).score,0),par=rd.holes.reduce((a,h)=>a+(h.shots.length?h.par:0),0);
+      const played=rd.holes.filter(h=>h.shots.length).length;
+      html+=`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--rule);">
+        <div style="flex:1;"><div class="small">${rd.date} · ${rd.courseName}</div><div style="font-size:10.5px;color:var(--ink-soft);margin-top:1px;">${played}洞</div></div>
+        <b>${tot} (${tot-par>=0?"+":""}${tot-par})</b>
+        <button class="del" style="font-size:14px;padding:4px 6px;" onclick="deleteRound(${realIdx})" title="删除此场">×</button>
+      </div>`;});
+    html+=`</div></section>`;}
+  if(!html)html=`<div class="empty">还没有记录。去『打球』里开始记录每一杆。</div>`;
+  w.innerHTML=html;}
+function roundSummary(){const hs=R.holes.map(holeStats);let tot=0,parP=0,firM=0,firE=0,girM=0,girE=0,putts=0,scrM=0,scrO=0,sandM=0,sandO=0,pen=0,played=0;
+  R.holes.forEach((h,i)=>{if(!h.shots.length)return;const s=hs[i];played++;tot+=s.score;parP+=h.par;if(s.firElig){firE++;if(s.fir)firM++;}girE++;if(s.gir)girM++;putts+=h.putts;if(s.scrOpp){scrO++;if(s.scrOk)scrM++;}if(s.sandOpp){sandO++;if(s.sandOk)sandM++;}pen+=s.pen;});
+  const pct=(m,e)=>e?Math.round(m/e*100)+"%":"–";
+  return `<section class="card"><div class="card-head"><h2>本轮汇总 · 已记 ${played} 洞</h2></div><div class="card-body"><div class="statgrid">
+    <div class="statbox"><div class="v">${tot} <span style="font-size:13px;">(${tot-parP>=0?"+":""}${tot-parP})</span></div><div class="l">总杆/对标准杆</div></div>
+    <div class="statbox"><div class="v">${putts} <span style="font-size:13px;">(${(putts/played).toFixed(1)})</span></div><div class="l">推杆/每洞</div></div>
+    <div class="statbox"><div class="v">${pct(firM,firE)}</div><div class="l">球道命中 (${firM}/${firE})</div></div>
+    <div class="statbox"><div class="v">${pct(girM,girE)}</div><div class="l">标准上果岭 (${girM}/${girE})</div></div>
+    <div class="statbox"><div class="v">${pct(scrM,scrO)}</div><div class="l">救球 (${scrM}/${scrO})</div></div>
+    <div class="statbox"><div class="v">${pct(sandM,sandO)}</div><div class="l">沙坑救球 (${sandM}/${sandO})</div></div>
+  </div>${pen?`<p class="small" style="margin-top:10px;">本轮罚杆合计：${pen}</p>`:""}</div></section>`;}
+function dispersionPanel(){const clubs=[...new Set(allShots().filter(s=>s.club).map(s=>s.club))];
+  const rows=clubs.map(c=>({c,t:clubTendency(c)})).filter(r=>r.t.dirN>=2||r.t.spread!=null).sort((a,b)=>b.t.samples-a.t.samples);
+  if(!rows.length)return`<section class="card"><div class="card-head"><h2>离散度 / 偏向</h2></div><div class="card-body"><p class="small">记录每杆时点一下「方向」和填距离，攒够数据这里会显示每支杆偏左/偏右、偏长/偏短和落点离散 ±码，并自动写进策略提醒。</p></div></section>`;
+  let html=`<section class="card"><div class="card-head"><h2>离散度 / 偏向</h2></div><div class="card-body">`;
+  rows.forEach(({c,t})=>{const tot=t.left+t.onN+t.right||1;const lp=Math.round(t.left/tot*100),rp=Math.round(t.right/tot*100);
+    // bar: center is "on", fill skews to dominant side
+    const skew=(t.right-t.left)/tot; // -1..1
+    const fillW=Math.min(Math.abs(skew)*50,50);const fillLeft=skew>=0?50:50-fillW;
+    html+=`<div class="disp"><div style="display:flex;justify-content:space-between;align-items:baseline;"><span class="ch">${c}</span>
+      <span class="small">${t.avg?`均 ${t.avg}码`:""}${t.spread!=null?` · 离散±${t.spread}码`:""} · ${t.samples}杆</span></div>
+      <div class="bar"><div class="mid"></div><div class="fill" style="left:${fillLeft}%;width:${fillW}%;"></div></div>
+      <div class="small" style="display:flex;justify-content:space-between;"><span>左 ${t.left}</span><span>准 ${t.onN}</span><span>右 ${t.right}</span></div>
+      ${(t.shortN||t.longN)?`<div class="small">短 ${t.shortN} · 长 ${t.longN}</div>`:""}</div>`;});
+  html+=`</div></section>`;return html;}
+function clubMap(){const m={};allShots().forEach(s=>{if(s.club&&s.dist)(m[s.club]=m[s.club]||[]).push(s.dist);});return m;}
+function clubAvgPanel(){const m=clubMap(),keys=Object.keys(m);if(!keys.length)return"";
+  let html=`<section class="card"><div class="card-head"><h2>球杆实测 → 校准球包</h2></div><div class="card-body"><p class="small" style="margin-bottom:10px;">用实际打出的距离更新球包，策略更准。</p>`;
+  keys.forEach(c=>{const arr=m[c],avg=Math.round(arr.reduce((a,b)=>a+b,0)/arr.length),bc=bag.find(b=>b.name===c);
+    html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--rule);"><span><b>${c}</b> <span class="small">×${arr.length}</span></span><span>实测 <b>${avg}</b>${bc?` <span class="small">/ 球包 ${bc.total}</span>`:""}</span></div>`;});
+  html+=`<button class="ghost full" style="margin-top:12px;" onclick="applyClubAvgs()">用实测更新球包 Total</button></div></section>`;return html;}
+function applyClubAvgs(){const m=clubMap();Object.keys(m).forEach(c=>{const arr=m[c],avg=Math.round(arr.reduce((a,b)=>a+b,0)/arr.length),bc=bag.find(b=>b.name===c);if(bc){const d=avg-bc.total;bc.total=avg;bc.carry=Math.max(bc.carry+d,0);}});
+  bag.sort((a,b)=>b.total-a.total);saveBag();renderBag();S.plans=[];alert("球包已按实测更新。回『打球』重新生成策略会用新距离。");}
+
+loadAll();
+if("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js");
+</script>
+</body>
+</html>
