@@ -25,15 +25,6 @@ jobs:
 
       - run: gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
 
-      - name: Ensure Artifact Registry repo exists
-        run: |
-          gcloud artifacts repositories describe yardage-caddie \
-            --location=us-central1 --project=${{ env.PROJECT_ID }} 2>/dev/null \
-          || gcloud artifacts repositories create yardage-caddie \
-            --repository-format=docker \
-            --location=us-central1 \
-            --project=${{ env.PROJECT_ID }}
-
       - name: Build & Push
         run: |
           docker build -t ${{ env.IMAGE }} .
