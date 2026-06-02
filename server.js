@@ -48,7 +48,7 @@ app.post("/api/scan", async (req, res) => {
     const { image, media_type } = req.body;
     const [token, project] = await Promise.all([gcpToken(), gcpProject()]);
     const r = await fetch(
-      `https://us-central1-aiplatform.googleapis.com/v1/projects/${project}/locations/us-central1/publishers/google/models/gemini-2.0-flash:generateContent`,
+      `https://us-central1-aiplatform.googleapis.com/v1/projects/${project}/locations/us-central1/publishers/google/models/gemini-2.0-flash-001:generateContent`,
       {
         method: "POST",
         headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
