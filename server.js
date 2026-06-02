@@ -40,7 +40,7 @@ app.post("/api/scan", async (req, res) => {
           contents: [{
             parts: [
               { inline_data: { mime_type: media_type, data: image } },
-              { text: 'Read this golf scorecard photo. For holes 1-18 return ONLY compact JSON, no markdown: {"t":["TeeName"],"h":[[holeNo,par,yd], ...18]} aligned to t, null for missing. Numbers only.' },
+              { text: 'Read this golf scorecard photo. Return ONLY valid JSON, no markdown, no explanation:\n{"tees":["TeeNameA","TeeNameB"],"holes":[{"no":1,"par":4,"yds":[ydA,ydB]},...]}\n- "tees": all tee names found, in the order they appear\n- "holes": all 18 holes, "yds" aligned to "tees" array order, null if missing\n- Numbers only, no units' },
             ],
           }],
         }),

@@ -267,8 +267,8 @@ async function handleScan(e){const f=e.target.files[0];if(!f)return;
   try{
     const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(",")[1]);r.onerror=rej;r.readAsDataURL(f);});
     const resp=await fetch("/api/scan",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({image:b64,media_type:f.type||"image/jpeg"})});
-    const J=await resp.json(); if(J.error)throw new Error(J.error); const tees=J.t&&J.t.length?J.t:["默认"];
-    S.course={name:"",tees,holes:J.h.map(row=>{const y={};tees.forEach((tn,k)=>y[tn]=row[2+k]??null);return{no:row[0],par:row[1]||4,yards:y};})};
+    const J=await resp.json(); if(J.error)throw new Error(J.error); const tees=J.tees&&J.tees.length?J.tees:["默认"];
+    S.course={name:"",tees,holes:(J.holes||[]).map(h=>{const y={};tees.forEach((tn,k)=>y[tn]=Array.isArray(h.yds)?h.yds[k]??null:null);return{no:h.no,par:h.par||4,yards:y};})};
     S.tee=tees[0];S.plans=[];S.showScorecard=true;saveCourse();renderPlay();
   }catch(err){const net=/fetch/i.test(err.message||"");
     alert(net?"拍照识别需在 claude.ai 的 artifact 里联网运行；本地预览会被浏览器拦掉(Failed to fetch)，跟图片清不清楚无关。\n已预填球场，点开「记分卡数据」核对即可。换球场把记分卡发到聊天我帮你填。":"识别失败："+(err.message||""));
