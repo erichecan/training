@@ -341,7 +341,9 @@ function switchView(v){["play","stats","train","bag"].forEach(x=>document.getEle
 
 /* ===== scorecard input ===== */
 document.getElementById("fileInput").addEventListener("change",handleScan);
-function triggerScan(){document.getElementById("fileInput").click();}
+function triggerScan(useCamera){const inp=document.getElementById("fileInput");
+  if(useCamera)inp.setAttribute("capture","environment");else inp.removeAttribute("capture");
+  inp.click();}
 function manualCourse(){S.course={name:"",tees:["默认"],holes:Array.from({length:18},(_,i)=>({no:i+1,par:4,yards:{"默认":null}}))};S.tee="默认";S.plans=[];S.gameplan=null;S.trainPlan=null;S.showScorecard=true;renderPlay();}
 async function handleScan(e){const f=e.target.files[0];if(!f)return;
   document.getElementById("overlay").classList.add("on");
@@ -621,7 +623,7 @@ function renderPlay(){const w=document.getElementById("playWrap");
   // ---- no course: import screen ----
   if(!S.course){
     document.body.classList.remove("play-mode");
-    w.innerHTML=`<div class="import-box"><div class="big">📷</div><h3>拍一张记分卡</h3><p class="small">自动读出 18 洞 Par 和码数</p><div class="scan-btn" onclick="triggerScan()">拍照 / 选图片</div></div><button class="ghost full" style="margin-top:14px;" onclick="manualCourse()">或 手动输入 18 洞</button>`;
+    w.innerHTML=`<div class="import-box"><div class="big">📷</div><h3>拍一张记分卡</h3><p class="small">自动读出 18 洞 Par 和码数</p><div style="display:flex;gap:10px;justify-content:center;margin-top:13px;flex-wrap:wrap;"><div class="scan-btn" style="margin-top:0;" onclick="triggerScan(true)">📷 拍照</div><div class="scan-btn" style="margin-top:0;background:var(--ink);" onclick="triggerScan(false)">🖼️ 相册选图</div></div></div><button class="ghost full" style="margin-top:14px;" onclick="manualCourse()">或 手动输入 18 洞</button>`;
     return;}
   // ---- play mode: full-screen, one hole at a time ----
   if(S.plans.length&&S.playMode){
