@@ -583,7 +583,7 @@ async function genTrainPlan(){
   if(mode==="prep"){eventDate=S.course.eventDate||"";if(!eventDate){alert("备赛模式请填比赛日期");return;}
     const days=Math.ceil((new Date(eventDate)-new Date())/86400000);weeksToEvent=Math.max(1,Math.ceil(days/7));}
   await saveTrainPrefs();saveCourse();
-  showOverlay("正在生成训练计划…（约 10 秒）");
+  showOverlay("正在生成训练计划…（内容较多，请稍候）");
   try{const J=await callCoach("trainplan",{mode,target:S.course.target||"",eventDate,weeksToEvent});
     S.trainPlan=J;trainWeek=0;await store.set("golf:trainPlan:"+courseKey(),JSON.stringify(J));renderTrain();
   }catch(err){coachError(err);}finally{hideOverlay();}
@@ -651,7 +651,7 @@ function renderPlay(){const w=document.getElementById("playWrap");
       <div class="field"><label>风速 mph</label><input type="number" inputmode="numeric" value="${S.windMph}" onchange="S.windMph=+this.value||0"></div></div>
     <div class="field"><label>果岭软硬 (整场默认)</label><div style="display:flex;gap:6px;">${["soft","medium","firm"].map(f=>`<button class="mini ${S.firm===f?"on":""}" onclick="S.firm='${f}';renderPlay()">${{soft:"软",medium:"中",firm:"硬"}[f]}</button>`).join("")}</div></div>
     <div class="row"><div class="field"><label>目标分数</label><input id="courseTarget" type="number" inputmode="numeric" placeholder="如 74" value="${S.course.target||""}" onchange="S.course.target=this.value;saveCourse()"></div>
-      <div class="field"><label>课程评级</label><input type="number" inputmode="decimal" placeholder="可选" value="${S.course.rating||""}" onchange="S.course.rating=+this.value||null;saveCourse()"></div>
+      <div class="field"><label>球场评级</label><input type="number" inputmode="decimal" placeholder="可选" value="${S.course.rating||""}" onchange="S.course.rating=+this.value||null;saveCourse()"></div>
       <div class="field"><label>坡度</label><input type="number" inputmode="numeric" placeholder="可选" value="${S.course.slope||""}" onchange="S.course.slope=+this.value||null;saveCourse()"></div></div>
     <details${S.showScorecard?" open":""} ontoggle="S.showScorecard=this.open"><summary class="small" style="cursor:pointer;font-weight:700;">记分卡数据 (点开核对/修改)</summary>
       <table class="sc-table"><thead><tr><th>洞</th><th>Par</th><th>码数(${S.tee})</th></tr></thead><tbody id="scBody">
