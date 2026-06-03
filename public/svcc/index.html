@@ -819,12 +819,25 @@ function toggleFS() {
 }
 
 // lightbox
+const _lb = document.getElementById('lightbox');
+const _lbMeta = document.querySelector('meta[name=viewport]');
+const _lbMetaContent = _lbMeta.getAttribute('content');
+
+function _lbBlockPinch(e) {
+  if (e.touches.length > 1) e.preventDefault();
+}
+
 function openLightbox(src) {
   document.getElementById('lb-img').src = src;
-  document.getElementById('lightbox').classList.add('open');
+  _lb.classList.add('open');
+  _lb.addEventListener('touchmove', _lbBlockPinch, {passive: false});
 }
 function closeLightbox() {
-  document.getElementById('lightbox').classList.remove('open');
+  _lb.classList.remove('open');
+  _lb.removeEventListener('touchmove', _lbBlockPinch);
+  // reset any viewport zoom that leaked through
+  _lbMeta.setAttribute('content', _lbMetaContent + ',maximum-scale=1.0');
+  setTimeout(() => _lbMeta.setAttribute('content', _lbMetaContent), 50);
 }
 
 // ── Init ─────────────────────────────────────
