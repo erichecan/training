@@ -89,7 +89,7 @@ function buildCoachPrompt(kind, p) {
     .join("，");
   const meta = [
     course.name ? `球场：${course.name}` : "",
-    course.rating ? `课程评级 ${course.rating}` : "",
+    course.rating ? `球场评级 ${course.rating}` : "",
     course.slope ? `坡度 ${course.slope}` : "",
     p.tee ? `Tee：${p.tee}` : "",
   ].filter(Boolean).join(" · ");
@@ -169,7 +169,11 @@ app.post("/api/coach", async (req, res) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { response_mime_type: "application/json", temperature: 0.7 },
+          generationConfig: {
+            response_mime_type: "application/json",
+            temperature: 0.7,
+            thinkingConfig: { thinkingBudget: 0 }, // 关闭思考，显著提速（结构由 prompt 约束）
+          },
         }),
       }
     );
