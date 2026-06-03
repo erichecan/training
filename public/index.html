@@ -167,6 +167,78 @@
   .pm-footer .stepper span{min-width:28px;font-size:13px;}
   .pm-next{background:var(--green);color:var(--paper);border:none;border-radius:4px;font-family:"Fraunces";font-weight:700;font-size:14px;padding:8px 15px;cursor:pointer;}
   .pm-badges{display:flex;gap:5px;flex-wrap:wrap;padding:4px 13px 8px;}
+  /* ---- hole class (得分/优势/困难) shared ---- */
+  .klass{display:inline-block;font-size:10px;font-weight:700;padding:1px 6px;border-radius:3px;letter-spacing:.04em;}
+  .klass.score{background:rgba(200,151,58,.18);color:#8a6310;}
+  .klass.adv{background:#cfe3d2;color:var(--green);}
+  .klass.hard{background:var(--flag-soft);color:#5c1d12;}
+  /* ---- game plan panel ---- */
+  .gp-summary{font-size:13px;line-height:1.55;color:var(--ink-soft);margin-bottom:10px;}
+  .gp-path{background:var(--ink);color:var(--paper);border-radius:5px;padding:11px 13px;margin-bottom:12px;}
+  .gp-path .pr{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:3px 0;opacity:.9;}
+  .gp-path .pr .eq{margin-left:auto;font-weight:700;color:var(--flag-soft);font-family:"Fraunces";white-space:nowrap;}
+  .gp-strip{display:flex;gap:6px;overflow-x:auto;padding:4px 0 10px;}
+  .gp-chip{flex:none;border-radius:5px;padding:5px 8px;text-align:center;min-width:48px;border:1.5px solid var(--rule);}
+  .gp-chip.score{background:rgba(200,151,58,.14);border-color:rgba(200,151,58,.4);}
+  .gp-chip.adv{background:rgba(46,125,70,.12);border-color:rgba(46,125,70,.4);}
+  .gp-chip.hard{background:rgba(192,57,43,.1);border-color:rgba(192,57,43,.35);}
+  .gp-chip .n{font-family:"Fraunces";font-weight:700;font-size:14px;}
+  .gp-chip .y{font-size:9px;color:var(--ink-soft);}
+  .gp-chip .k{font-size:9px;font-weight:700;}
+  .gp-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:4px;}
+  .gp-table th{font-size:9.5px;text-transform:uppercase;color:var(--ink-soft);text-align:left;padding:5px 6px;border-bottom:1.5px solid var(--ink);}
+  .gp-table td{padding:6px;border-bottom:1px solid var(--rule);vertical-align:top;color:var(--ink-soft);}
+  .gp-table td b{color:var(--ink);}
+  .gp-table .hn{font-family:"Fraunces";font-weight:700;color:var(--ink);}
+  /* ---- training view ---- */
+  .tp-hero{background:var(--green);color:var(--paper);border:1.5px solid var(--ink);border-radius:5px;box-shadow:4px 4px 0 var(--shadow);padding:15px;margin-top:16px;position:relative;overflow:hidden;}
+  .tp-hero .kk{font-size:10px;letter-spacing:.2em;text-transform:uppercase;opacity:.75;font-weight:700;}
+  .tp-hero h2{font-family:"Fraunces",serif;font-size:21px;font-weight:600;margin:4px 0;}
+  .tp-hero h2 em{font-style:italic;color:#f0c96a;}
+  .tp-hero .sub{font-size:12px;opacity:.8;line-height:1.5;}
+  .tp-anal{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;}
+  @media(max-width:440px){.tp-anal{grid-template-columns:1fr;}}
+  .tp-anal .col h3{font-size:10px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px;}
+  .tp-anal .hardest h3{color:var(--flag);}.tp-anal .easiest h3{color:var(--green-2);}
+  .tp-anal .row{font-size:12px;line-height:1.45;margin-bottom:5px;}
+  .tp-anal .row b{color:var(--ink);}
+  .tp-insight{background:linear-gradient(135deg,var(--paper-2),rgba(200,151,58,.08));border:1.5px solid rgba(200,151,58,.35);border-radius:5px;padding:11px 13px;font-size:12.5px;line-height:1.6;margin-top:12px;}
+  .tp-focus .fr{display:flex;align-items:flex-start;gap:9px;padding:8px 0;border-bottom:1px dashed var(--rule);}
+  .tp-focus .fr:last-child{border-bottom:none;}
+  .tp-focus .rk{font-family:"Fraunces";font-weight:700;font-size:16px;color:var(--green-2);min-width:20px;}
+  .tp-focus .ft{font-weight:700;font-size:13px;}
+  .tp-focus .fd{font-size:12px;color:var(--ink-soft);line-height:1.5;margin-top:1px;}
+  .tp-focus .pc{margin-left:auto;font-family:"Fraunces";font-weight:700;color:var(--flag);font-size:13px;white-space:nowrap;}
+  .tp-skip{font-size:12px;color:var(--ink-soft);margin-top:10px;line-height:1.5;}
+  .tp-skip b{color:var(--flag);}
+  .wk-tabs{display:flex;gap:4px;overflow-x:auto;margin-top:16px;}
+  .wk-tab{flex:none;border:1.5px solid var(--rule);background:var(--paper);border-radius:4px;padding:8px 12px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--ink-soft);}
+  .wk-tab.on{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+  .wk-head{background:var(--paper-2);border-left:4px solid var(--green);border-radius:4px;padding:12px 14px;margin-top:12px;}
+  .wk-head h3{font-family:"Fraunces";font-size:16px;color:var(--green);}
+  .wk-head p{font-size:12px;color:var(--ink-soft);line-height:1.5;margin-top:3px;}
+  .wk-goal{display:inline-block;margin-top:7px;background:var(--green);color:var(--paper);font-size:11px;font-weight:700;padding:3px 10px;border-radius:3px;}
+  .day{background:var(--paper);border:1.5px solid var(--ink);border-radius:5px;box-shadow:3px 3px 0 var(--shadow);margin-top:12px;overflow:hidden;}
+  .day-hd{display:flex;align-items:center;gap:10px;background:var(--ink);color:var(--paper);padding:10px 13px;}
+  .day-hd.wknd{background:var(--green-2);}
+  .day-lb{font-size:10px;font-weight:700;letter-spacing:.1em;background:rgba(255,255,255,.16);padding:2px 8px;border-radius:3px;white-space:nowrap;}
+  .day-tt{font-family:"Fraunces";font-size:15px;flex:1;}
+  .day-tm{font-size:10.5px;opacity:.75;white-space:nowrap;}
+  .day-bd{padding:12px 13px;}
+  .sess{margin-bottom:11px;padding-bottom:11px;border-bottom:1px dashed var(--rule);}
+  .sess:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none;}
+  .sess-hd{display:flex;align-items:center;gap:7px;margin-bottom:6px;}
+  .sess-nm{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--green-2);}
+  .sess-dr{font-size:10.5px;color:var(--ink-soft);margin-left:auto;}
+  .drl{display:flex;gap:8px;font-size:12.5px;line-height:1.5;color:var(--ink-soft);margin-bottom:4px;}
+  .drl .dt{width:5px;height:5px;border-radius:50%;background:var(--flag);flex:none;margin-top:7px;}
+  .drl b{color:var(--ink);}
+  .drl .dn{font-size:11px;font-style:italic;color:var(--ink-soft);opacity:.85;}
+  .drl .tg{display:inline-block;font-size:9.5px;font-weight:700;padding:1px 5px;border-radius:3px;margin-left:4px;background:rgba(200,151,58,.16);color:#8a6310;}
+  .day-focus{background:linear-gradient(135deg,var(--paper-2),rgba(46,125,70,.07));border:1px solid rgba(46,125,70,.2);border-radius:4px;padding:9px 11px;font-size:12px;line-height:1.55;margin-top:8px;}
+  .day-focus b{display:block;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--green-2);margin-bottom:3px;}
+  .day.rest{background:var(--paper-2);border-style:dashed;box-shadow:none;}
+  .day.rest .day-bd{display:flex;align-items:center;gap:10px;color:var(--ink-soft);font-size:12.5px;}
 </style>
 </head>
 <body>
@@ -174,6 +246,7 @@
 
 <div class="view on" id="playView"><div class="wrap" id="playWrap"></div></div>
 <div class="view" id="statsView"><div class="wrap" id="statsWrap"></div></div>
+<div class="view" id="trainView"><div class="wrap" id="trainWrap"></div></div>
 <div class="view" id="bagView"><div class="wrap">
   <section class="card"><div class="card-head"><h2>我的球包 · 配一次就行</h2></div><div class="card-body">
     <p class="small" style="margin-bottom:12px;"><b>Total</b>=落地+滚动总距离（开球用）。<b>Carry</b>=飞行落地距离（攻果岭定落点用）。</p>
@@ -187,10 +260,11 @@
 <div class="tabbar">
   <button class="on" id="tabPlay" onclick="switchView('play')"><span class="ic">⛳</span>打球</button>
   <button id="tabStats" onclick="switchView('stats')"><span class="ic">📊</span>数据</button>
+  <button id="tabTrain" onclick="switchView('train')"><span class="ic">🏋️</span>训练</button>
   <button id="tabBag" onclick="switchView('bag')"><span class="ic">🎒</span>球包</button>
 </div>
 <input type="file" id="fileInput" accept="image/*" capture="environment" style="display:none">
-<div class="overlay" id="overlay"><div class="spinner"><div class="dot"></div><p class="small">正在识别记分卡…</p></div></div>
+<div class="overlay" id="overlay"><div class="spinner"><div class="dot"></div><p class="small" id="overlayMsg">正在识别记分卡…</p></div></div>
 
 <script>
 /* ===== portable storage (Claude artifact OR self-hosted PWA) ===== */
@@ -221,8 +295,11 @@ const RESULTS=[{k:"fairway",t:"球道",g:"good"},{k:"rough",t:"长草",g:"meh"},
 const DIRS=[{k:"left",t:"左"},{k:"short",t:"短"},{k:"on",t:"准"},{k:"long",t:"长"},{k:"right",t:"右"}];
 
 let bag=[];
-let S={course:null,tee:null,windMph:0,firm:"medium",plans:[],current:0,holePin:[],holeWind:[],playMode:false};
+let S={course:null,tee:null,windMph:0,firm:"medium",plans:[],current:0,holePin:[],holeWind:[],playMode:false,gameplan:null,trainPlan:null};
 let R=null, rounds=[];
+const DEFAULT_PREFS={daysPerWeek:4,hoursPerDay:2,facilities:["range","green","course"],focusNote:""};
+let trainPrefs=JSON.parse(JSON.stringify(DEFAULT_PREFS));
+let trainWeek=0;
 
 /* ===== load/save ===== */
 async function loadAll(){
@@ -231,8 +308,14 @@ async function loadAll(){
   if(!S.course){S.course=JSON.parse(JSON.stringify(PRELOAD_COURSE));S.tee=PRELOAD_COURSE.tees[0];}
   let rr=await store.get("golf:rounds"); rounds=rr&&rr.value?JSON.parse(rr.value):[];
   let cr=await store.get("golf:curRound"); if(cr&&cr.value&&cr.value!=="null")R=JSON.parse(cr.value);
+  let tp=await store.get("golf:trainPrefs"); if(tp&&tp.value)trainPrefs=Object.assign(JSON.parse(JSON.stringify(DEFAULT_PREFS)),JSON.parse(tp.value));
+  await loadCoach();
   renderBag(); renderPlay();
 }
+async function loadCoach(){const ck=S.course?courseKey():"";
+  let g=await store.get("golf:gameplan:"+ck); S.gameplan=g&&g.value?JSON.parse(g.value):null;
+  let t=await store.get("golf:trainPlan:"+ck); S.trainPlan=t&&t.value?JSON.parse(t.value):null;}
+async function saveTrainPrefs(){await store.set("golf:trainPrefs",JSON.stringify(trainPrefs));}
 async function saveBag(msg){collectBag();await store.set("golf:bag2",JSON.stringify(bag));
   if(msg){const m=document.getElementById("savedMsg");m.classList.add("show");setTimeout(()=>m.classList.remove("show"),1300);}}
 async function saveCourse(){await store.set("golf:course2",JSON.stringify({course:S.course,tee:S.tee}));}
@@ -252,16 +335,14 @@ function addClub(){collectBag();const n=document.getElementById("newClub").value
 function delClub(i){collectBag();bag.splice(i,1);renderBag();saveBag();}
 
 /* ===== view switch ===== */
-function switchView(v){["play","stats","bag"].forEach(x=>document.getElementById(x+"View").classList.toggle("on",v===x));
-  document.getElementById("tabPlay").classList.toggle("on",v==="play");
-  document.getElementById("tabStats").classList.toggle("on",v==="stats");
-  document.getElementById("tabBag").classList.toggle("on",v==="bag");
-  if(v==="bag")collectBag(); if(v==="stats")renderStats(); if(v==="play")renderPlay();}
+function switchView(v){["play","stats","train","bag"].forEach(x=>document.getElementById(x+"View").classList.toggle("on",v===x));
+  ["Play","Stats","Train","Bag"].forEach(x=>document.getElementById("tab"+x).classList.toggle("on",v===x.toLowerCase()));
+  if(v==="bag")collectBag(); if(v==="stats")renderStats(); if(v==="play")renderPlay(); if(v==="train")renderTrain();}
 
 /* ===== scorecard input ===== */
 document.getElementById("fileInput").addEventListener("change",handleScan);
 function triggerScan(){document.getElementById("fileInput").click();}
-function manualCourse(){S.course={name:"",tees:["默认"],holes:Array.from({length:18},(_,i)=>({no:i+1,par:4,yards:{"默认":null}}))};S.tee="默认";S.plans=[];S.showScorecard=true;renderPlay();}
+function manualCourse(){S.course={name:"",tees:["默认"],holes:Array.from({length:18},(_,i)=>({no:i+1,par:4,yards:{"默认":null}}))};S.tee="默认";S.plans=[];S.gameplan=null;S.trainPlan=null;S.showScorecard=true;renderPlay();}
 async function handleScan(e){const f=e.target.files[0];if(!f)return;
   document.getElementById("overlay").classList.add("on");
   try{
@@ -269,7 +350,7 @@ async function handleScan(e){const f=e.target.files[0];if(!f)return;
     const resp=await fetch("/api/scan",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({image:b64,media_type:f.type||"image/jpeg"})});
     const J=await resp.json(); if(J.error)throw new Error(J.error); const tees=J.tees&&J.tees.length?J.tees:["默认"];
     S.course={name:"",tees,holes:(J.holes||[]).map(h=>{const y={};tees.forEach((tn,k)=>y[tn]=Array.isArray(h.yds)?h.yds[k]??null:null);return{no:h.no,par:h.par||4,yards:y};})};
-    S.tee=tees[0];S.plans=[];S.showScorecard=true;saveCourse();renderPlay();
+    S.tee=tees[0];S.plans=[];S.gameplan=null;S.trainPlan=null;S.showScorecard=true;saveCourse();renderPlay();
   }catch(err){const net=/fetch/i.test(err.message||"");
     alert(net?"拍照识别需在 claude.ai 的 artifact 里联网运行；本地预览会被浏览器拦掉(Failed to fetch)，跟图片清不清楚无关。\n已预填球场，点开「记分卡数据」核对即可。换球场把记分卡发到聊天我帮你填。":"识别失败："+(err.message||""));
     renderPlay();}
@@ -395,6 +476,146 @@ function tendencyNote(club,par,pin){const t=clubTendency(club);if(t.dirN<4&&!(t.
   if(t.spread&&t.spread>=8)adv.push("攻果岭打中心、别冲边旗");
   if(adv.length)s+="；"+adv.join("，");return s;}
 
+/* ===== AI COACH: game plan + training plan ===== */
+const KLAB={score:"得分",adv:"优势",hard:"困难"};
+function esc(s){return String(s==null?"":s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
+function showOverlay(msg){document.getElementById("overlayMsg").textContent=msg||"处理中…";document.getElementById("overlay").classList.add("on");}
+function hideOverlay(){document.getElementById("overlay").classList.remove("on");}
+function coachError(err){const net=/fetch|Failed to fetch/i.test(err.message||"");
+  alert(net?"生成失败：调用 AI 需要联网，且服务端需配置 GEMINI_API_KEY。本地预览/离线无法生成。":"生成失败："+(err.message||""));}
+
+function buildStatsDigest(){
+  const rs=[...rounds];if(R)rs.push(R);
+  const played=rs.filter(rd=>rd.holes.some(h=>h.shots.length));
+  const shots=allShots();
+  if(!played.length&&!shots.length)return{hasData:false};
+  let firM=0,firE=0,girM=0,girE=0,putts=0,holesPlayed=0,scrM=0,scrO=0,sandM=0,sandO=0,pen=0;
+  const agg={};
+  rs.forEach(rd=>rd.holes.forEach(h=>{if(!h.shots.length)return;const st=holeStats(h);holesPlayed++;
+    if(st.firElig){firE++;if(st.fir)firM++;}girE++;if(st.gir)girM++;putts+=st.putts;
+    if(st.scrOpp){scrO++;if(st.scrOk)scrM++;}if(st.sandOpp){sandO++;if(st.sandOk)sandM++;}pen+=st.pen;
+    const a=agg[h.no]=agg[h.no]||{sum:0,n:0,par:h.par};a.sum+=(st.score-h.par);a.n++;}));
+  const harr=Object.entries(agg).map(([no,v])=>({no:+no,par:v.par,n:v.n,avg:+(v.sum/v.n).toFixed(2)}));
+  const weak=[...harr].sort((a,b)=>b.avg-a.avg).slice(0,5);
+  const strong=[...harr].sort((a,b)=>a.avg-b.avg).slice(0,5);
+  const clubs=[...new Set(shots.filter(s=>s.club).map(s=>s.club))]
+    .map(c=>{const t=clubTendency(c);return{club:c,samples:t.samples,avg:t.avg,spread:t.spread,left:t.left,right:t.right,shortN:t.shortN,longN:t.longN};})
+    .filter(x=>x.samples>=2);
+  const pf=(m,e)=>e?Math.round(m/e*100):null;
+  return{hasData:true,rounds:played.length,holesPlayed,fir:pf(firM,firE),gir:pf(girM,girE),
+    scrambling:pf(scrM,scrO),sandSave:pf(sandM,sandO),puttsPerHole:holesPlayed?+(putts/holesPlayed).toFixed(2):null,
+    penalties:pen,weakHoles:weak,strongHoles:strong,clubs};
+}
+async function callCoach(kind,extra){
+  const payload=Object.assign({
+    course:{name:S.course.name||"",rating:S.course.rating||null,slope:S.course.slope||null,
+      holes:S.course.holes.map(h=>({no:h.no,par:h.par,yards:h.yards[S.tee]??null}))},
+    tee:S.tee,bag:sb(),digest:buildStatsDigest(),prefs:trainPrefs
+  },extra||{});
+  const resp=await fetch("/api/coach",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({kind,payload})});
+  const J=await resp.json();if(J.error)throw new Error(J.error);return J;
+}
+async function genGamePlan(){
+  collectBag();readScorecardInputs();
+  if(sb().length<2){alert("先去『球包』填几支杆");switchView("bag");return;}
+  if(!S.course.holes.some(h=>h.yards[S.tee])){alert("先补上各洞码数（点开『记分卡数据』）");return;}
+  const tg=document.getElementById("courseTarget");if(tg)S.course.target=tg.value;saveCourse();
+  showOverlay("正在生成整场博弈…");
+  try{const J=await callCoach("gameplan",{target:S.course.target||""});
+    S.gameplan=J;await store.set("golf:gameplan:"+courseKey(),JSON.stringify(J));renderPlay();
+  }catch(err){coachError(err);}finally{hideOverlay();}
+}
+function renderGamePlanPanel(){const g=S.gameplan;if(!g)return"";
+  let h=`<section class="card"><div class="card-head"><h2>🎯 整场博弈 · 目标 ${esc(g.target||S.course.target||"—")}</h2></div><div class="card-body">`;
+  if(g.summary)h+=`<div class="gp-summary">${esc(g.summary)}</div>`;
+  if(g.path&&g.path.length)h+=`<div class="gp-path">${g.path.map(p=>`<div class="pr"><span>${esc(p.icon||"")} ${esc(p.text||"")}</span><span class="eq">${esc(p.delta||"")}</span></div>`).join("")}</div>`;
+  if(g.holes&&g.holes.length){
+    h+=`<div class="gp-strip">${g.holes.map(x=>`<div class="gp-chip ${x.klass}"><div class="n">${x.no}</div><div class="y">${x.yards||""}码</div><div class="k klass ${x.klass}">${KLAB[x.klass]||""}</div></div>`).join("")}</div>`;
+    h+=`<table class="gp-table"><tr><th>洞</th><th>码/Par</th><th>定位</th><th>开球</th><th>策略</th></tr>${g.holes.map(x=>`<tr><td class="hn">${x.no}</td><td>${x.yards||"?"}/${x.par}</td><td><span class="klass ${x.klass}">${KLAB[x.klass]||""}</span></td><td>${esc(x.tee_club||"")}</td><td><b>${esc(x.plan||"")}</b>${x.note?`<br><span style="font-size:11px;">${esc(x.note)}</span>`:""}</td></tr>`).join("")}</table>`;
+  }
+  if(g.notes&&g.notes.length)h+=`<div class="notes" style="margin-top:12px;"><h3>整场提醒</h3><ul>${g.notes.map(n=>`<li>${esc(n)}</li>`).join("")}</ul></div>`;
+  h+=`<button class="ghost full" style="margin-top:12px;" onclick="genGamePlan()">↻ 重新生成博弈</button></div></section>`;return h;}
+
+/* ===== TRAINING VIEW ===== */
+function renderTrain(){const w=document.getElementById("trainWrap");
+  if(!S.course){w.innerHTML=`<div class="empty">先在『打球』里导入球场，再来生成训练计划。</div>`;return;}
+  if(!S.trainPlan){w.innerHTML=renderTrainSetup();return;}
+  w.innerHTML=renderTrainPlan()+`<button class="ghost full" style="margin-top:14px;" onclick="trainReconfig()">↻ 重新生成 / 改设置</button>
+    <p class="footnote">打几轮记录后再生成，计划会按你最新的数据短板调整。</p>`;}
+function trainReconfig(){S.trainPlan=null;renderTrain();}
+function syncTrainForm(){
+  const d=document.getElementById("tpDate");if(d)S.course.eventDate=d.value;
+  const t=document.getElementById("tpTarget");if(t)S.course.target=t.value;
+  const pd=document.getElementById("prefDays");if(pd)trainPrefs.daysPerWeek=+pd.value||trainPrefs.daysPerWeek;
+  const ph=document.getElementById("prefHours");if(ph)trainPrefs.hoursPerDay=+ph.value||trainPrefs.hoursPerDay;
+  const pn=document.getElementById("prefNote");if(pn)trainPrefs.focusNote=pn.value;}
+function setTrainMode(m){syncTrainForm();S.trainMode=m;renderTrain();}
+function togglePrefFac(k){syncTrainForm();const f=trainPrefs.facilities;const i=f.indexOf(k);if(i>=0)f.splice(i,1);else f.push(k);renderTrain();}
+function renderTrainSetup(){const m=S.trainMode||(S.trainMode="prep");const fac=trainPrefs.facilities||[];
+  return `<section class="card"><div class="card-head"><h2>🏋️ 生成训练计划</h2></div><div class="card-body">
+    <p class="small" style="margin-bottom:12px;">基于球场「${esc(S.course.name||"未命名")}」+ 你『数据』里的真实表现。打得越多，生成越准。</p>
+    <label>模式</label>
+    <div style="display:flex;gap:6px;margin-bottom:13px;">
+      <button class="mini ${m==="prep"?"on":""}" onclick="setTrainMode('prep')">备赛冲刺</button>
+      <button class="mini ${m==="ongoing"?"on":""}" onclick="setTrainMode('ongoing')">日常提升</button>
+    </div>
+    <div class="row">
+      ${m==="prep"?`<div class="field"><label>比赛日期</label><input id="tpDate" type="date" value="${S.course.eventDate||""}"></div>`:""}
+      <div class="field"><label>目标分数</label><input id="tpTarget" type="number" inputmode="numeric" placeholder="如 74" value="${S.course.target||""}"></div>
+    </div>
+    <details><summary class="small" style="cursor:pointer;font-weight:700;">训练偏好（记住，下次免填）</summary>
+      <div class="row" style="margin-top:10px;">
+        <div class="field"><label>每周天数</label><input id="prefDays" type="number" inputmode="numeric" value="${trainPrefs.daysPerWeek}"></div>
+        <div class="field"><label>每天小时</label><input id="prefHours" type="number" inputmode="numeric" value="${trainPrefs.hoursPerDay}"></div>
+      </div>
+      <label>可用设施</label>
+      <div style="display:flex;gap:6px;margin-bottom:11px;">${[["range","练习场"],["green","果岭区"],["course","可下场"]].map(([k,t])=>`<button class="mini ${fac.includes(k)?"on":""}" onclick="togglePrefFac('${k}')">${t}</button>`).join("")}</div>
+      <div class="field"><label>自评短板（可选）</label><input id="prefNote" type="text" placeholder="如 推杆不稳、长草切杆差" value="${esc(trainPrefs.focusNote||"")}"></div>
+    </details>
+    <button class="primary" style="margin-top:14px;" onclick="genTrainPlan()">🏋️ 生成训练计划</button>
+  </div></section>`;}
+async function genTrainPlan(){
+  collectBag();syncTrainForm();
+  if(sb().length<2){alert("先去『球包』填几支杆");switchView("bag");return;}
+  const mode=S.trainMode||"prep";let eventDate=null,weeksToEvent=null;
+  if(mode==="prep"){eventDate=S.course.eventDate||"";if(!eventDate){alert("备赛模式请填比赛日期");return;}
+    const days=Math.ceil((new Date(eventDate)-new Date())/86400000);weeksToEvent=Math.max(1,Math.ceil(days/7));}
+  await saveTrainPrefs();saveCourse();
+  showOverlay("正在生成训练计划…（约 10 秒）");
+  try{const J=await callCoach("trainplan",{mode,target:S.course.target||"",eventDate,weeksToEvent});
+    S.trainPlan=J;trainWeek=0;await store.set("golf:trainPlan:"+courseKey(),JSON.stringify(J));renderTrain();
+  }catch(err){coachError(err);}finally{hideOverlay();}
+}
+function renderTrainPlan(){const t=S.trainPlan;let h="";
+  h+=`<div class="tp-hero"><div class="kk">${t.mode==="prep"?"备赛冲刺":"日常提升"}${t.weeksToEvent?` · 倒计时 ${t.weeksToEvent} 周`:""}</div>
+    <h2>${esc(t.title||"训练计划")}${t.target?` · 目标 <em>${esc(t.target)}</em>`:""}</h2>
+    ${t.subtitle?`<div class="sub">${esc(t.subtitle)}</div>`:""}</div>`;
+  if(t.analysis){const a=t.analysis;
+    h+=`<section class="card"><div class="card-body"><div class="tp-anal">
+      <div class="col hardest"><h3>🔴 最难 / 易丢分</h3>${(a.hardest||[]).map(x=>`<div class="row"><b>${esc(x.label)}</b> ${esc(x.detail)}</div>`).join("")||'<div class="row small">—</div>'}</div>
+      <div class="col easiest"><h3>🟢 最易得分</h3>${(a.easiest||[]).map(x=>`<div class="row"><b>${esc(x.label)}</b> ${esc(x.detail)}</div>`).join("")||'<div class="row small">—</div>'}</div>
+    </div>${a.insight?`<div class="tp-insight">${esc(a.insight)}</div>`:""}</div></section>`;}
+  if(t.focus&&t.focus.length){h+=`<section class="card"><div class="card-head"><h2>🎯 训练重点</h2></div><div class="card-body tp-focus">
+    ${t.focus.map(f=>`<div class="fr"><span class="rk">${esc(f.rank||"·")}</span><div style="flex:1;"><div class="ft">${esc(f.title)}</div><div class="fd">${esc(f.detail)}</div></div>${f.pct?`<span class="pc">${esc(f.pct)}</span>`:""}</div>`).join("")}
+    ${t.skip&&t.skip.length?`<div class="tp-skip"><b>暂时不练：</b>${t.skip.map(esc).join("、")}</div>`:""}</div></section>`;}
+  if(t.path&&t.path.length)h+=`<section class="card"><div class="card-body"><div class="gp-path">${t.path.map(p=>`<div class="pr"><span>${esc(p.icon||"")} ${esc(p.text||"")}</span><span class="eq">${esc(p.delta||"")}</span></div>`).join("")}</div></div></section>`;
+  if(t.weeks&&t.weeks.length){if(trainWeek>=t.weeks.length)trainWeek=0;
+    h+=`<div class="wk-tabs">${t.weeks.map((wk,i)=>`<button class="wk-tab ${i===trainWeek?"on":""}" onclick="trainWeek=${i};renderTrain()">第${wk.n||i+1}周</button>`).join("")}</div>`;
+    const wk=t.weeks[trainWeek];
+    h+=`<div class="wk-head"><h3>${esc(wk.title||("第"+(wk.n||trainWeek+1)+"周"))}</h3>${wk.summary?`<p>${esc(wk.summary)}</p>`:""}${wk.goal?`<div class="wk-goal">✓ ${esc(wk.goal)}</div>`:""}</div>`;
+    h+=(wk.days||[]).map(renderDay).join("");}
+  return h;}
+function renderDay(dd){
+  if(dd.rest)return `<div class="day rest"><div class="day-bd"><span style="font-size:18px;">😴</span><div><b style="color:var(--ink-soft);">${esc(dd.label||"")} · 主动休息</b><br>${esc(dd.restNote||"拉伸放松")}</div></div></div>`;
+  const wknd=/六|日|末/.test(dd.label||"");
+  let s=`<div class="day"><div class="day-hd ${wknd?"wknd":""}"><span class="day-lb">${esc(dd.label||"")}</span><span class="day-tt">${esc(dd.title||"")}</span>${dd.time?`<span class="day-tm">${esc(dd.time)}</span>`:""}</div><div class="day-bd">`;
+  (dd.sessions||[]).forEach(se=>{
+    s+=`<div class="sess"><div class="sess-hd"><span>${esc(se.icon||"•")}</span><span class="sess-nm">${esc(se.name||"")}</span>${se.dur?`<span class="sess-dr">${esc(se.dur)}</span>`:""}</div>`;
+    (se.drills||[]).forEach(dr=>{s+=`<div class="drl"><span class="dt"></span><div><span><b>${esc(dr.text||"")}</b>${dr.tag?`<span class="tg">${esc(dr.tag)}</span>`:""}</span>${dr.note?`<div class="dn">${esc(dr.note)}</div>`:""}</div></div>`;});
+    s+=`</div>`;});
+  if(dd.focus)s+=`<div class="day-focus"><b>本日重点</b>${esc(dd.focus)}</div>`;
+  s+=`</div></div>`;return s;}
+
 /* ===== PLAY VIEW (plan + actual unified) ===== */
 function renderPlay(){const w=document.getElementById("playWrap");
   // ---- no course: import screen ----
@@ -424,19 +645,29 @@ function renderPlay(){const w=document.getElementById("playWrap");
   document.body.classList.remove("play-mode");
   let html=`<section class="card"><div class="card-body">
     <div class="field"><label>球场</label><input id="courseName" value="${S.course.name||""}" placeholder="球场名 (可选)"></div>
-    <div class="row"><div class="field"><label>Tee 台</label><select onchange="S.tee=this.value;S.plans=[];renderPlay()">${S.course.tees.map(t=>`<option ${t===S.tee?"selected":""}>${t}</option>`).join("")}</select></div>
+    <div class="row"><div class="field"><label>Tee 台</label><select onchange="changeTee(this.value)">${S.course.tees.map(t=>`<option ${t===S.tee?"selected":""}>${t}</option>`).join("")}</select></div>
       <div class="field"><label>风速 mph</label><input type="number" inputmode="numeric" value="${S.windMph}" onchange="S.windMph=+this.value||0"></div></div>
     <div class="field"><label>果岭软硬 (整场默认)</label><div style="display:flex;gap:6px;">${["soft","medium","firm"].map(f=>`<button class="mini ${S.firm===f?"on":""}" onclick="S.firm='${f}';renderPlay()">${{soft:"软",medium:"中",firm:"硬"}[f]}</button>`).join("")}</div></div>
+    <div class="row"><div class="field"><label>目标分数</label><input id="courseTarget" type="number" inputmode="numeric" placeholder="如 74" value="${S.course.target||""}" onchange="S.course.target=this.value;saveCourse()"></div>
+      <div class="field"><label>课程评级</label><input type="number" inputmode="decimal" placeholder="可选" value="${S.course.rating||""}" onchange="S.course.rating=+this.value||null;saveCourse()"></div>
+      <div class="field"><label>坡度</label><input type="number" inputmode="numeric" placeholder="可选" value="${S.course.slope||""}" onchange="S.course.slope=+this.value||null;saveCourse()"></div></div>
     <details${S.showScorecard?" open":""} ontoggle="S.showScorecard=this.open"><summary class="small" style="cursor:pointer;font-weight:700;">记分卡数据 (点开核对/修改)</summary>
       <table class="sc-table"><thead><tr><th>洞</th><th>Par</th><th>码数(${S.tee})</th></tr></thead><tbody id="scBody">
       ${S.course.holes.map(h=>`<tr><td class="hno">${h.no}</td><td><input class="scPar" type="number" inputmode="numeric" value="${h.par}"></td><td><input class="scYd" type="number" inputmode="numeric" value="${h.yards[S.tee]??""}"></td></tr>`).join("")}
       </tbody></table></details>
     <button class="primary" style="margin-top:14px;" onclick="generateAll()">⛳ 生成 18 洞策略</button>
     ${S.plans.length?`<button class="ghost full" style="margin-top:10px;" onclick="S.playMode=true;renderPlay()">继续打球 › 第 ${S.course.holes[S.current].no} 洞</button>`:""}
-    <button class="ghost full" style="margin-top:10px;" onclick="S.course=null;S.plans=[];renderPlay()">重新导入记分卡</button>
+    <div class="row" style="margin-top:10px;gap:8px;">
+      <button class="ghost full" onclick="genGamePlan()">🎯 整场博弈(AI)</button>
+      <button class="ghost full" onclick="switchView('train')">🏋️ 训练计划</button>
+    </div>
+    <button class="ghost full" style="margin-top:10px;" onclick="newCourse()">重新导入记分卡</button>
   </div></section>`;
+  if(S.gameplan)html+=renderGamePlanPanel();
   html+=`<p class="footnote">上半=计划/目标，下半=实际完成。数据攒多了，策略提醒会带上你的偏向与离散。</p>`;
   w.innerHTML=html;}
+function changeTee(v){S.tee=v;S.plans=[];loadCoach().then(renderPlay);}
+function newCourse(){S.course=null;S.plans=[];S.gameplan=null;S.trainPlan=null;renderPlay();}
 function renderHoleCompact(i){
   const h=S.course.holes[i],p=S.plans[i];
   const rh=R?R.holes[i]:null,st=rh?holeStats(rh):null;
@@ -450,6 +681,9 @@ function renderHoleCompact(i){
     <span class="pm-meta-lab">风</span>
     <div style="display:flex;gap:3px;">${[["none","无"],["into","逆"],["down","顺"],["cross","侧"]].map(([x,t])=>`<button class="mini wind ${S.holeWind[i]===x?"on":""}" onclick="setWind('${x}')">${t}</button>`).join("")}</div>
   </div>`;
+  // game-plan positioning (AI 整场博弈) if available
+  if(S.gameplan){const gh=(S.gameplan.holes||[]).find(x=>x.no===h.no);
+    if(gh)s+=`<div class="pm-plan-bar"><span class="klass ${gh.klass}">${KLAB[gh.klass]||""}</span> ${esc(gh.tee_club||"")}${gh.plan?` · ${esc(gh.plan)}`:""}${gh.note?` <b>${esc(gh.note)}</b>`:""}</div>`;}
   // plan section with shot detail
   s+=`<div class="pm-plan"><div class="pm-plan-hd">策略</div>`;
   p.shots.forEach(sh=>{
