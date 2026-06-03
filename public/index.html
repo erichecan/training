@@ -239,6 +239,29 @@
   .day-focus b{display:block;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--green-2);margin-bottom:3px;}
   .day.rest{background:var(--paper-2);border-style:dashed;box-shadow:none;}
   .day.rest .day-bd{display:flex;align-items:center;gap:10px;color:var(--ink-soft);font-size:12.5px;}
+  /* ---- tournament view ---- */
+  .tr-hero{background:var(--ink);color:var(--paper);border:1.5px solid var(--ink);border-radius:5px;box-shadow:5px 5px 0 var(--shadow);margin-top:16px;overflow:hidden;}
+  .tr-hero-top{padding:14px 15px 10px;position:relative;}
+  .tr-hero-top::after{content:"🏆";position:absolute;right:12px;top:10px;font-size:42px;opacity:.18;}
+  .tr-status{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:2px 8px;border-radius:3px;margin-bottom:8px;}
+  .tr-status.upcoming{background:var(--green-2);color:var(--paper);}
+  .tr-status.past{background:var(--ink-soft);color:var(--paper);}
+  .tr-name{font-family:"Fraunces",serif;font-size:20px;font-weight:700;line-height:1.2;margin-bottom:4px;}
+  .tr-meta{font-size:12px;opacity:.75;line-height:1.6;}
+  .tr-body{padding:12px 15px;background:var(--paper-2);border-top:1.5px solid rgba(255,255,255,.1);}
+  .tr-info{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;}
+  .tr-info-item{flex:1;min-width:120px;background:var(--paper);border:1.5px solid var(--rule);border-radius:4px;padding:8px 10px;}
+  .tr-info-item .ti-lab{font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:3px;}
+  .tr-info-item .ti-val{font-size:13px;font-weight:700;color:var(--ink);}
+  .tr-btn{display:block;width:100%;font-family:"Fraunces",serif;font-weight:700;font-size:16px;background:var(--flag);color:var(--paper);border:1.5px solid var(--ink);padding:12px;border-radius:4px;cursor:pointer;box-shadow:3px 3px 0 var(--ink);text-align:center;text-decoration:none;transition:transform .1s,box-shadow .1s;}
+  .tr-btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink);}
+  .tr-past-card{background:var(--paper);border:1.5px solid var(--rule);border-radius:5px;margin-top:12px;overflow:hidden;opacity:.72;}
+  .tr-past-card .tr-hero-top{background:var(--paper-2);color:var(--ink);}
+  .tr-past-card .tr-name{font-size:16px;}
+  .tr-past-card .tr-meta{opacity:.6;}
+  .tr-section-hd{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin:20px 0 8px;display:flex;align-items:center;gap:8px;}
+  .tr-section-hd::after{content:"";flex:1;height:1.5px;background:var(--rule);}
+  .tr-empty{text-align:center;color:var(--ink-soft);font-size:13px;padding:28px 10px;line-height:1.6;}
 </style>
 </head>
 <body>
@@ -247,6 +270,7 @@
 <div class="view on" id="playView"><div class="wrap" id="playWrap"></div></div>
 <div class="view" id="statsView"><div class="wrap" id="statsWrap"></div></div>
 <div class="view" id="trainView"><div class="wrap" id="trainWrap"></div></div>
+<div class="view" id="tournView"><div class="wrap" id="tournWrap"></div></div>
 <div class="view" id="bagView"><div class="wrap">
   <section class="card"><div class="card-head"><h2>我的球包 · 配一次就行</h2></div><div class="card-body">
     <p class="small" style="margin-bottom:12px;"><b>Total</b>=落地+滚动总距离（开球用）。<b>Carry</b>=飞行落地距离（攻果岭定落点用）。</p>
@@ -261,6 +285,7 @@
   <button class="on" id="tabPlay" onclick="switchView('play')"><span class="ic">⛳</span>打球</button>
   <button id="tabStats" onclick="switchView('stats')"><span class="ic">📊</span>数据</button>
   <button id="tabTrain" onclick="switchView('train')"><span class="ic">🏋️</span>训练</button>
+  <button id="tabTourn" onclick="switchView('tourn')"><span class="ic">🏆</span>比赛</button>
   <button id="tabBag" onclick="switchView('bag')"><span class="ic">🎒</span>球包</button>
 </div>
 <input type="file" id="fileInput" accept="image/*" style="display:none">
@@ -335,9 +360,9 @@ function addClub(){collectBag();const n=document.getElementById("newClub").value
 function delClub(i){collectBag();bag.splice(i,1);renderBag();saveBag();}
 
 /* ===== view switch ===== */
-function switchView(v){["play","stats","train","bag"].forEach(x=>document.getElementById(x+"View").classList.toggle("on",v===x));
-  ["Play","Stats","Train","Bag"].forEach(x=>document.getElementById("tab"+x).classList.toggle("on",v===x.toLowerCase()));
-  if(v==="bag")collectBag(); if(v==="stats")renderStats(); if(v==="play")renderPlay(); if(v==="train")renderTrain();}
+function switchView(v){["play","stats","train","tourn","bag"].forEach(x=>document.getElementById(x+"View").classList.toggle("on",v===x));
+  ["Play","Stats","Train","Tourn","Bag"].forEach(x=>document.getElementById("tab"+x).classList.toggle("on",v===x.toLowerCase()));
+  if(v==="bag")collectBag(); if(v==="stats")renderStats(); if(v==="play")renderPlay(); if(v==="train")renderTrain(); if(v==="tourn")renderTourn();}
 
 /* ===== scorecard input ===== */
 document.getElementById("fileInput").addEventListener("change",handleScan);
@@ -824,6 +849,68 @@ function clubAvgPanel(){const m=clubMap(),keys=Object.keys(m);if(!keys.length)re
   html+=`<button class="ghost full" style="margin-top:12px;" onclick="applyClubAvgs()">用实测更新球包 Total</button></div></section>`;return html;}
 function applyClubAvgs(){const m=clubMap();Object.keys(m).forEach(c=>{const arr=m[c],avg=Math.round(arr.reduce((a,b)=>a+b,0)/arr.length),bc=bag.find(b=>b.name===c);if(bc){const d=avg-bc.total;bc.total=avg;bc.carry=Math.max(bc.carry+d,0);}});
   bag.sort((a,b)=>b.total-a.total);saveBag();renderBag();S.plans=[];alert("球包已按实测更新。回『打球』重新生成策略会用新距离。");}
+
+/* ===== tournament data ===== */
+const TOURNAMENTS=[
+  {
+    id:"svcc-2025",
+    status:"upcoming",
+    name:"U.S. Girls' Junior Amateur Qualifying",
+    org:"USGA",
+    date:"2025年7月",
+    course:"Spring Valley Country Club",
+    location:"Milpitas, CA",
+    format:"18洞淘汰赛制，低杆晋级",
+    playbook:"/svcc/"
+  }
+];
+
+function renderTourn(){
+  const w=document.getElementById("tournWrap");
+  const upcoming=TOURNAMENTS.filter(t=>t.status==="upcoming");
+  const past=TOURNAMENTS.filter(t=>t.status==="past");
+  let h="";
+
+  if(upcoming.length){
+    h+=`<div class="tr-section-hd">即将到来</div>`;
+    upcoming.forEach(t=>{
+      h+=`<div class="tr-hero">
+        <div class="tr-hero-top">
+          <div class="tr-status upcoming">即将到来</div>
+          <div class="tr-name">${t.name}</div>
+          <div class="tr-meta">${t.org} · ${t.date}</div>
+        </div>
+        <div class="tr-body">
+          <div class="tr-info">
+            <div class="tr-info-item"><div class="ti-lab">球场</div><div class="ti-val">${t.course}</div></div>
+            <div class="tr-info-item"><div class="ti-lab">地点</div><div class="ti-val">${t.location}</div></div>
+            <div class="tr-info-item"><div class="ti-lab">赛制</div><div class="ti-val">${t.format}</div></div>
+          </div>
+          <a class="tr-btn" href="${t.playbook}" target="_blank">查看赛前策略手册 →</a>
+        </div>
+      </div>`;
+    });
+  } else {
+    h+=`<div class="tr-empty">暂无即将到来的比赛<br><span style="font-size:11px;">赛事信息更新后会显示在这里</span></div>`;
+  }
+
+  if(past.length){
+    h+=`<div class="tr-section-hd" style="margin-top:24px;">历史赛事</div>`;
+    past.forEach(t=>{
+      const pbLink=t.playbook?`<a href="${t.playbook}" target="_blank" style="font-size:12px;color:var(--green-2);font-weight:700;text-decoration:none;">查看手册 →</a>`:"";
+      h+=`<div class="tr-past-card">
+        <div class="tr-hero-top">
+          <div class="tr-status past">已完成</div>
+          <div class="tr-name">${t.name}</div>
+          <div class="tr-meta">${t.org} · ${t.date} · ${t.course}</div>
+        </div>
+        ${pbLink?`<div style="padding:8px 15px 12px;background:var(--paper);">${pbLink}</div>`:""}
+      </div>`;
+    });
+  }
+
+  w.innerHTML=h;
+}
 
 loadAll();
 if("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js");
