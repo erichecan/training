@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spring Valley CC — 18洞完整打法手册</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #f5faf5;
+    --surface:  #edf5ed;
+    --card:     #ffffff;
+    --border:   #c0d8c0;
+    --accent:   #1f7a3e;
+    --text:     #1a2d1a;
+    --muted:    #4d6d4d;
+    --gold:     #9b7800;
+    --red:      #c0160a;
+    --orange:   #b85500;
+    --yellow:   #806000;
+    --lgreen:   #1f7a3e;
+    --green:    #1a6035;
+    --blue:     #1a5ea8;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* ── DECK ─────────────────────────────────── */
+  #deck {
+    position: relative;
+    width: 100%; height: 100%;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+  }
+  .slide.active { display: flex; }
+
+  /* ── TOP BAR ──────────────────────────────── */
+  .topbar {
+    flex: 0 0 48px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 12px;
+  }
+  .topbar .course-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: .5px;
+    white-space: nowrap;
+  }
+  .topbar .slide-title {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    text-align: center;
+  }
+  .topbar .specs {
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .topbar .btn-fs {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 3px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .topbar .btn-fs:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* ── BODY ─────────────────────────────────── */
+  .slide-body {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* ── BOTTOM NAV ───────────────────────────── */
+  .bottomnav {
+    flex: 0 0 52px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 0 12px;
+  }
+  .btn-nav {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 5px 18px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background .15s;
+  }
+  .btn-nav:hover { background: #c8dfc8; }
+  .btn-nav:disabled { opacity: .3; cursor: default; }
+
+  .dot-home {
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--card);
+    border: 2px solid var(--border);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    color: var(--muted);
+    transition: border-color .15s;
+  }
+  .dot-home:hover, .dot-home.active { border-color: var(--accent); color: var(--accent); }
+
+  .dot-num {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px;
+    font-weight: 700;
+    color: rgba(0,0,0,.75);
+    transition: transform .15s;
+    opacity: .75;
+  }
+  .dot-num:hover { transform: scale(1.25); opacity: 1; }
+  .dot-num.active { transform: scale(1.3); opacity: 1; border-color: rgba(0,0,0,.5); }
+
+  /* ── TITLE SLIDE ──────────────────────────── */
+  .title-slide-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 28px 32px 16px;
+    overflow-y: auto;
+  }
+  .title-main {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .title-main h1 {
+    font-size: 28px;
+    color: var(--accent);
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .title-main .subtitle {
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .course-stats {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .stat-chip {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 18px;
+    text-align: center;
+  }
+  .stat-chip .val { font-size: 20px; font-weight: 700; color: var(--accent); }
+  .stat-chip .lbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  .heatmap-title {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 10px;
+    letter-spacing: .5px;
+  }
+  .heatmap-grid {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    gap: 5px;
+    width: 100%;
+    max-width: 700px;
+    margin-bottom: 24px;
+  }
+  .hm-cell {
+    border-radius: 8px;
+    padding: 8px 4px;
+    text-align: center;
+    cursor: pointer;
+    transition: transform .15s;
+    border: 1px solid rgba(0,0,0,.12);
+  }
+  .hm-cell:hover { transform: scale(1.08); }
+  .hm-cell .hm-n { font-size: 11px; font-weight: 700; color: rgba(0,0,0,.85); }
+  .hm-cell .hm-par { font-size: 10px; color: rgba(0,0,0,.55); }
+  .hm-cell .hm-avg { font-size: 12px; font-weight: 700; color: rgba(0,0,0,.88); margin-top: 3px; }
+
+  .legend-row {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .leg-item {
+    display: flex; align-items: center; gap: 5px;
+    font-size: 11px; color: var(--muted);
+  }
+  .leg-dot {
+    width: 12px; height: 12px;
+    border-radius: 3px;
+  }
+
+  /* ── HOLE SLIDE ───────────────────────────── */
+  .hole-img-panel {
+    flex: 0 0 60%;
+    position: relative;
+    overflow: hidden;
+    background: #000;
+  }
+  .hole-img-panel img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  .hole-stats-panel {
+    flex: 1;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 14px 16px;
+    overflow-y: auto;
+    gap: 12px;
+  }
+
+  /* hole header */
+  .h-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .h-num-badge {
+    flex: 0 0 auto;
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: var(--card);
+  }
+  .h-num-badge .hn { font-size: 20px; font-weight: 800; color: var(--accent); line-height: 1; }
+  .h-num-badge .hp { font-size: 10px; color: var(--muted); }
+
+  .h-title-block { flex: 1; }
+  .h-title { font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.3; }
+  .h-yds { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+  .h-rank-badge {
+    flex: 0 0 auto;
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+  }
+  .h-rank-badge .rlbl { font-size: 9px; opacity: .8; }
+  .h-rank-badge .rnum { font-size: 16px; font-weight: 800; }
+
+  /* avg row */
+  .avg-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--card);
+    border-radius: 8px;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+  }
+  .avg-lbl { font-size: 12px; color: var(--muted); }
+  .avg-val { font-size: 26px; font-weight: 800; }
+  .avg-desc { font-size: 11px; color: var(--muted); flex: 1; text-align: right; }
+
+  /* distribution bar */
+  .dist-section {}
+  .dist-title { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+  .dist-bar {
+    height: 22px;
+    border-radius: 4px;
+    overflow: hidden;
+    display: flex;
+    margin-bottom: 6px;
+  }
+  .dist-seg {
+    height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700; color: rgba(255,255,255,.9);
+    transition: flex .3s;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .dist-legend {
+    display: flex; gap: 8px; flex-wrap: wrap;
+  }
+  .dl-item {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 10px; color: var(--muted);
+  }
+  .dl-dot { width: 8px; height: 8px; border-radius: 2px; flex: 0 0 auto; }
+
+  /* strategy */
+  .strat-section {}
+  .strat-title { font-size: 11px; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: .5px; }
+  .strat-list { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+  .strat-list li {
+    font-size: 12px;
+    color: var(--text);
+    line-height: 1.5;
+    padding-left: 14px;
+    position: relative;
+  }
+  .strat-list li::before {
+    content: '▶';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-size: 8px;
+    top: 3px;
+  }
+
+  /* key note */
+  .key-note {
+    background: #e4f0e8;
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .key-note .kl { font-size: 10px; color: var(--accent); font-weight: 700; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .5px; }
+
+  /* ── MOBILE ≤ 639px ──────────────────────────── */
+  @media (max-width: 639px) {
+    /* Stacked layout: image on top, stats below */
+    .slide-body {
+      flex-direction: column;
+    }
+    .hole-img-panel {
+      flex: 0 0 45vh;
+      min-height: 0;
+      border-left: none;
+      border-bottom: 1px solid var(--border);
+    }
+    .hole-stats-panel {
+      flex: 1;
+      border-left: none;
+      padding: 10px 12px;
+      gap: 8px;
+    }
+
+    /* Compact topbar */
+    .topbar {
+      flex: 0 0 42px;
+      padding: 0 10px;
+      gap: 8px;
+    }
+    .topbar .specs { display: none; }
+    .topbar .btn-fs { display: none; }
+    .topbar .course-name { font-size: 11px; }
+    .topbar .slide-title { font-size: 13px; }
+
+    /* Scrollable bottom nav */
+    .bottomnav {
+      flex: 0 0 46px;
+      padding: 0 8px;
+      gap: 3px;
+      justify-content: flex-start;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x mandatory;
+    }
+    .bottomnav::-webkit-scrollbar { display: none; }
+    .btn-nav {
+      flex: 0 0 auto;
+      padding: 4px 12px;
+      font-size: 13px;
+    }
+    .dot-home {
+      flex: 0 0 auto;
+      width: 20px; height: 20px;
+      font-size: 10px;
+    }
+    .dot-num {
+      flex: 0 0 auto;
+      width: 18px; height: 18px;
+      font-size: 8px;
+    }
+
+    /* Title slide */
+    .title-slide-body {
+      padding: 16px 14px 10px;
+    }
+    .title-main h1 { font-size: 20px; }
+    .title-main .subtitle { font-size: 12px; }
+    .course-stats { gap: 8px; }
+    .stat-chip { padding: 8px 12px; }
+    .stat-chip .val { font-size: 16px; }
+    .stat-chip .lbl { font-size: 10px; }
+    .heatmap-grid {
+      grid-template-columns: repeat(9, 1fr);
+      gap: 3px;
+    }
+    .hm-cell { padding: 5px 2px; }
+    .hm-cell .hm-n { font-size: 9px; }
+    .hm-cell .hm-par { font-size: 8px; }
+    .hm-cell .hm-avg { font-size: 10px; }
+
+    /* Hole stats */
+    .h-num-badge { width: 42px; height: 42px; }
+    .h-num-badge .hn { font-size: 16px; }
+    .h-title { font-size: 14px; }
+    .h-yds { font-size: 11px; }
+    .avg-val { font-size: 22px; }
+    .avg-lbl { font-size: 11px; }
+    .avg-desc { font-size: 10px; }
+    .strat-list li { font-size: 11px; }
+    .key-note { font-size: 11px; padding: 8px 10px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="deck"></div>
+
+<script>
+const HOLES = [
+  {n:1,  par:4, yds:364, rank:4,  avg:+0.598, e:0.0, b:2.4,  p:48.8, bo:42.7, d:6.1,
+   title:"开场稳定洞",
+   notes:["开球选中铁或小木杆，球道中段落点，不追距离","第2杆以上绿为首要目标，切勿攻旗","开场第一洞节奏比结果更重要，接受柏忌不要崩洞"],
+   key:"柏忌率42.7%——控制崩洞风险比争鸟更重要"},
+  {n:2,  par:5, yds:416, rank:18, avg:-0.073, e:1.2, b:30.5, p:51.2, bo:14.6, d:2.4,
+   title:"全场唯一得分洞 ⭐",
+   notes:["全场唯一均值为负的洞——必须进攻","第1杆全力争取理想落点（130码以内）","第2杆不怕沙坑，冲击绿地","丢掉这洞鸟球是全场最大战略失误"],
+   key:"31.7%鸟球+鹰球率——这是全场最重要的得分机会"},
+  {n:3,  par:3, yds:154, rank:6,  avg:+0.390, e:0.0, b:7.3,  p:46.3, bo:39.0, d:7.3,
+   title:"左侧水障Par 3",
+   notes:["绿地左侧有水障碍，开球必须瞄准右侧","旗插左侧时忽略旗位，打向绿面中偏右","上绿后推杆保守，Par是这洞的成功结果"],
+   key:"左侧水障碍是元凶——宁进右沙坑，不下水"},
+  {n:4,  par:4, yds:378, rank:1,  avg:+0.793, e:0.0, b:1.2,  p:45.1, bo:51.2, d:2.4,
+   title:"全场最难洞 🔴",
+   notes:["接受柏忌是合理战略目标，不要强行进攻","开球沿球道中线稳打，不走弯道捷径","第2杆宁打绿前安全区留短切，绝不强攻","双柏率仅2.4%——只要不冒险崩洞可控"],
+   key:"51.2%柏忌率——这洞的柏忌不是失误，是正确结果"},
+  {n:5,  par:4, yds:365, rank:5,  avg:+0.537, e:0.0, b:4.9,  p:42.7, bo:45.1, d:7.3,
+   title:"上坡险洞",
+   notes:["上坡使实际距离比标注多10-15码，球杆选大一号","绿地周围沙坑：进沙后稳定上下杆，不赌短切冲洞","第4+第5连续最难路段，提前接受可能合计+2"],
+   key:"H4→H5全场最难连续路段——心理准备比技术更关键"},
+  {n:6,  par:4, yds:332, rank:7,  avg:+0.390, e:0.0, b:9.8,  p:40.2, bo:45.1, d:4.9,
+   title:"短而有陷阱",
+   notes:["左侧水障碍，开球必须偏右侧球道","332码：中铁精准落点 或 木杆威胁绿地二选一","9.8%鸟球率说明进攻有回报，但球道安全优先"],
+   key:"看起来容易打难——45%柏忌说明不能轻视"},
+  {n:7,  par:3, yds:166, rank:10, avg:+0.354, e:0.0, b:7.3,  p:50.0, bo:37.8, d:4.9,
+   title:"跨越Par 3",
+   notes:["击球穿越低洼地带，不受地势落差影响选杆","目标绿面中部，50%的人打了标准杆","上绿后注意推杆线路，三推是柏忌主要来源"],
+   key:"50%标准杆率——稳打中部绿面，不追旗位"},
+  {n:8,  par:4, yds:380, rank:8,  avg:+0.390, e:0.0, b:8.5,  p:43.9, bo:41.5, d:6.1,
+   title:"中等Par 4",
+   notes:["开球保证球道，避免OB或树林","第2杆稳上绿不求旗，6.1%双柏来自短切失误","前九后段保持稳定，为第9洞Par 5积蓄状态"],
+   key:"6.1%双柏——绿地周围短切是主要崩洞来源"},
+  {n:9,  par:5, yds:452, rank:12, avg:+0.232, e:0.0, b:20.7, p:46.3, bo:28.0, d:4.9,
+   title:"前九收官Par 5",
+   notes:["20.7%鸟球率——前九重要得分洞，争取进攻","评估第2杆能否安全避开水障碍区域上绿","不能安全上绿则坚决打安全位置留第3杆"],
+   key:"20.7%鸟球——前九最重要的抢分机会之一"},
+  {n:10, par:4, yds:357, rank:11, avg:+0.317, e:0.0, b:11.0, p:45.1, bo:37.8, d:6.1,
+   title:"后九开局得分洞",
+   notes:["11%鸟球率是Par 4中最高之一，进攻有意义","开球偏左侧球道，远离右侧水障碍","第2杆距离合理则大胆攻旗"],
+   key:"后九最好的开局洞——11%鸟球率要充分利用"},
+  {n:11, par:4, yds:382, rank:9,  avg:+0.366, e:0.0, b:8.5,  p:46.3, bo:37.8, d:7.3,
+   title:"左侧大水障Par 4",
+   notes:["左侧有大片水体，开球必须偏右侧球道","宁可落右侧粗草也不下水","第2杆从粗草区需选大号码球杆"],
+   key:"7.3%双柏——左侧水障碍吃球是主要崩洞原因"},
+  {n:12, par:5, yds:458, rank:10, avg:+0.378, e:0.0, b:17.1, p:43.9, bo:30.5, d:8.5,
+   title:"三杆策略Par 5",
+   notes:["绿地附近有水障碍，不要强行两杆上绿","三杆策略：第1、2杆稳打定位，第3杆上绿","8.5%双柏——激进的两杆上绿是主要崩洞来源"],
+   key:"Par 5中崩洞率最高(8.5%)——三杆策略是唯一正确选择"},
+  {n:13, par:3, yds:141, rank:17, avg:+0.098, e:0.0, b:14.6, p:58.5, bo:24.4, d:2.4,
+   title:"后九得分Par 3 ⭐",
+   notes:["141码全场最短Par 3，可用熟悉球杆打精准","旗插什么位置就打什么位置，可以进攻","沙坑上下杆容易，进沙不等于双柏"],
+   key:"58.5%标准杆+14.6%鸟球——后九最重要的稳分洞"},
+  {n:14, par:4, yds:406, rank:2,  avg:+0.793, e:0.0, b:4.9,  p:29.3, bo:50.0, d:15.9,
+   title:"崩洞风险最高 ⚠️",
+   notes:["15.9%双柏率全场最高——进攻代价极重","第1杆务必确保球道，406码本身已是挑战","第2杆宁打绿前安全区留短切，绝不强攻","接受柏忌，把双柏概率控制到最低"],
+   key:"15.9%双柏率全场最高——这洞的唯一策略：保守"},
+  {n:15, par:4, yds:347, rank:3,  avg:+0.610, e:0.0, b:4.9,  p:37.8, bo:46.3, d:11.0,
+   title:"短而危险陷阱洞",
+   notes:["绿地右侧水障碍是核心威胁","第2杆必须落在水的左侧，绝不过水攻旗","宁可打到绿地左侧粗草区做短切","11%双柏几乎全来自强行过水的失误"],
+   key:"347码短Par 4却是第3难——右侧水障碍是职业杀手"},
+  {n:16, par:3, yds:133, rank:13, avg:+0.293, e:0.0, b:14.6, p:51.2, bo:28.0, d:6.1,
+   title:"水景Par 3",
+   notes:["133码完全可控，深呼吸","用熟悉球杆打向绿面中部，不追两侧旗位","51%标准杆——选手表现比预期好","保持节奏比选球杆更重要，不被水景影响"],
+   key:"51%标准杆——视觉压力大于实际难度，保持冷静"},
+  {n:17, par:4, yds:270, rank:16, avg:+0.110, e:1.2, b:22.0, p:54.9, bo:19.5, d:2.4,
+   title:"后九最佳得分洞 ⭐",
+   notes:["270码——木杆可直接威胁绿地，大胆进攻","23.2%鸟球+鹰球率，绝不保守","木杆到不了绿地则短铁攻旗，鸟球机会高","后九最重要的得分洞，必须充分利用"],
+   key:"23.2%鸟球率Par 4最高——全场最不该保守的洞"},
+  {n:18, par:5, yds:520, rank:10, avg:+0.354, e:0.0, b:19.5, p:41.5, bo:30.5, d:8.5,
+   title:"稳健收官",
+   notes:["稳打三杆上绿，鸟球是奖励，Par是目标","第2杆小心中间段水障碍，选择安全落点","8.5%双柏来自强行两杆上绿的失误代价","以稳定心态完成全场最后一洞"],
+   key:"收官洞：稳稳打出Par甚至鸟球，不冒险"},
+];
+
+// colour helpers
+function diffColor(avg) {
+  if (avg < 0)    return '#52b87a';
+  if (avg < 0.2)  return '#85cfa0';
+  if (avg < 0.4)  return '#c8a020';
+  if (avg < 0.6)  return '#d06010';
+  return '#c0160a';
+}
+function rankBg(rank) {
+  if (rank <= 3)  return '#fce8e8';
+  if (rank <= 6)  return '#fef0e0';
+  if (rank <= 10) return '#fdf6d8';
+  if (rank <= 14) return '#e4f4e8';
+  return '#d8f0e4';
+}
+function rankFg(rank) {
+  if (rank <= 3)  return '#b01208';
+  if (rank <= 6)  return '#a04800';
+  if (rank <= 10) return '#7a5800';
+  if (rank <= 14) return '#1a6a38';
+  return '#0f5828';
+}
+function avgColor(avg) {
+  if (avg < 0)    return '#1a7a40';
+  if (avg < 0.2)  return '#2a8a50';
+  if (avg < 0.4)  return '#9a7000';
+  if (avg < 0.6)  return '#c05800';
+  return '#b01208';
+}
+function pad2(n){ return n < 10 ? '0'+n : ''+n; }
+
+// ── Build slides ─────────────────────────────
+const deck = document.getElementById('deck');
+let current = 0;
+
+function buildTitleSlide() {
+  const slide = document.createElement('div');
+  slide.className = 'slide';
+  slide.dataset.idx = 0;
+
+  // topbar
+  slide.innerHTML = `
+    <div class="topbar">
+      <span class="course-name">⛳ SPRING VALLEY COUNTRY CLUB</span>
+      <span class="slide-title">18洞完整打法手册</span>
+      <span class="specs">6,021 yds · Par 72 · Rating 75.4 / Slope 138</span>
+      <button class="btn-fs" onclick="toggleFS()">⛶</button>
+    </div>
+    <div class="slide-body title-slide-body">
+      <div class="title-main">
+        <h1>Spring Valley CC 打法手册</h1>
+        <div class="subtitle">基于 2023–2025 USGA Girls' Junior Qualifying · 82名选手 · 完整统计分析</div>
+      </div>
+      <div class="course-stats">
+        <div class="stat-chip"><div class="val">6,021</div><div class="lbl">总码数 (Yards)</div></div>
+        <div class="stat-chip"><div class="val">Par 72</div><div class="lbl">标准杆</div></div>
+        <div class="stat-chip"><div class="val">75.4</div><div class="lbl">球场评分</div></div>
+        <div class="stat-chip"><div class="val">138</div><div class="lbl">坡度系数</div></div>
+        <div class="stat-chip"><div class="val">82</div><div class="lbl">统计选手数</div></div>
+      </div>
+      <div class="heatmap-title">▼ 全场难度热力图 · 点击任意格进入该洞详情</div>
+      <div class="heatmap-grid" id="heatmap"></div>
+      <div class="legend-row">
+        <div class="leg-item"><div class="leg-dot" style="background:#c0160a"></div>极难 (avg ≥+0.6)</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#d06010"></div>较难 (avg +0.4–0.6)</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#c8a020"></div>中等 (avg +0.2–0.4)</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#85cfa0"></div>较易 (avg 0–0.2)</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#52b87a"></div>得分洞 (avg &lt;0)</div>
+      </div>
+    </div>
+    <div class="bottomnav" id="nav0"></div>
+  `;
+  deck.appendChild(slide);
+
+  // heatmap
+  const hm = slide.querySelector('#heatmap');
+  HOLES.forEach(h => {
+    const cell = document.createElement('div');
+    cell.className = 'hm-cell';
+    cell.style.background = diffColor(h.avg);
+    const sign = h.avg >= 0 ? '+' : '';
+    cell.innerHTML = `<div class="hm-n">H${h.n}</div><div class="hm-par">Par ${h.par}</div><div class="hm-avg">${sign}${h.avg.toFixed(2)}</div>`;
+    cell.addEventListener('click', () => goTo(h.n));
+    hm.appendChild(cell);
+  });
+
+  buildNav(slide.querySelector('#nav0'), 0);
+}
+
+function buildHoleSlide(h) {
+  const slide = document.createElement('div');
+  slide.className = 'slide';
+  slide.dataset.idx = h.n;
+
+  const sign = h.avg >= 0 ? '+' : '';
+  const imgFile = 'https://storage.googleapis.com/svcc-playbook/hole_' + pad2(h.n) + '.png';
+
+  // distribution bar segments
+  const segs = [
+    {pct: h.e, color: '#e8c840', label: '鹰鸟'},
+    {pct: h.b, color: '#4caf7d', label: '鸟球'},
+    {pct: h.p, color: '#4a90d9', label: '标准'},
+    {pct: h.bo, color: '#e07a20', label: '柏忌'},
+    {pct: h.d, color: '#dc3232', label: '双柏+'},
+  ];
+  const barHTML = segs.map(s => {
+    const txt = s.pct >= 8 ? s.pct.toFixed(0)+'%' : '';
+    return `<div class="dist-seg" style="flex:${s.pct};background:${s.color}">${txt}</div>`;
+  }).join('');
+  const legendHTML = segs.map(s =>
+    `<div class="dl-item"><div class="dl-dot" style="background:${s.color}"></div>${s.label} ${s.pct.toFixed(1)}%</div>`
+  ).join('');
+
+  const notesHTML = h.notes.map(n => `<li>${n}</li>`).join('');
+
+  slide.innerHTML = `
+    <div class="topbar">
+      <span class="course-name">⛳ SPRING VALLEY CC</span>
+      <span class="slide-title">第${h.n}洞 · ${h.title}</span>
+      <span class="specs">Par ${h.par} · ${h.yds} yds · 难度排名 #${h.rank}/18</span>
+      <button class="btn-fs" onclick="toggleFS()">⛶</button>
+    </div>
+    <div class="slide-body">
+      <div class="hole-img-panel">
+        <img src="${imgFile}" alt="Hole ${h.n} aerial map" loading="lazy">
+      </div>
+      <div class="hole-stats-panel">
+        <!-- header -->
+        <div class="h-header">
+          <div class="h-num-badge">
+            <div class="hn">${h.n}</div>
+            <div class="hp">Par ${h.par}</div>
+          </div>
+          <div class="h-title-block">
+            <div class="h-title">${h.title}</div>
+            <div class="h-yds">${h.yds} 码 · 全场难度第 ${h.rank} 位</div>
+          </div>
+          <div class="h-rank-badge" style="background:${rankBg(h.rank)};color:${rankFg(h.rank)}">
+            <div class="rlbl">难度</div>
+            <div class="rnum">#${h.rank}</div>
+          </div>
+        </div>
+
+        <!-- avg -->
+        <div class="avg-row">
+          <div class="avg-lbl">3年均值</div>
+          <div class="avg-val" style="color:${avgColor(h.avg)}">${sign}${h.avg.toFixed(3)}</div>
+          <div class="avg-desc">${avgDesc(h.avg)}</div>
+        </div>
+
+        <!-- dist -->
+        <div class="dist-section">
+          <div class="dist-title">成绩分布（82名选手）</div>
+          <div class="dist-bar">${barHTML}</div>
+          <div class="dist-legend">${legendHTML}</div>
+        </div>
+
+        <!-- strategy -->
+        <div class="strat-section">
+          <div class="strat-title">打法策略</div>
+          <ul class="strat-list">${notesHTML}</ul>
+        </div>
+
+        <!-- key note -->
+        <div class="key-note">
+          <div class="kl">核心要点</div>
+          ${h.key}
+        </div>
+      </div>
+    </div>
+    <div class="bottomnav" id="nav${h.n}"></div>
+  `;
+  deck.appendChild(slide);
+  buildNav(slide.querySelector(`#nav${h.n}`), h.n);
+}
+
+function avgDesc(avg) {
+  if (avg < 0)    return '得分洞 — 低于标准杆';
+  if (avg < 0.1)  return '接近标准 — 较易';
+  if (avg < 0.3)  return '轻微超标 — 中等';
+  if (avg < 0.5)  return '明显超标 — 较难';
+  if (avg < 0.7)  return '高于标准 — 困难';
+  return '极高超标 — 极难';
+}
+
+function buildNav(container, idx) {
+  // prev
+  const prev = document.createElement('button');
+  prev.className = 'btn-nav';
+  prev.textContent = '← 上一洞';
+  prev.disabled = idx === 0;
+  prev.addEventListener('click', () => goTo(idx - 1));
+  container.appendChild(prev);
+
+  // home dot
+  const home = document.createElement('div');
+  home.className = 'dot-home' + (idx === 0 ? ' active' : '');
+  home.textContent = '⛳';
+  home.title = '封面';
+  home.addEventListener('click', () => goTo(0));
+  container.appendChild(home);
+
+  // hole dots
+  HOLES.forEach(h => {
+    const dot = document.createElement('div');
+    dot.className = 'dot-num' + (h.n === idx ? ' active' : '');
+    dot.style.background = diffColor(h.avg);
+    dot.textContent = h.n;
+    dot.title = `H${h.n} · ${h.title}`;
+    dot.addEventListener('click', () => goTo(h.n));
+    container.appendChild(dot);
+  });
+
+  // next
+  const next = document.createElement('button');
+  next.className = 'btn-nav';
+  next.textContent = '下一洞 →';
+  next.disabled = idx === 18;
+  next.addEventListener('click', () => goTo(idx + 1));
+  container.appendChild(next);
+}
+
+// ── Navigation ───────────────────────────────
+function goTo(idx) {
+  const slides = document.querySelectorAll('.slide');
+  slides.forEach(s => s.classList.remove('active'));
+  const target = document.querySelector(`.slide[data-idx="${idx}"]`);
+  if (target) { target.classList.add('active'); current = idx; }
+}
+
+// keyboard
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { if (current < 18) goTo(current + 1); }
+  else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { if (current > 0) goTo(current - 1); }
+});
+
+// touch swipe
+let tx = 0;
+document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, {passive:true});
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - tx;
+  if (dx < -50 && current < 18) goTo(current + 1);
+  else if (dx > 50 && current > 0) goTo(current - 1);
+}, {passive:true});
+
+// fullscreen
+function toggleFS() {
+  if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(()=>{});
+  else document.exitFullscreen().catch(()=>{});
+}
+
+// ── Init ─────────────────────────────────────
+buildTitleSlide();
+HOLES.forEach(h => buildHoleSlide(h));
+goTo(0);
+</script>
+</body>
+</html>
