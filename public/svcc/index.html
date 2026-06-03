@@ -378,6 +378,9 @@
     object-fit: contain;
     border-radius: 4px;
     pointer-events: none;
+    transform-origin: center center;
+    will-change: transform;
+    touch-action: none;
   }
   #lb-close {
     position: absolute;
@@ -485,7 +488,7 @@
 
 <div id="deck"></div>
 
-<div id="lightbox" onclick="closeLightbox(event)" ontouchstart="event.stopPropagation()" ontouchend="event.stopPropagation();closeLightbox(event)">
+<div id="lightbox" onclick="closeLightbox()">
   <span id="lb-close">✕</span>
   <img id="lb-img" src="" alt="">
 </div>
@@ -818,26 +821,66 @@ function toggleFS() {
   else document.exitFullscreen().catch(()=>{});
 }
 
-// lightbox
-const _lb = document.getElementById('lightbox');
+// lightbox — pinch-to-zoom within overlay, no viewport zoom leak
+const _lb    = document.getElementById('lightbox');
+const _lbImg = document.getElementById('lb-img');
 const _lbMeta = document.querySelector('meta[name=viewport]');
-const _lbMetaContent = _lbMeta.getAttribute('content');
+const _lbMetaBase = _lbMeta.getAttribute('content');
 
-function _lbBlockPinch(e) {
-  if (e.touches.length > 1) e.preventDefault();
+let _lbScale = 1, _lbBaseScale = 1;
+let _lbPanX = 0, _lbPanY = 0, _lbBasePanX = 0, _lbBasePanY = 0;
+let _lbDist0 = 0, _lbTx0 = 0, _lbTy0 = 0;
+let _lbMoved = false, _lbT0 = 0;
+
+function _lbPinchDist(t) { return Math.hypot(t[0].clientX-t[1].clientX, t[0].clientY-t[1].clientY); }
+function _lbApply() { _lbImg.style.transform = `translate(${_lbPanX}px,${_lbPanY}px) scale(${_lbScale})`; }
+function _lbReset() { _lbScale=1; _lbPanX=0; _lbPanY=0; _lbImg.style.transform=''; }
+
+function _lbStart(e) {
+  e.stopPropagation();
+  _lbMoved = false; _lbT0 = Date.now();
+  if (e.touches.length === 2) {
+    _lbDist0 = _lbPinchDist(e.touches);
+    _lbBaseScale = _lbScale; _lbBasePanX = _lbPanX; _lbBasePanY = _lbPanY;
+  } else if (e.touches.length === 1) {
+    _lbTx0 = e.touches[0].clientX - _lbPanX;
+    _lbTy0 = e.touches[0].clientY - _lbPanY;
+  }
+}
+function _lbMove(e) {
+  e.preventDefault(); e.stopPropagation(); _lbMoved = true;
+  if (e.touches.length === 2) {
+    _lbScale = Math.min(6, Math.max(1, _lbBaseScale * _lbPinchDist(e.touches) / _lbDist0));
+    _lbApply();
+  } else if (e.touches.length === 1 && _lbScale > 1) {
+    _lbPanX = e.touches[0].clientX - _lbTx0;
+    _lbPanY = e.touches[0].clientY - _lbTy0;
+    _lbApply();
+  }
+}
+function _lbEnd(e) {
+  e.stopPropagation();
+  if (_lbScale < 1.05) _lbReset();
+  // tap to close only when not zoomed and no drag
+  if (!_lbMoved && e.changedTouches.length === 1 && _lbScale <= 1 && Date.now()-_lbT0 < 300) closeLightbox();
 }
 
 function openLightbox(src) {
-  document.getElementById('lb-img').src = src;
+  _lbReset();
+  _lbImg.src = src;
   _lb.classList.add('open');
-  _lb.addEventListener('touchmove', _lbBlockPinch, {passive: false});
+  _lb.addEventListener('touchstart', _lbStart, {passive:false});
+  _lb.addEventListener('touchmove',  _lbMove,  {passive:false});
+  _lb.addEventListener('touchend',   _lbEnd,   {passive:false});
 }
 function closeLightbox() {
   _lb.classList.remove('open');
-  _lb.removeEventListener('touchmove', _lbBlockPinch);
-  // reset any viewport zoom that leaked through
-  _lbMeta.setAttribute('content', _lbMetaContent + ',maximum-scale=1.0');
-  setTimeout(() => _lbMeta.setAttribute('content', _lbMetaContent), 50);
+  _lb.removeEventListener('touchstart', _lbStart);
+  _lb.removeEventListener('touchmove',  _lbMove);
+  _lb.removeEventListener('touchend',   _lbEnd);
+  _lbMeta.setAttribute('content', _lbMetaBase + ',maximum-scale=1.0');
+  setTimeout(() => _lbMeta.setAttribute('content', _lbMetaBase), 50);
+  _lbReset();
 }
 
 // ── Init ─────────────────────────────────────
