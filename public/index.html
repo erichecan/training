@@ -280,6 +280,7 @@
   </div></section>
   <p class="footnote">球包、球场、记录都存在本设备；放到 Claude 外自托管时自动用浏览器本地存储。</p>
 </div></div>
+<div class="view" id="trainView"><div class="wrap" id="trainWrap"></div></div>
 
 <div class="tabbar">
   <button class="on" id="tabPlay" onclick="switchView('play')"><span class="ic">⛳</span>打球</button>
@@ -287,6 +288,7 @@
   <button id="tabTrain" onclick="switchView('train')"><span class="ic">🏋️</span>训练</button>
   <button id="tabTourn" onclick="switchView('tourn')"><span class="ic">🏆</span>比赛</button>
   <button id="tabBag" onclick="switchView('bag')"><span class="ic">🎒</span>球包</button>
+  <button id="tabTrain" onclick="switchView('train')"><span class="ic">🏋️</span>训练</button>
 </div>
 <input type="file" id="fileInput" accept="image/*" style="display:none">
 <div class="overlay" id="overlay"><div class="spinner"><div class="dot"></div><p class="small" id="overlayMsg">正在识别记分卡…</p></div></div>
@@ -362,7 +364,7 @@ function delClub(i){collectBag();bag.splice(i,1);renderBag();saveBag();}
 /* ===== view switch ===== */
 function switchView(v){["play","stats","train","tourn","bag"].forEach(x=>document.getElementById(x+"View").classList.toggle("on",v===x));
   ["Play","Stats","Train","Tourn","Bag"].forEach(x=>document.getElementById("tab"+x).classList.toggle("on",v===x.toLowerCase()));
-  if(v==="bag")collectBag(); if(v==="stats")renderStats(); if(v==="play")renderPlay(); if(v==="train")renderTrain(); if(v==="tourn")renderTourn();}
+  if(v==="bag")collectBag(); if(v==="stats")renderStats(); if(v==="play")renderPlay(); if(v==="train")renderTraining(); if(v==="tourn")renderTourn();}
 
 /* ===== scorecard input ===== */
 document.getElementById("fileInput").addEventListener("change",handleScan);
@@ -911,6 +913,145 @@ function renderTourn(){
 
   w.innerHTML=h;
 }
+
+/* ===== TRAINING VIEW ===== */
+function renderTraining(){
+  const w=document.getElementById("trainWrap");
+  const dow=new Date().getDay();
+  if(!S.trainDay)S.trainDay=dow===0?"sun":dow===6?"sat":"eve";
+  // stats
+  const allR=[...rounds];if(R)allR.push(R);
+  const ph=allR.flatMap(rd=>rd.holes.filter(h=>h.shots.length>0));
+  let firM=0,firE=0,girM=0,girE=0,ps=0,pn=0,scrM=0,scrO=0;
+  ph.forEach(h=>{const st=holeStats(h);if(st.firElig){firE++;if(st.fir)firM++;}girE++;if(st.gir)girM++;ps+=h.putts;pn++;if(st.scrOpp){scrO++;if(st.scrOk)scrM++;}});
+  const girP=girE>=9?Math.round(girM/girE*100):null;
+  const firP=firE>=5?Math.round(firM/firE*100):null;
+  const putAvg=pn>=9?(ps/pn).toFixed(1):null;
+  // dispersion
+  const badClubs=[...new Set(allShots().filter(s=>s.club).map(s=>s.club))].map(c=>({c,t:clubTendency(c)})).filter(r=>r.t.samples>=4&&(r.t.spread>=8||Math.abs(r.t.right-r.t.left)>=3)).sort((a,b)=>(b.t.spread||0)-(a.t.spread||0));
+  // course data
+  const par3s=S.course?S.course.holes.filter(h=>h.par===3).map(h=>({no:h.no,yd:h.yards[S.tee]||0})).filter(h=>h.yd>0):[];
+  const par4s=S.course?S.course.holes.filter(h=>h.par===4).map(h=>({no:h.no,yd:h.yards[S.tee]||0})).filter(h=>h.yd>0):[];
+  const drv=bag.find(c=>c.name==="Driver")||bag[0];
+  const drvDist=drv?drv.total:200;
+  const appr=par4s.map(h=>({no:h.no,d:Math.max(h.yd-drvDist,0)})).filter(h=>h.d>20&&h.d<210).sort((a,b)=>a.d-b.d);
+  const h17=S.course?S.course.holes.find(h=>h.no===17):null;
+  function cf(yd){const b2=sb();return b2.length?nearestTotal(b2,yd)?.name||"中铁":"中铁";}
+  // block renderer
+  function blk(arr){return arr.map(b=>{const li=b.steps.filter(s=>s).map(s=>'<li class="small" style="margin-bottom:3px;">'+s+'</li>').join('');return '<div style="border-left:3px solid '+b.c+';padding:10px 12px;margin-bottom:10px;"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;"><span style="font-family:\'Fraunces\';font-size:15px;font-weight:700;">'+b.icon+' '+b.title+'</span><span style="font-size:11px;color:var(--ink-soft);font-weight:700;">'+b.time+'</span></div><ul style="margin-left:14px;">'+li+'</ul></div>';}).join('');}
+  // day picker
+  let html='<div style="display:flex;gap:6px;margin-top:14px;">'
+    +[['eve','🌙 工作日晚'],['sat','☀️ 周六'],['sun','🏆 周日']].map(([k,l])=>'<button class="mini '+(S.trainDay===k?'on':'')+'" style="flex:1;padding:9px 4px;font-size:12.5px;font-weight:700;" onclick="S.trainDay=\''+k+'\';renderTraining()">'+l+'</button>').join('')+'</div>';
+  let body='',title='',tip='';
+  if(S.trainDay==='eve'){
+    // ── 工作日晚：Range 关闭，纯推杆 2h ──
+    title='🌙 工作日晚 · 推杆 2 小时（Range 已关）';
+    tip='每次练完回想：哪个距离今晚推得最顺？明天带着这个感觉上场。';
+    if(putAvg)body+='<div style="background:var(--paper-2);border-radius:4px;padding:10px 12px;margin-bottom:14px;"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--ink-soft);margin-bottom:5px;">数据背景</div><div class="small">均推 '+putAvg+'/洞，'+(parseFloat(putAvg)>2.0?'需降到2.0以内——今晚就是最好的机会':'已达标，今晚加难度训练')+'。</div></div>';
+    const p3tip=par3s.length?'备赛重点：'+par3s.slice(0,2).map(h=>'第'+h.no+'洞Par3').join('、')+'上绿后常见短推':'';
+    const midTip=appr.length?'Par4进攻上绿后常见'+Math.round(appr[Math.floor(appr.length/2)].d/4+3)+'步中距推杆，今晚集中练这个距离':'';
+    body+=blk([
+      {time:'0–15 分钟',icon:'🌡️',c:'#8a9a8c',title:'校准速度',steps:[
+        '随便推5个长推（30步以上），感受今晚果岭速度',
+        '不求进洞，求全部停在1步内',
+        '心里记下：今晚果岭快还是慢？']},
+      {time:'15–50 分钟',icon:'🎯',c:'var(--flag)',title:'短推 · 比赛最关键的杆',steps:[
+        '定3步（9英尺）：打10球，目标8/10进',
+        '进了8个以上：试左坡、右坡各5球',
+        '进了6个以下：退到2步，先建信心',
+        p3tip,
+        '压力收官：连续进5个才算通关（不然重来）']},
+      {time:'50–80 分钟',icon:'📏',c:'var(--wind)',title:'中距离速度控制',steps:[
+        '15步：10球，全部停旗2步内（不求进）',
+        '25步：5球，lag推——求停1.5步内',
+        midTip,
+        '每5球停：偏哪方向？调整站位或发力节奏']},
+      {time:'80–100 分钟',icon:'🧠',c:'#b07040',title:'果岭阅读练习',steps:[
+        '找4条不同坡向的推线（上坡/下坡/左坡/右坡）',
+        '每条推5球：先站后面看坡向，再走上去推',
+        '上坡推死一点；下坡推轻，先确保不过洞',
+        '记住今晚最难的坡向——比赛时那里优先打安全落点']},
+      {time:'100–120 分钟',icon:'🏆',c:'var(--green-2)',title:'比赛压力模拟',steps:[
+        '场景：比赛最后3洞保par，每个3步推杆当作决定性一推',
+        '进了继续；没进从头计数',
+        '目标：连续进5个，才算今晚合格',
+        '最后3球：随意推，带着成功感觉离场']}]);
+  }else if(S.trainDay==='sat'){
+    // ── 周六半天：Range 开放，全面备赛 ──
+    title='☀️ 周六 · 比赛准备 半天（约4小时）';
+    tip='周六重点是建立比赛感：每一杆站好对准再打。追感觉，不追数字。';
+    const par3Desc=par3s.map(h=>'第'+h.no+'洞'+h.yd+'码('+cf(h.yd)+')').join('、');
+    const apprDesc=appr.slice(0,3).map(h=>'第'+h.no+'洞约'+h.d+'码('+cf(h.d)+')').join('、');
+    const bc=badClubs[0];
+    const bcTip=bc?(bc.t.right>bc.t.left*1.5?'注意 '+bc.c+' 偏右，练时瞄左半球宽':bc.t.left>bc.t.right*1.5?'注意 '+bc.c+' 偏左，练时瞄右半球宽':''):'';
+    const h17yd=h17?h17.yards[S.tee]:270;
+    if(girP!==null||firP!==null)body+='<div style="background:var(--paper-2);border-radius:4px;padding:10px 12px;margin-bottom:14px;"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--ink-soft);margin-bottom:5px;">本周数据</div>'+(girP!==null?'<div class="small">· GIR '+girP+'% '+(girP<30?'⚠ 攻果岭是首要问题':'✓ 继续保持')+'</div>':'')+(firP!==null?'<div class="small">· FIR '+firP+'% '+(firP<40?'⚠ 开球精度需提升':'✓ 开球不错')+'</div>':'')+'</div>';
+    body+=blk([
+      {time:'0–20 分钟',icon:'🌡️',c:'#8a9a8c',title:'热身 + 找状态',steps:[
+        'SW/GW/9i/7i 各5球，半挥杆到全力',
+        '记住：今天哪支杆感觉最顺？比赛留着用',
+        '不要追距离，追节奏感']},
+      {time:'20–70 分钟',icon:'🎯',c:'var(--green-2)',title:'攻果岭模拟 · 球场实际距离',steps:[
+        par3Desc?'Par3必练（'+par3Desc+'）各10球，瞄旗中心':'',
+        apprDesc?'Par4进攻距离（'+apprDesc+'）各10球':'铁杆各距离各10球',
+        '策略重点：不冲边旗（上绿后长推比冲边旗更伤成绩）',
+        bcTip]},
+      {time:'70–100 分钟',icon:'✈️',c:'var(--flag)',title:'开球可控性',steps:[
+        '3W/5W各10球：找球道，不追距离',
+        'Driver 15球：追落地角，保安全区',
+        h17yd?'第17洞'+h17yd+'码Par4短洞：专门试3W能否冲绿，找到今天最大安全距离':'']},
+      {time:'100–125 分钟',icon:'✂️',c:'#b07040',title:'Wedge区间 · 比赛关键距离',steps:[
+        '80–100码：GW/SW各10球，落点要一致',
+        '100–120码：PW 10球，追同一落点区域',
+        'Par5第三杆或短Par4第二杆常是这个距离，攒手感']},
+      {time:'125–150 分钟',icon:'🏖️',c:'var(--wind)',title:'推杆压力训练',steps:[
+        '5步短推：连续进5个才算合格',
+        '15步中距10球：停旗2步内',
+        '想象每次推杆都是比赛保par的一推']},
+      {time:'150–185 分钟',icon:'🏌️',c:'var(--green)',title:'前9洞模拟收尾',steps:[
+        '在练习场按前9洞顺序想象打（不用换位置）',
+        '每杆站好对准再打，模拟比赛节奏',
+        '记录：攻果岭哪支杆今天感觉最准？明天用它']}]);
+  }else{
+    // ── 周日全天：实战 / 备赛 ──
+    title='🏆 周日 · 全天备赛';
+    tip='周日核心：每杆站好想好再打，技术问题留给平时。今天只想打好每一杆。';
+    body+=blk([
+      {time:'赛前 40 分钟',icon:'🌡️',c:'#8a9a8c',title:'赛前热身常规',steps:[
+        '推杆10分钟：感受速度，不练技术',
+        'SW/GW/7i 各5球：找节奏，不追数字',
+        'Driver 5球：热开关节，不追距离',
+        '最后：连推进3个3步短推，带信心上场']},
+      {time:'上午（若无比赛）',icon:'🎯',c:'var(--green-2)',title:'全面技术练习',steps:[
+        '热身20分钟',
+        par3s.length?'Par3必练：'+par3s.map(h=>'第'+h.no+'洞'+h.yd+'码('+cf(h.yd)+')').join('、')+' 各15球':'Par3各距离各15球',
+        '铁杆从短到长，每个距离15球，记落点分布',
+        girP!==null?'GIR '+girP+'%'+(girP<30?' ⚠ 今天重点攻果岭':'，继续保持攻果岭准度'):'攻果岭全程瞄中心']},
+      {time:'下午（打球时段）',icon:'🏌️',c:'var(--green)',title:'18洞实战 / 全场模拟',steps:[
+        '打实际18洞，每洞参照策略手册选杆',
+        '开球：按策略选杆，不追距离，找球道',
+        '推杆：每次推前读绿线，不凭感觉瞎推',
+        '比赛心态：每洞只想这洞，打完再想下洞']},
+      {time:'结束后 30 分钟',icon:'📝',c:'var(--wind)',title:'存档 + 复盘',steps:[
+        '把今天数据存入App（推杆数、落点方向）',
+        '找最多失分的3洞：开球、进攻还是推杆的问题？',
+        '找今天最好的3杆：下周训练从这里出发',
+        '下周训练重点：根据今天数据自动更新']}]);
+  }
+  html+='<section class="card" style="margin-top:12px;"><div class="card-head"><h2>'+title+'</h2></div><div class="card-body">'+body+'<p class="small" style="color:var(--ink-soft);margin-top:10px;">💡 '+tip+'</p></div></section>';
+  // bad club tips card (always useful)
+  if(badClubs.length){
+    html+='<section class="card" style="margin-top:0;"><div class="card-head"><h2>今日球杆提示</h2></div><div class="card-body">';
+    badClubs.slice(0,4).forEach(function(x){const tips=[];const c=x.c,t=x.t;
+      if(t.right>t.left*1.5)tips.push('偏右('+t.right+'/'+t.dirN+'次) → 练时瞄左半球宽');
+      if(t.left>t.right*1.5)tips.push('偏左('+t.left+'/'+t.dirN+'次) → 练时瞄右半球宽');
+      if(t.shortN>t.longN*1.5)tips.push('偏短 → 考虑大半号或加力');
+      if(t.spread>=10)tips.push('离散±'+t.spread+'码 → 主练稳定性，不追距离');
+      if(!tips.length)return;
+      html+='<div style="padding:8px 0;border-bottom:1px solid var(--rule);"><b>'+c+'</b><span class="small" style="margin-left:6px;">'+(t.avg?'均'+t.avg+'码 · ':'')+t.samples+'杆</span><div class="small" style="margin-top:4px;">'+tips.join('；')+'</div></div>';});
+    html+='</div></section>';}
+  html+='<p class="footnote">弱项和球杆提示根据数据自动更新。打完一轮先存档再来看。</p>';
+  w.innerHTML=html;}
 
 loadAll();
 if("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js");
