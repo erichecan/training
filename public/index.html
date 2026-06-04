@@ -280,7 +280,6 @@
   </div></section>
   <p class="footnote">球包、球场、记录都存在本设备；放到 Claude 外自托管时自动用浏览器本地存储。</p>
 </div></div>
-<div class="view" id="trainView"><div class="wrap" id="trainWrap"></div></div>
 
 <div class="tabbar">
   <button class="on" id="tabPlay" onclick="switchView('play')"><span class="ic">⛳</span>打球</button>
@@ -288,7 +287,6 @@
   <button id="tabTrain" onclick="switchView('train')"><span class="ic">🏋️</span>训练</button>
   <button id="tabTourn" onclick="switchView('tourn')"><span class="ic">🏆</span>比赛</button>
   <button id="tabBag" onclick="switchView('bag')"><span class="ic">🎒</span>球包</button>
-  <button id="tabTrain" onclick="switchView('train')"><span class="ic">🏋️</span>训练</button>
 </div>
 <input type="file" id="fileInput" accept="image/*" style="display:none">
 <div class="overlay" id="overlay"><div class="spinner"><div class="dot"></div><p class="small" id="overlayMsg">正在识别记分卡…</p></div></div>
@@ -322,11 +320,58 @@ const RESULTS=[{k:"fairway",t:"球道",g:"good"},{k:"rough",t:"长草",g:"meh"},
 const DIRS=[{k:"left",t:"左"},{k:"short",t:"短"},{k:"on",t:"准"},{k:"long",t:"长"},{k:"right",t:"右"}];
 
 let bag=[];
-let S={course:null,tee:null,windMph:0,firm:"medium",plans:[],current:0,holePin:[],holeWind:[],playMode:false,gameplan:null,trainPlan:null};
-let R=null, rounds=[];
+let S={course:null,tee:null,windMph:0,firm:"medium",plans:[],current:0,holePin:[],holeWind:[],playMode:false,gameplan:null,trainPlan:null,tasksDone:[]};
+let R=null, rounds=[], checkins=[];
 const DEFAULT_PREFS={daysPerWeek:4,hoursPerDay:2,facilities:["range","green","course"],focusNote:""};
 let trainPrefs=JSON.parse(JSON.stringify(DEFAULT_PREFS));
 let trainWeek=0;
+
+/* ===== check-in helpers ===== */
+async function saveCheckins(){await store.set("golf:checkins",JSON.stringify(checkins));}
+function todayStr(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+function streakCount(){
+  if(!checkins.length)return 0;
+  const days=new Set(checkins.map(c=>c.date));
+  let n=0;const d=new Date();
+  if(!days.has(todayStr()))d.setDate(d.getDate()-1);
+  for(let i=0;i<365;i++){
+    const s=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+    if(days.has(s)){n++;d.setDate(d.getDate()-1);}else break;
+  }
+  return n;
+}
+function computeBadges(){
+  const streak=streakCount();
+  const pressN=checkins.filter(c=>c.tasks&&c.tasks.includes("pressure")).length;
+  const allR=[...rounds];if(R)allR.push(R);
+  const pn=allR.flatMap(rd=>rd.holes.filter(h=>h.shots.length>0)).length;
+  const now=Date.now();
+  const month30=checkins.filter(c=>c.ts&&(now-c.ts)<30*86400000).length;
+  return [
+    {icon:"🌙",name:"首次打卡",earned:checkins.length>=1},
+    {icon:"🔥",name:"三连击",earned:streak>=3},
+    {icon:"💪",name:"一周战士",earned:streak>=7},
+    {icon:"🎯",name:"推杆通关",earned:pressN>=1},
+    {icon:"🏆",name:"推杆大师",earned:pressN>=10},
+    {icon:"☀️",name:"周六勇士",earned:checkins.some(c=>c.type==="sat")},
+    {icon:"🏌️",name:"全天备赛",earned:checkins.some(c=>c.type==="sun")},
+    {icon:"📊",name:"数据达人",earned:pn>=9},
+    {icon:"⭐",name:"月度坚持",earned:month30>=20},
+  ];
+}
+async function doCheckin(){
+  const today=todayStr();const type=S.trainDay||"eve";
+  checkins=checkins.filter(c=>!(c.date===today&&c.type===type));
+  checkins.push({date:today,type,tasks:[...S.tasksDone],ts:Date.now()});
+  await saveCheckins();
+  S._taskInitKey=null;
+  renderTraining();
+}
+function toggleTrainTask(tid){
+  const idx=S.tasksDone.indexOf(tid);
+  if(idx>=0)S.tasksDone.splice(idx,1);else S.tasksDone.push(tid);
+  renderTraining();
+}
 
 /* ===== load/save ===== */
 async function loadAll(){
@@ -336,6 +381,7 @@ async function loadAll(){
   let rr=await store.get("golf:rounds"); rounds=rr&&rr.value?JSON.parse(rr.value):[];
   let cr=await store.get("golf:curRound"); if(cr&&cr.value&&cr.value!=="null")R=JSON.parse(cr.value);
   let tp=await store.get("golf:trainPrefs"); if(tp&&tp.value)trainPrefs=Object.assign(JSON.parse(JSON.stringify(DEFAULT_PREFS)),JSON.parse(tp.value));
+  let ci=await store.get("golf:checkins"); checkins=ci&&ci.value?JSON.parse(ci.value):[];
   await loadCoach();
   renderBag(); renderPlay();
 }
@@ -919,6 +965,12 @@ function renderTraining(){
   const w=document.getElementById("trainWrap");
   const dow=new Date().getDay();
   if(!S.trainDay)S.trainDay=dow===0?"sun":dow===6?"sat":"eve";
+  // init tasksDone from today's checkin (reset on day-type switch)
+  const today=todayStr();
+  const ciKey=today+":"+S.trainDay;
+  if(S._taskInitKey!==ciKey){S._taskInitKey=ciKey;
+    const ci=checkins.find(c=>c.date===today&&c.type===S.trainDay);
+    S.tasksDone=ci?[...ci.tasks]:[];}
   // stats
   const allR=[...rounds];if(R)allR.push(R);
   const ph=allR.flatMap(rd=>rd.holes.filter(h=>h.shots.length>0));
@@ -937,14 +989,67 @@ function renderTraining(){
   const appr=par4s.map(h=>({no:h.no,d:Math.max(h.yd-drvDist,0)})).filter(h=>h.d>20&&h.d<210).sort((a,b)=>a.d-b.d);
   const h17=S.course?S.course.holes.find(h=>h.no===17):null;
   function cf(yd){const b2=sb();return b2.length?nearestTotal(b2,yd)?.name||"中铁":"中铁";}
-  // block renderer
   function blk(arr){return arr.map(b=>{const li=b.steps.filter(s=>s).map(s=>'<li class="small" style="margin-bottom:3px;">'+s+'</li>').join('');return '<div style="border-left:3px solid '+b.c+';padding:10px 12px;margin-bottom:10px;"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;"><span style="font-family:\'Fraunces\';font-size:15px;font-weight:700;">'+b.icon+' '+b.title+'</span><span style="font-size:11px;color:var(--ink-soft);font-weight:700;">'+b.time+'</span></div><ul style="margin-left:14px;">'+li+'</ul></div>';}).join('');}
-  // day picker
-  let html='<div style="display:flex;gap:6px;margin-top:14px;">'
-    +[['eve','🌙 工作日晚'],['sat','☀️ 周六'],['sun','🏆 周日']].map(([k,l])=>'<button class="mini '+(S.trainDay===k?'on':'')+'" style="flex:1;padding:9px 4px;font-size:12.5px;font-weight:700;" onclick="S.trainDay=\''+k+'\';renderTraining()">'+l+'</button>').join('')+'</div>';
+  // gamification data
+  const streak=streakCount();
+  const badges=computeBadges();
+  const todayCi=checkins.find(c=>c.date===today&&c.type===S.trainDay);
+  const WDAY=['日','一','二','三','四','五','六'];
+  let wdots='';
+  for(let i=6;i>=0;i--){const dd=new Date();dd.setDate(dd.getDate()-i);
+    const ds=dd.getFullYear()+"-"+String(dd.getMonth()+1).padStart(2,"0")+"-"+String(dd.getDate()).padStart(2,"0");
+    const has=checkins.some(c=>c.date===ds);const isT=i===0;
+    wdots+='<div style="width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;background:'+(has?'var(--green-2)':'var(--paper)')+';border:2px solid '+(has?'var(--green)':isT?'var(--flag)':'var(--rule)')+';color:'+(has?'var(--paper)':'var(--ink-soft)')+';">'+(has?'✓':WDAY[dd.getDay()])+'</div>';}
+  const TASKS={
+    eve:[{id:'speed',l:'校准速度'},{id:'short',l:'短推通关'},{id:'mid',l:'中距控制'},{id:'read',l:'果岭阅读'},{id:'pressure',l:'压力模拟'}],
+    sat:[{id:'warmup',l:'热身找状态'},{id:'approach',l:'攻果岭模拟'},{id:'drive',l:'开球可控'},{id:'wedge',l:'Wedge区间'},{id:'putt',l:'推杆压力'},{id:'sim',l:'前9模拟'}],
+    sun:[{id:'warmup',l:'赛前热身'},{id:'tech',l:'全面技术练'},{id:'round',l:'18洞实战'},{id:'review',l:'存档复盘'}]
+  };
+  const tasks=TASKS[S.trainDay]||TASKS.eve;
+  const doneN=S.tasksDone.length;
+  // ── streak banner ──
+  const hi=streak>=3;
+  const streakSub=streak===0?'今天开始第一步！':streak<3?'再坚持'+(3-streak)+'天解锁三连击':'继续！已连续'+streak+'天';
+  let html='<div style="background:'+(hi?'var(--green-2)':'var(--paper-2)')+';border-radius:6px;padding:12px 14px;margin-top:14px;display:flex;align-items:center;justify-content:space-between;">'
+    +'<div><div style="font-family:\'Fraunces\';font-size:22px;font-weight:700;color:'+(hi?'var(--paper)':'var(--ink)')+';">'+(streak>=1?'🔥':'⚡')+' '+streak+' 天连击</div>'
+    +'<div style="font-size:11px;color:'+(hi?'rgba(244,240,228,.8)':'var(--ink-soft)')+';margin-top:2px;">'+streakSub+'</div></div>'
+    +'<div style="display:flex;gap:3px;">'+wdots+'</div></div>';
+  // ── day picker ──
+  html+='<div style="display:flex;gap:6px;margin-top:10px;">'
+    +[['eve','🌙 工作日晚'],['sat','☀️ 周六'],['sun','🏆 周日']].map(([k,l])=>'<button class="mini '+(S.trainDay===k?'on':'')+'" style="flex:1;padding:9px 4px;font-size:12.5px;font-weight:700;" onclick="S.trainDay=\''+k+'\';S._taskInitKey=null;renderTraining()">'+l+'</button>').join('')+'</div>';
+  // ── check-in card ──
+  const taskGrid=tasks.map(t=>{const ck=S.tasksDone.includes(t.id);
+    return '<div style="display:flex;align-items:center;gap:9px;cursor:pointer;padding:9px 11px;border-radius:4px;background:'+(ck?'var(--green-2)':'var(--paper-2)')+';border:1.5px solid '+(ck?'var(--green)':'var(--rule)')+';margin-bottom:6px;" onclick="toggleTrainTask(\''+t.id+'\')">'
+      +'<span style="font-size:15px;width:20px;text-align:center;flex-shrink:0;">'+(ck?'✅':'⭕')+'</span>'
+      +'<span style="font-size:13px;font-weight:700;color:'+(ck?'var(--paper)':'var(--ink)')+';">'+t.l+'</span></div>';
+  }).join('');
+  html+='<section class="card" style="margin-top:10px;">'
+    +'<div class="card-head" style="display:flex;justify-content:space-between;align-items:center;">'
+    +'<h2>今日打卡</h2>'
+    +(todayCi?'<span style="font-size:12px;color:var(--green-2);font-weight:700;">✅ 已打卡 '+todayCi.tasks.length+'/'+tasks.length+'</span>':'<span style="font-size:12px;color:var(--ink-soft);">'+doneN+'/'+tasks.length+'</span>')
+    +'</div><div class="card-body" style="padding:12px 15px;">'+taskGrid;
+  if(todayCi){
+    html+='<div style="text-align:center;padding:9px;background:var(--paper-2);border-radius:4px;font-size:12px;color:var(--ink-soft);">今日已打卡 <span style="color:var(--green-2);font-weight:700;cursor:pointer;margin-left:6px;" onclick="checkins=checkins.filter(c=>!(c.date===\''+today+'\'&&c.type===\''+S.trainDay+'\'));saveCheckins();S._taskInitKey=null;renderTraining()">重新打卡</span></div>';
+  }else{
+    html+='<button class="primary" style="font-size:15px;'+(doneN===0?'opacity:.4;cursor:not-allowed;':'')+'" onclick="if(S.tasksDone.length)doCheckin()">🏅 打卡完成（'+doneN+' 项）</button>';
+  }
+  html+='</div></section>';
+  // ── badges ──
+  const earnedN=badges.filter(b=>b.earned).length;
+  html+='<section class="card" style="margin-top:0;">'
+    +'<div class="card-head" style="display:flex;justify-content:space-between;align-items:center;">'
+    +'<h2>成就徽章</h2><span style="font-size:12px;color:var(--ink-soft);">'+earnedN+'/'+badges.length+'</span></div>'
+    +'<div class="card-body" style="padding:12px 15px;"><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">';
+  badges.forEach(b=>{
+    html+='<div style="text-align:center;padding:10px 6px;border-radius:6px;background:'+(b.earned?'var(--green-2)':'var(--paper-2)')+';border:1.5px solid '+(b.earned?'var(--green)':'var(--rule)')+';opacity:'+(b.earned?1:.4)+';">'
+      +'<div style="font-size:24px;margin-bottom:3px;">'+b.icon+'</div>'
+      +'<div style="font-size:11px;font-weight:700;color:'+(b.earned?'var(--paper)':'var(--ink-soft)')+';">'+b.name+'</div>'
+      +'</div>';
+  });
+  html+='</div></div></section>';
+  // ── training plan ──
   let body='',title='',tip='';
   if(S.trainDay==='eve'){
-    // ── 工作日晚：Range 关闭，纯推杆 2h ──
     title='🌙 工作日晚 · 推杆 2 小时（Range 已关）';
     tip='每次练完回想：哪个距离今晚推得最顺？明天带着这个感觉上场。';
     if(putAvg)body+='<div style="background:var(--paper-2);border-radius:4px;padding:10px 12px;margin-bottom:14px;"><div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--ink-soft);margin-bottom:5px;">数据背景</div><div class="small">均推 '+putAvg+'/洞，'+(parseFloat(putAvg)>2.0?'需降到2.0以内——今晚就是最好的机会':'已达标，今晚加难度训练')+'。</div></div>';
@@ -977,7 +1082,6 @@ function renderTraining(){
         '目标：连续进5个，才算今晚合格',
         '最后3球：随意推，带着成功感觉离场']}]);
   }else if(S.trainDay==='sat'){
-    // ── 周六半天：Range 开放，全面备赛 ──
     title='☀️ 周六 · 比赛准备 半天（约4小时）';
     tip='周六重点是建立比赛感：每一杆站好对准再打。追感觉，不追数字。';
     const par3Desc=par3s.map(h=>'第'+h.no+'洞'+h.yd+'码('+cf(h.yd)+')').join('、');
@@ -1013,7 +1117,6 @@ function renderTraining(){
         '每杆站好对准再打，模拟比赛节奏',
         '记录：攻果岭哪支杆今天感觉最准？明天用它']}]);
   }else{
-    // ── 周日全天：实战 / 备赛 ──
     title='🏆 周日 · 全天备赛';
     tip='周日核心：每杆站好想好再打，技术问题留给平时。今天只想打好每一杆。';
     body+=blk([
@@ -1039,7 +1142,6 @@ function renderTraining(){
         '下周训练重点：根据今天数据自动更新']}]);
   }
   html+='<section class="card" style="margin-top:12px;"><div class="card-head"><h2>'+title+'</h2></div><div class="card-body">'+body+'<p class="small" style="color:var(--ink-soft);margin-top:10px;">💡 '+tip+'</p></div></section>';
-  // bad club tips card (always useful)
   if(badClubs.length){
     html+='<section class="card" style="margin-top:0;"><div class="card-head"><h2>今日球杆提示</h2></div><div class="card-body">';
     badClubs.slice(0,4).forEach(function(x){const tips=[];const c=x.c,t=x.t;
