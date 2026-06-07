@@ -293,13 +293,54 @@
 
 <script>
 /* ===== portable storage (Claude artifact OR self-hosted PWA) ===== */
+const SYNC_KEYS=["rounds","curRound","bag2","course2","trainPrefs","checkins"];
+function syncStateMap(){try{return JSON.parse(localStorage.getItem("_syncState")||"{}");}catch(e){return {};}}
+function setSyncState(k,s){const m=syncStateMap();m[k]=s;try{localStorage.setItem("_syncState",JSON.stringify(m));}catch(e){}}
 const store={
   async get(k){ try{ const r=await fetch("/api/kv/"+encodeURIComponent(k)); const j=await r.json();
-    if(j) localStorage.setItem(k,j.value); return j; }
+    if(j&&j.value!=null){ try{localStorage.setItem(k,j.value);}catch(e){} return j; }
+    const v=localStorage.getItem(k); return v==null?null:{value:v}; }
     catch(e){ const v=localStorage.getItem(k); return v==null?null:{value:v}; } },
   async set(k,v){ try{ localStorage.setItem(k,v); }catch(e){}
-    try{ await fetch("/api/kv/"+encodeURIComponent(k),{method:"PUT",headers:{"content-type":"application/json"},body:JSON.stringify({value:v})}); }catch(e){} }
+    try{ const r=await fetch("/api/kv/"+encodeURIComponent(k),{method:"PUT",headers:{"content-type":"application/json"},body:JSON.stringify({value:v})});
+      if(!r.ok) throw new Error("HTTP "+r.status); setSyncState(k,"cloud"); }
+    catch(e){ setSyncState(k,"local"); } }
 };
+async function syncAllToCloud(){
+  let ok=0,fail=0;const detail=[];
+  for(const k of SYNC_KEYS){const v=localStorage.getItem(k);if(v==null)continue;
+    try{ const r=await fetch("/api/kv/"+encodeURIComponent(k),{method:"PUT",headers:{"content-type":"application/json"},body:JSON.stringify({value:v})});
+      if(!r.ok) throw new Error("HTTP "+r.status); setSyncState(k,"cloud"); ok++; }
+    catch(e){ setSyncState(k,"local"); fail++; detail.push(k+": "+(e.message||"失败")); } }
+  try{renderStats();}catch(e){}
+  alert(fail? `同步完成:成功 ${ok} 项,失败 ${fail} 项\n${detail.join("\n")}\n(失败多半是网络问题,联网后再点一次)` : `✅ 全部 ${ok} 项已同步到云端,换设备也不会丢了。`);
+}
+function exportData(){
+  const dump={_exportedAt:new Date().toISOString()};
+  SYNC_KEYS.forEach(k=>{const v=localStorage.getItem(k);if(v!=null)dump[k]=v;});
+  const json=JSON.stringify(dump,null,2);
+  try{ const blob=new Blob([json],{type:"application/json"}); const url=URL.createObjectURL(blob);
+    const a=document.createElement("a"); a.href=url; a.download="caddie-backup-"+new Date().toISOString().slice(0,10)+".json";
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1500); }catch(e){}
+  const box=document.getElementById("exportBox");
+  if(box){ box.value=json; box.style.display="block"; box.focus(); box.select(); }
+}
+function backupPanel(){
+  const m=syncStateMap();
+  const present=SYNC_KEYS.filter(k=>localStorage.getItem(k)!=null);
+  const pend=present.filter(k=>m[k]!=="cloud");
+  const badge=present.length===0? `<span style="color:var(--ink-soft);">本设备暂无数据</span>`
+    : pend.length? `<span style="color:var(--flag);font-weight:700;">⚠️ ${pend.length} 项仅存在本设备</span>`
+    : `<span style="color:var(--green);font-weight:700;">✅ 已同步云端</span>`;
+  return `<section class="card"><div class="card-head"><h2>📦 数据备份 / 同步</h2></div><div class="card-body">
+    <p class="small" style="margin-bottom:9px;">${badge} · 数据默认只存你这台设备,点同步可上云,换设备/清缓存才不会丢。</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="ghost full" onclick="syncAllToCloud()">☁️ 一键同步到云端</button>
+      <button class="ghost full" onclick="exportData()">⬇️ 导出备份</button>
+    </div>
+    <textarea id="exportBox" readonly placeholder="导出的数据会显示在这里,长按全选复制" style="display:none;width:100%;height:120px;margin-top:9px;font-size:11px;font-family:monospace;border:1.5px solid var(--rule);border-radius:4px;padding:6px;background:var(--paper);color:var(--ink);" onclick="this.select()"></textarea>
+  </div></section>`;
+}
 
 /* ===== data ===== */
 const DEFAULT_BAG=[
@@ -845,7 +886,7 @@ const h=S.course.holes[i],p=S.plans[i];const rh=R?R.holes[i]:null;const st=rh?ho
   s+=`</div></div>`;return s;}
 
 /* ===== STATS VIEW ===== */
-function renderStats(){const w=document.getElementById("statsWrap");let html="";
+function renderStats(){const w=document.getElementById("statsWrap");let html=backupPanel();
   if(R&&R.holes.some(h=>h.shots.length)){html+=roundSummary()+`<div style="margin-top:10px;display:flex;gap:8px;">
     <button class="ghost full" onclick="finishRound()">存档本轮</button>
     <button class="ghost full" style="color:var(--flag);border-color:var(--flag);" onclick="abandonRound()">放弃本轮</button>
