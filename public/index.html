@@ -516,32 +516,38 @@ function sb(){return [...bag].filter(c=>c.total>0).sort((a,b)=>b.total-a.total);
 function nearestTotal(b,t){let best=b[0],g=Infinity;for(const c of b){const d=Math.abs(c.total-t);if(d<g){g=d;best=c;}}return best;}
 function windAdj(D,type,mph){if(!mph||!type||type==="cross"||type==="none")return 0;const f=type==="into"?1:type==="down"?-.6:0;return Math.round(f*mph*D/150);}
 function gapNote(club,t){const g=club.total-t;if(Math.abs(g)<=4)return"满杆";return g>0?`比满杆多约${g}码，收着打`:`比满杆少约${-g}码，可大半号`;}
-function approachShot(no,label,b,remaining,pin,firm,wt,mph){
-  const eff=remaining+PIN_OFF[pin], plays=eff+windAdj(eff,wt,mph), club=nearestTotal(b,plays);
+function isDriver(c){return /driver|一号木|^d$|^1\s*w$/i.test(c.name||"");}
+function fairwayOf(b){const f=b.filter(c=>!isDriver(c));return f.length?f:b;}
+function approachShot(no,label,b,remaining,pin,firm,wt,mph,allowDriver){
+  const pool=allowDriver?b:fairwayOf(b); // 球道上不用一号木,只有发球台开球(par3)才放行
+  const eff=remaining+PIN_OFF[pin], plays=eff+windAdj(eff,wt,mph), club=nearestTotal(pool,plays);
   const t=clubTendency(club.name);
   let land=Math.max(club.carry+FIRM_ROLL[firm],0);
   const windTxt=plays!==eff?`，风修正按 <b>${plays}码</b>`:"";
-  let detail=`本距离 <b>${eff}码</b>${windTxt}。${gapNote(club,plays)}，落点约 <b>${land}码</b>借滚动到旗。`;
+  const gapShort=plays-club.total; // 最长可用杆都够不到
+  let detail;
+  if(gapShort>12)detail=`本距离 <b>${eff}码</b>${windTxt}。最长能上手的 ${club.name} 也差 <b>${gapShort}码</b>够不到 → 别硬冲,${club.name} 打远或放短,留个顺手距离再攻果岭。`;
+  else detail=`本距离 <b>${eff}码</b>${windTxt}。${gapNote(club,plays)}，落点约 <b>${land}码</b>借滚动到旗。`;
   return {no,label,clubName:club.name,clubYd:club.total,detail,
-    tag:Math.abs(club.total-plays)<=4?{t:"safe",x:"满杆"}:{t:"warn",x:"非满杆"},
+    tag:gapShort>12?{t:"warn",x:"够不到·放球道"}:(Math.abs(club.total-plays)<=4?{t:"safe",x:"满杆"}:{t:"warn",x:"非满杆"}),
     wind:plays!==eff?{t:"wind",x:wt==="into"?"逆风+":"顺风−"}:null};
 }
 function pickTee(b,hole,wt,mph){let cands=b.filter(c=>c.total>=150);if(!cands.length)cands=[b[0]];const longest=b[0];
   return cands.map(c=>{const eff=c.total-windAdj(c.total,wt,mph),remaining=hole-eff;let score=0;
-    if(remaining<=0)score+=Math.abs(remaining)*4+30;else{const ap=nearestTotal(b,remaining);score+=Math.abs(ap.total-remaining);if(remaining>longest.total)score+=(remaining-longest.total)*5;score+=remaining*.03;}
+    if(remaining<=0)score+=Math.abs(remaining)*4+30;else{const ap=nearestTotal(fairwayOf(b),remaining);score+=Math.abs(ap.total-remaining);if(remaining>longest.total)score+=(remaining-longest.total)*5;score+=remaining*.03;}
     return{club:c,landing:Math.round(eff),remaining:Math.round(remaining),score};}).sort((x,y)=>x.score-y.score);}
 function computePlan(h,pin,firm,wt,mph){
   const b=sb(),par=h.par,hole=h.yards[S.tee],shots=[],notes=[];
   const pinTxt={front:"前旗",mid:"中旗",back:"后旗"}[pin];
   if(!hole)return{par,hole:null,shots:[],notes:["这洞没码数，去『记分卡数据』补上。"]};
-  if(par===3){shots.push(approachShot(1,"开球·攻果岭",b,hole,pin,firm,wt,mph));if(pin==="front")notes.push("前旗别冲，落果岭中部更稳。");}
+  if(par===3){shots.push(approachShot(1,"开球·攻果岭",b,hole,pin,firm,wt,mph,true));if(pin==="front")notes.push("前旗别冲，落果岭中部更稳。");}
   else{const rank=pickTee(b,hole,wt,mph),best=rank[0],longest=b[0];
     if(best.club.name!==longest.name)notes.push(`收着用 ${best.club.name}（非 ${longest.name}），留个更顺的进攻距离 ~${best.remaining}码。`);
     if(par===4){shots.push({no:1,label:"开球",clubName:best.club.name,clubYd:best.club.total,detail:`预计到 <b>${best.landing}码</b>，还剩 <b>${best.remaining>0?best.remaining:0}码</b>。`,wind:mph&&wt!=="none"&&wt!=="cross"?{t:"wind",x:wt==="into"?"逆风":"顺风"}:null});
       if(best.remaining<=0)notes.push("这杆够得着果岭，无碍可冲，求稳就换短杆放球道。");else shots.push(approachShot(2,"第二杆·攻果岭",b,best.remaining,pin,firm,wt,mph));}
     else{const rem2=Math.round(hole-best.landing);
       shots.push({no:1,label:"开球",clubName:best.club.name,clubYd:best.club.total,detail:`预计到 <b>${best.landing}码</b>，还剩 <b>${rem2}码</b>到果岭。`,wind:null});
-      if(b[0].total>=rem2&&rem2>0){const go=nearestTotal(b,rem2);shots.push({no:2,label:"第二杆·可两上",clubName:go.name,clubYd:go.total,detail:`想两上：${go.name} 够 ${rem2}码，风险高就放球道。`,tag:{t:"warn",x:"高风险"},wind:null});
+      const fw=fairwayOf(b);if(fw[0].total>=rem2&&rem2>0){const go=nearestTotal(fw,rem2);shots.push({no:2,label:"第二杆·可两上",clubName:go.name,clubYd:go.total,detail:`想两上：${go.name} 够 ${rem2}码，风险高就放球道。`,tag:{t:"warn",x:"高风险"},wind:null});
         const wedge=b.filter(c=>c.total<=110).sort((x,y)=>y.total-x.total)[0]||b[b.length-1];const lay=nearestTotal(b,rem2-wedge.total);const r3=Math.max(rem2-lay.total,40);
         shots.push(Object.assign(approachShot(3,"x",b,r3,pin,firm,wt,mph),{label:`或：${lay.name}放球道→第三杆`}));}
       else{const wedge=b.filter(c=>c.total>=85&&c.total<=115).sort((x,y)=>y.total-x.total)[0]||b[b.length-1];const lay=nearestTotal(b,rem2-wedge.total);const r3=Math.max(Math.round(rem2-lay.total),0);
