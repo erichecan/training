@@ -307,7 +307,7 @@
 
 <script>
 /* ===== portable storage (Claude artifact OR self-hosted PWA) ===== */
-const SYNC_KEYS=["golf:rounds","golf:curRound","golf:bag2","golf:course2","golf:trainPrefs","golf:checkins","golf:courses"];
+const SYNC_KEYS=["golf:rounds","golf:curRound","golf:bag2","golf:course2","golf:trainPrefs","golf:checkins","golf:courses","golf:qeDraft"];
 function syncStateMap(){try{return JSON.parse(localStorage.getItem("_syncState")||"{}");}catch(e){return {};}}
 function setSyncState(k,s){const m=syncStateMap();m[k]=s;try{localStorage.setItem("_syncState",JSON.stringify(m));}catch(e){}}
 const store={
@@ -438,6 +438,7 @@ async function loadAll(){
   let tp=await store.get("golf:trainPrefs"); if(tp&&tp.value)trainPrefs=Object.assign(JSON.parse(JSON.stringify(DEFAULT_PREFS)),JSON.parse(tp.value));
   let ci=await store.get("golf:checkins"); checkins=ci&&ci.value?JSON.parse(ci.value):[];
   let cs=await store.get("golf:courses"); courses=cs&&cs.value?JSON.parse(cs.value):[];
+  let qd=await store.get("golf:qeDraft"); if(qd&&qd.value&&qd.value!=="null"){try{const d=JSON.parse(qd.value);if(d&&d.holes){d.paused=true;QE=d;}}catch(e){}}
   await loadCoach();
   renderBag(); renderPlay();
 }
@@ -682,24 +683,29 @@ const QROWS=[{k:"yards",t:"码数"},{k:"par",t:"Par"},{k:"fir",t:"FIR",bool:1},{
 function roundsForStats(){return rounds.filter(rd=>statsFilter==="all"||(rd.kind||"match")===statsFilter);}
 function setStatsFilter(k){statsFilter=k;renderStats();}
 function statsFilterBar(){if(!rounds.length)return"";return `<div style="display:flex;gap:6px;margin-bottom:10px;">${[["all","全部"],["train","训练"],["match","比赛"]].map(([k,t])=>`<button class="mini ${statsFilter===k?"on":""}" onclick="setStatsFilter('${k}')">${t}</button>`).join("")}</div>`;}
+function saveQEDraft(){if(QE)store.set("golf:qeDraft",JSON.stringify(QE));}
+function clearQEDraft(){QE=null;store.set("golf:qeDraft","null");}
+function resumeQuickEntry(){if(QE){QE.paused=false;saveQEDraft();renderStats();}}
+function pauseQuickEntry(){if(QE){QE.paused=true;saveQEDraft();renderStats();}}
 function openQuickEntry(){
+  if(QE&&QE.paused){if(!confirm("有一份没填完的快速记分,放弃它、重新开始?"))return;}
   const src=(S.course&&S.course.holes&&S.course.holes.length)?S.course.holes:Array.from({length:18},(_,i)=>({no:i+1,par:4,yards:null}));
-  QE={date:new Date().toISOString().slice(0,10),kind:"train",notes:"",courseName:(S.course&&S.course.name)||"训练",
+  QE={date:new Date().toISOString().slice(0,10),kind:"train",notes:"",paused:false,courseName:(S.course&&S.course.name)||"训练",
     holes:src.map(h=>({no:h.no,par:h.par||4,yards:(h.yards&&S.tee&&h.yards[S.tee]!=null)?h.yards[S.tee]:"",fir:null,gir:null,putts:"",chips:"",score:"",note:""}))};
-  renderStats();
+  saveQEDraft();renderStats();
 }
-function closeQuickEntry(){if(QE&&confirm("放弃这次快速记分?未保存的内容会丢失。")){QE=null;renderStats();}}
-function setQE(i,f,v){if(QE)QE.holes[i][f]=v;}
-function setQEMeta(f,v){if(QE){QE[f]=v;if(f==="kind")renderStats();}}
-function setQEHalf(h){if(QE){QE.half=h;renderStats();}}
-function cycleQE(i,f){if(!QE)return;const v=QE.holes[i][f];QE.holes[i][f]=v===true?false:v===false?null:true;renderStats();}
+function closeQuickEntry(){if(QE&&confirm("放弃这次快速记分?已填的内容会丢失(可改用「暂存」保留)。")){clearQEDraft();renderStats();}}
+function setQE(i,f,v){if(QE){QE.holes[i][f]=v;saveQEDraft();}}
+function setQEMeta(f,v){if(QE){QE[f]=v;saveQEDraft();if(f==="kind")renderStats();}}
+function setQEHalf(h){if(QE){QE.half=h;saveQEDraft();renderStats();}}
+function cycleQE(i,f){if(!QE)return;const v=QE.holes[i][f];QE.holes[i][f]=v===true?false:v===false?null:true;saveQEDraft();renderStats();}
 function saveQuickEntry(){
   if(!QE)return;
   const holes=QE.holes.map(h=>({no:h.no,par:+h.par||4,yards:h.yards!==""&&h.yards!=null?+h.yards:null,quick:true,
     fir:(+h.par>3)?(h.fir===true):null,gir:h.gir===true,putts:+h.putts||0,chips:+h.chips||0,score:h.score!==""?+h.score:0,note:h.note||"",shots:[]}));
   if(!holes.some(h=>h.score>0)){alert("至少填一个洞的总杆再保存。");return;}
   const round={id:Date.now(),date:QE.date,courseName:QE.courseName||"训练",courseKey:(QE.courseName||"训练")+"|quick",tee:"",kind:QE.kind,quick:true,notes:QE.notes||"",holes};
-  rounds.push(round);saveRounds();QE=null;statsFilter="all";renderStats();
+  rounds.push(round);saveRounds();clearQEDraft();statsFilter="all";renderStats();
   alert("✅ 已保存这场快速记分。");
 }
 function renderQuickEntry(){
@@ -735,9 +741,10 @@ function renderQuickEntry(){
     <div style="margin-top:14px;"><div class="pm-rl" style="margin-bottom:5px;">📝 本场笔记</div>
       <textarea onchange="setQEMeta('notes',this.value)" placeholder="整场心得:哪个洞出了什么状况、想改进的点、球场记忆…" style="width:100%;min-height:130px;font-size:13px;padding:9px;border:1.5px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);font-family:inherit;line-height:1.6;box-sizing:border-box;resize:vertical;">${esc(QE.notes||"")}</textarea>
     </div>
-    <div style="display:flex;gap:8px;margin-top:12px;">
-      <button class="ghost full" onclick="saveQuickEntry()">保存这场</button>
-      <button class="ghost full" style="color:var(--flag);border-color:var(--flag);" onclick="closeQuickEntry()">取消</button>
+    <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+      <button class="primary" style="flex:1;min-width:120px;" onclick="saveQuickEntry()">保存这场</button>
+      <button class="ghost full" onclick="pauseQuickEntry()">暂存,稍后填</button>
+      <button class="ghost full" style="color:var(--flag);border-color:var(--flag);" onclick="closeQuickEntry()">放弃</button>
     </div></div></section>`;
   return s;
 }
@@ -1072,8 +1079,12 @@ const h=S.course.holes[i],p=S.plans[i];const rh=R?R.holes[i]:null;const st=rh?ho
 
 /* ===== STATS VIEW ===== */
 function renderStats(){const w=document.getElementById("statsWrap");
-  if(QE){w.innerHTML=renderQuickEntry();return;}
-  let html=backupPanel()+`<button class="ghost full" style="margin:10px 0;" onclick="openQuickEntry()">➕ 快速记一场(誊计分卡)</button>`+statsFilterBar();
+  if(QE&&!QE.paused){w.innerHTML=renderQuickEntry();return;}
+  let html=backupPanel();
+  if(QE&&QE.paused){const filled=QE.holes.filter(h=>h.score!==""&&h.score!=null).length;
+    html+=`<div style="display:flex;gap:8px;margin:10px 0;"><button class="primary" style="flex:1;" onclick="resumeQuickEntry()">▶ 继续填写快速记分(已填${filled}洞)</button><button class="ghost" style="white-space:nowrap;" onclick="openQuickEntry()">➕ 重记</button></div>`;
+  }else{html+=`<button class="ghost full" style="margin:10px 0;" onclick="openQuickEntry()">➕ 快速记一场(誊计分卡)</button>`;}
+  html+=statsFilterBar();
   if(R&&R.holes.some(h=>h.shots.length)){html+=roundSummary()+`<button class="primary" style="margin-top:10px;width:100%;" onclick="continueRound()">▶ 继续本轮</button>
   <div style="margin-top:8px;display:flex;gap:8px;">
     <button class="ghost full" onclick="finishRound()">存档本轮</button>
