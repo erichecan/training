@@ -583,6 +583,9 @@ function continueRound(){
   S.current=Math.min(idx,S.plans.length-1);S.playMode=true;switchView("play");renderPlay();
 }
 function recomputeHole(i){S.plans[i]=computePlan(S.course.holes[i],S.holePin[i],S.firm,S.holeWind[i],S.windMph);renderPlay();}
+function recalcPlanQuiet(i){if(S.plans.length&&S.course.holes[i])S.plans[i]=computePlan(S.course.holes[i],S.holePin[i]||"mid",S.firm,S.holeWind[i]||"none",S.windMph);}
+function setHolePar(i,v){if(!S.course.holes[i])return;S.course.holes[i].par=+v||4;saveCourse();recalcPlanQuiet(i);}
+function setHoleYd(i,v){if(!S.course.holes[i])return;S.course.holes[i].yards[S.tee]=v?+v:null;saveCourse();recalcPlanQuiet(i);}
 function ensureFirstShot(i){startRoundIfNeeded();if(R&&R.holes[i].shots.length===0){R.holes[i].shots.push({club:suggestedClub(i),dist:null,result:"",dir:[],note:""});saveCur();}}
 function setHole(i){S.current=i;S.editKey=null;window.scrollTo(0,0);if(S.playMode)ensureFirstShot(i);renderPlay();}
 function setPin(p){S.holePin[S.current]=p;recomputeHole(S.current);}
@@ -1036,7 +1039,7 @@ function renderPlay(){const w=document.getElementById("playWrap");
       <div class="field"><label>坡度</label><input type="number" inputmode="numeric" placeholder="可选" value="${S.course.slope||""}" onchange="S.course.slope=+this.value||null;saveCourse()"></div></div>
     <details${S.showScorecard?" open":""} ontoggle="S.showScorecard=this.open"><summary class="small" style="cursor:pointer;font-weight:700;">记分卡数据 (点开核对/修改)</summary>
       <table class="sc-table"><thead><tr><th>洞</th><th>Par</th><th>码数(${S.tee})</th></tr></thead><tbody id="scBody">
-      ${S.course.holes.map(h=>`<tr><td class="hno">${h.no}</td><td><input class="scPar" type="number" inputmode="numeric" value="${h.par}"></td><td><input class="scYd" type="number" inputmode="numeric" value="${h.yards[S.tee]??""}"></td></tr>`).join("")}
+      ${S.course.holes.map((h,i)=>`<tr><td class="hno">${h.no}</td><td><input class="scPar" type="number" inputmode="numeric" value="${h.par}" onchange="setHolePar(${i},this.value)"></td><td><input class="scYd" type="number" inputmode="numeric" value="${h.yards[S.tee]??""}" onchange="setHoleYd(${i},this.value)"></td></tr>`).join("")}
       </tbody></table></details>
     <button class="primary" style="margin-top:14px;" onclick="generateAll()">⛳ 生成 18 洞策略</button>
     ${(S.plans.length||R)?`<button class="ghost full" style="margin-top:10px;" onclick="${R&&!S.plans.length?"continueRound()":"S.playMode=true;renderPlay()"}">继续打球 › 第 ${S.course.holes[S.current]?S.course.holes[S.current].no:1} 洞</button>`:""}
@@ -1065,6 +1068,11 @@ function renderHoleCompact(i){
     <div style="display:flex;gap:3px;">${[["none","无"],["into","逆"],["down","顺"],["cross","侧"]].map(([x,t])=>`<button class="mini wind ${S.holeWind[i]===x?"on":""}" onclick="setWind('${x}')">${t}</button>`).join("")}</div>
     <span class="sep">|</span>
     <button class="mini" onclick="markTee(${i})" title="开球前点一下,用于算开球距离">📍发球台${(R&&R.holes[i]&&R.holes[i].tee)?" ✓":""}</button>
+    <span class="sep">|</span>
+    <span class="pm-meta-lab">Par</span>
+    <input type="number" inputmode="numeric" value="${h.par}" onchange="setHolePar(${i},this.value);renderPlay()" style="width:36px;padding:3px;font-size:11px;border:1px solid var(--rule);border-radius:3px;background:var(--paper);color:var(--ink);" title="改本洞 Par">
+    <span class="pm-meta-lab">码</span>
+    <input type="number" inputmode="numeric" value="${h.yards[S.tee]??""}" onchange="setHoleYd(${i},this.value);renderPlay()" style="width:50px;padding:3px;font-size:11px;border:1px solid var(--rule);border-radius:3px;background:var(--paper);color:var(--ink);" title="改本洞码数(识别错了在这改)">
   </div>`;
   // game-plan positioning (AI 整场博弈) if available
   if(S.gameplan){const gh=(S.gameplan.holes||[]).find(x=>x.no===h.no);
