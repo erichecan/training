@@ -369,7 +369,7 @@ const PRELOAD_COURSE={name:"Spring Valley Country Club, Columbia, SC (USGA Tees)
  {no:10,par:4,yards:{USGA:357}},{no:11,par:4,yards:{USGA:382}},{no:12,par:5,yards:{USGA:458}},
  {no:13,par:3,yards:{USGA:141}},{no:14,par:4,yards:{USGA:406}},{no:15,par:4,yards:{USGA:347}},
  {no:16,par:3,yards:{USGA:133}},{no:17,par:4,yards:{USGA:270}},{no:18,par:5,yards:{USGA:520}}]};
-const RESULTS=[{k:"fairway",t:"球道",g:"good"},{k:"rough",t:"长草",g:"meh"},{k:"fbunker",t:"球道沙坑",g:"bad"},
+const RESULTS=[{k:"fairway",t:"球道",g:"good"},{k:"rough",t:"长草",g:"meh"},{k:"trees",t:"树下",g:"bad"},{k:"fbunker",t:"球道沙坑",g:"bad"},
  {k:"fringe",t:"果岭边缘",g:"meh"},{k:"green",t:"果岭",g:"good"},{k:"gbunker",t:"果岭沙坑",g:"bad"},
  {k:"water",t:"水",g:"pen"},{k:"ob",t:"OB",g:"pen"},{k:"other",t:"其它",g:"meh"}];
 const DIRS=[{k:"left",t:"左"},{k:"fl",t:"偏左"},{k:"short",t:"短"},{k:"on",t:"准"},{k:"long",t:"长"},{k:"fr",t:"偏右"},{k:"right",t:"右"}];
@@ -592,7 +592,7 @@ function liveSuggest(i,j){
   const sh=R.holes[i].shots,prev=sh[j-1];if(!prev||prev.rem==null||prev.rem<=0)return null;
   const b=sb();if(b.length<1)return null;
   const a=approachShot(j+1,"实时",b,prev.rem,S.holePin[i]||"mid",S.firm||"med",S.holeWind[i]||"none",S.windMph);
-  const lieMap={rough:"上一杆在长草,力量打折,宁可大半号",fbunker:"球道沙坑,先稳出来",gbunker:"沙坑,先上果岭",ob:"刚罚杆,这杆求稳",water:"刚罚杆,这杆求稳",fringe:"果岭边缘,可推或切滚"};
+  const lieMap={rough:"上一杆在长草,力量打折,宁可大半号",trees:"树下,先低弹道打出来回球道,别强求距离",fbunker:"球道沙坑,先稳出来",gbunker:"沙坑,先上果岭",ob:"刚罚杆,这杆求稳",water:"刚罚杆,这杆求稳",fringe:"果岭边缘,可推或切滚"};
   const dir=nd(prev.dir),bits=[];
   if(lieMap[prev.result])bits.push(lieMap[prev.result]);
   if(dir.includes("left")||dir.includes("fl"))bits.push("上杆偏左,瞄右一点");
