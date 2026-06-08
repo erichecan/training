@@ -118,6 +118,11 @@ function buildCoachPrompt(kind, p) {
     ].filter(Boolean).join("；");
   }
 
+  const exp = (p.experience || []);
+  const expTxt = exp.length
+    ? `\n球员经验笔记（球员手记，多为距离/用杆/球场记忆，含 OCR 修正与失误教训。务必在对应洞的 note 与整场 notes 里具体引用、转成可执行建议）：\n- ${exp.join("\n- ")}`
+    : "";
+
   if (kind === "gameplan") {
     return `你是经验丰富的高尔夫球场策略教练。基于以下信息，为这位球员制定一份"整场博弈方案"：把 18 洞分类为 score(得分洞,主动争 birdie)/adv(优势洞,稳 par)/hard(困难洞,接受 bogey 不强攻)，并给出达成目标分数的得分路径与逐洞定位。
 
@@ -125,7 +130,7 @@ ${meta}
 目标分数：${p.target || "未指定（按稳健进步推断）"}
 逐洞：${holes}
 球包：${bag}
-球员数据：${stats}
+球员数据：${stats}${expTxt}
 
 只输出一个 JSON 对象，不要任何解释或 markdown 代码块，结构严格如下：
 {"target":"目标分数字符串","summary":"一句话总览策略","path":[{"icon":"emoji","text":"得分来源说明","delta":"如 -2 / ±0 / +2"}],"holes":[{"no":洞号数字,"par":数字,"yards":数字,"klass":"score|adv|hard","tee_club":"开球建议用杆","plan":"该洞策略目标一句话","note":"可选关键提醒，可空字符串"}],"notes":["整场注意事项"]}
@@ -147,7 +152,7 @@ ${meta}
 目标分数：${p.target || "未指定"}
 逐洞：${holes}
 球包：${bag}
-球员数据：${stats}
+球员数据：${stats}${expTxt}
 训练条件：每周可练 ${prefs.daysPerWeek || 4} 天、每天约 ${prefs.hoursPerDay || 2} 小时、设施：${fac}${prefs.focusNote ? `；球员自评：${prefs.focusNote}` : ""}
 
 只输出一个 JSON 对象，不要任何解释或 markdown 代码块，结构严格如下：

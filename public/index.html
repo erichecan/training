@@ -276,6 +276,7 @@
   .live-sg{background:var(--paper-2);border-left:4px solid var(--green);border-radius:4px;padding:7px 9px;margin-bottom:8px;font-size:13px;}
   .live-sg .live-d{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
   .live-sg .live-a{font-size:11.5px;color:var(--flag);margin-top:2px;}
+  .hist-ref{font-size:11.5px;color:var(--ink-soft);background:var(--paper-2);border-radius:4px;padding:5px 8px;margin-bottom:8px;line-height:1.5;}
 </style>
 </head>
 <body>
@@ -668,9 +669,11 @@ function setShotRem(i,j,v){
 function setEditShot(i,j){S.editKey=(j<0)?null:i+"-"+j;renderPlay();}
 function shotEditorHTML(i,j,isActive){
   const sh=R.holes[i].shots[j],p=S.plans[i],sugg=p&&p.shots?p.shots[j]:null,ls=isActive?liveSuggest(i,j):null;
+  const hist=ls?clubHistoryAt(ls.rem):null;
   let s=`<div class="pm-cur">
       <div class="pm-cur-title"><span>第 ${j+1} 杆${ls?` · 建议 ${ls.club}`:(isActive&&sugg?` · 建议 ${sugg.clubName}`:"")}</span>${isActive?`<button class="del" onclick="delShot(${i},${j})">×</button>`:`<button class="mini" onclick="setEditShot(${i},-1)">✓ 完成</button>`}</div>
       ${ls?`<div class="live-sg">🎯 按实际剩 <b>${ls.rem}码</b> → <b>${ls.club}</b>(${ls.clubYd}码)<div class="live-d">${ls.detail}</div>${ls.advice?`<div class="live-a">⚠️ ${ls.advice}</div>`:""}</div>`:""}
+      ${hist&&hist.length?`<div class="hist-ref">📋 你以前打 ~${ls.rem}码:${hist.slice(0,3).map(h=>`${h.club}×${h.n}${topResLabel(h.res)}`).join(" · ")} <span style="opacity:.65;">仅供参考</span></div>`:""}
       <div class="pm-hchips">${bag.map(c=>`<button class="chip ${sh.club===c.name?"on":""}" onclick="setShotClub(${i},${j},'${c.name}')">${c.name}</button>`).join("")}</div>
       <div class="pm-rl">落点</div>
       <div class="pm-hchips">${RESULTS.map(r=>`<button class="chip ${r.g} ${sh.result===r.k?"on":""}" onclick="setShotRes(${i},${j},'${r.k}')">${r.t}</button>`).join("")}</div>
@@ -786,6 +789,27 @@ function renderQuickEntry(){
 /* ===== DISPERSION / TENDENCY ===== */
 function allShots(){const rs=[...roundsForStats()];if(R&&(statsFilter==="all"||statsFilter==="match"))rs.push(R);const out=[];
   rs.forEach(rd=>(rd.holes||[]).forEach(h=>(h.shots||[]).forEach((s,j)=>out.push({...s,par:h.par,idx:j}))));return out;}
+function allShotsRaw(){const rs=[...rounds];if(R)rs.push(R);const out=[];rs.forEach(rd=>(rd.holes||[]).forEach(h=>(h.shots||[]).forEach(s=>out.push(s))));return out;}
+function topResLabel(res){const e=Object.entries(res||{}).sort((a,b)=>b[1]-a[1])[0];if(!e)return"";return "("+((RESULTS.find(r=>r.k===e[0])||{}).t||e[0])+")";}
+function clubHistoryAt(yards,tol){
+  if(!yards||yards<=0)return[];
+  tol=tol||Math.max(12,Math.round(yards*0.12));
+  const by={};
+  allShotsRaw().forEach(s=>{if(!s.club||!s.dist||Math.abs(s.dist-yards)>tol)return;
+    const b=by[s.club]=by[s.club]||{club:s.club,n:0,sum:0,res:{}};b.n++;b.sum+=s.dist;if(s.result)b.res[s.result]=(b.res[s.result]||0)+1;});
+  return Object.values(by).map(b=>({club:b.club,n:b.n,avg:Math.round(b.sum/b.n),res:b.res})).sort((a,b)=>b.n-a.n);
+}
+function experienceForAI(){
+  const out=[],seen=new Set();const push=t=>{if(t&&!seen.has(t)){seen.add(t);out.push(t);}};
+  [...rounds,...(R?[R]:[])].forEach(rd=>{
+    if(rd.notes)push(`[${rd.courseName||"某场"}·整场] ${rd.notes}`);
+    (rd.holes||[]).forEach(h=>{
+      if(h.note)push(`[${h.no}号Par${h.par}] ${h.note}`);
+      (h.shots||[]).forEach(s=>{if(s.note){const dt=s.dist?` ${s.dist}码`:"";const rt=s.result?((RESULTS.find(r=>r.k===s.result)||{}).t||""):"";push(`[${h.no}号 ${s.club||""}${dt}${rt?" "+rt:""}] ${s.note}`);}});
+    });
+  });
+  return out.slice(-50);
+}
 function clubTendency(club){const shots=allShots().filter(s=>s.club===club);
   const dirs=shots.filter(s=>nd(s.dir).length>0),cnt=t=>shots.filter(s=>nd(s.dir).includes(t)).length;
   const dist=shots.filter(s=>s.dist).map(s=>s.dist);
@@ -862,7 +886,7 @@ async function callCoach(kind,extra){
   const payload=Object.assign({
     course:{name:S.course.name||"",rating:S.course.rating||null,slope:S.course.slope||null,
       holes:S.course.holes.map(h=>({no:h.no,par:h.par,yards:h.yards[S.tee]??null}))},
-    tee:S.tee,bag:sb(),digest:buildStatsDigest(),prefs:trainPrefs
+    tee:S.tee,bag:sb(),digest:buildStatsDigest(),prefs:trainPrefs,experience:experienceForAI()
   },extra||{});
   const resp=await fetch("/api/coach",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({kind,payload})});
   const J=await resp.json();if(J.error)throw new Error(J.error);return J;
