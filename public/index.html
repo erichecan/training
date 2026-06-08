@@ -583,7 +583,7 @@ function continueRound(){
 }
 function recomputeHole(i){S.plans[i]=computePlan(S.course.holes[i],S.holePin[i],S.firm,S.holeWind[i],S.windMph);renderPlay();}
 function ensureFirstShot(i){startRoundIfNeeded();if(R&&R.holes[i].shots.length===0){R.holes[i].shots.push({club:suggestedClub(i),dist:null,result:"",dir:[],note:""});saveCur();}}
-function setHole(i){S.current=i;window.scrollTo(0,0);if(S.playMode)ensureFirstShot(i);renderPlay();}
+function setHole(i){S.current=i;S.editKey=null;window.scrollTo(0,0);if(S.playMode)ensureFirstShot(i);renderPlay();}
 function setPin(p){S.holePin[S.current]=p;recomputeHole(S.current);}
 function setWind(w){S.holeWind[S.current]=w;recomputeHole(S.current);}
 function readScorecardInputs(){if(!document.getElementById("scBody"))return;
@@ -612,7 +612,7 @@ function liveSuggest(i,j){
   return {club:a.clubName,clubYd:a.clubYd,detail:a.detail,rem:prev.rem,advice:bits.join(";")};
 }
 function addShot(i){startRoundIfNeeded();R.holes[i].shots.push({club:suggestedClub(i),dist:null,result:"",dir:[],note:""});saveCur();renderPlay();}
-function delShot(i,j){R.holes[i].shots.splice(j,1);saveCur();renderPlay();}
+function delShot(i,j){R.holes[i].shots.splice(j,1);S.editKey=null;saveCur();renderPlay();}
 function setShotClub(i,j,c){R.holes[i].shots[j].club=c;saveCur();renderPlay();}
 function setShotRes(i,j,k){R.holes[i].shots[j].result=k;saveCur();renderPlay();}
 function nd(d){return Array.isArray(d)?d:(d?[d]:[]);}
@@ -664,6 +664,29 @@ function setShotRem(i,j,v){
   R.holes[i].shots[j].rem=v?+v:null;
   recalcShotDist(i,j);
   saveCur();renderPlay();
+}
+function setEditShot(i,j){S.editKey=(j<0)?null:i+"-"+j;renderPlay();}
+function shotEditorHTML(i,j,isActive){
+  const sh=R.holes[i].shots[j],p=S.plans[i],sugg=p&&p.shots?p.shots[j]:null,ls=isActive?liveSuggest(i,j):null;
+  let s=`<div class="pm-cur">
+      <div class="pm-cur-title"><span>第 ${j+1} 杆${ls?` · 建议 ${ls.club}`:(isActive&&sugg?` · 建议 ${sugg.clubName}`:"")}</span>${isActive?`<button class="del" onclick="delShot(${i},${j})">×</button>`:`<button class="mini" onclick="setEditShot(${i},-1)">✓ 完成</button>`}</div>
+      ${ls?`<div class="live-sg">🎯 按实际剩 <b>${ls.rem}码</b> → <b>${ls.club}</b>(${ls.clubYd}码)<div class="live-d">${ls.detail}</div>${ls.advice?`<div class="live-a">⚠️ ${ls.advice}</div>`:""}</div>`:""}
+      <div class="pm-hchips">${bag.map(c=>`<button class="chip ${sh.club===c.name?"on":""}" onclick="setShotClub(${i},${j},'${c.name}')">${c.name}</button>`).join("")}</div>
+      <div class="pm-rl">落点</div>
+      <div class="pm-hchips">${RESULTS.map(r=>`<button class="chip ${r.g} ${sh.result===r.k?"on":""}" onclick="setShotRes(${i},${j},'${r.k}')">${r.t}</button>`).join("")}</div>
+      <div class="pm-rl">方向 (可多选)</div>
+      <div class="pm-hchips">${DIRS.map(d=>`<button class="chip dir ${nd(sh.dir).includes(d.k)?"on":""}" onclick="setShotDir(${i},${j},'${d.k}')">${d.t}</button>`).join("")}</div>
+      <div class="pm-dist" style="flex-wrap:wrap;gap:6px;">
+        <button class="mini" onclick="markShotPos(${i},${j})" title="走到球边点一下,GPS 算这一杆距离">📍球位${sh.pos?` ✓±${sh.pos.acc}m`:""}</button>
+        ${sh.pos?`<button class="mini" onclick="clearShotPos(${i},${j})" title="清除本杆定位">✕</button>`:""}
+        <span class="pm-rl" style="margin:0 4px 0 4px;">距旗</span>
+        <input class="ydinput" type="number" inputmode="numeric" value="${sh.rem??""}" placeholder="码" onchange="setShotRem(${i},${j},this.value)" style="padding:5px;font-size:14px;width:62px;">
+        ${sh.dist!=null?`<span style="font-size:11px;color:var(--ink-soft);margin-left:4px;">本杆 ${sh.dist}码${sh.distSrc==="gps"?" ·GPS":sh.distSrc==="rem"?" ·反推":sh.distSrc==="manual"?" ·手填":""}</span>`:""}
+      </div>
+      <div style="margin-top:5px;"><div class="pm-rl">备注</div><input type="text" value="${(sh.note||"").replace(/"/g,"&quot;")}" placeholder="可选…" onblur="setShotNote(${i},${j},this.value)" style="display:block;width:100%;font-size:13px;padding:5px 8px;border:1.5px solid var(--rule);border-radius:4px;background:var(--paper);font-family:inherit;color:var(--ink);margin-top:3px;"></div>`;
+  if(!isActive)s+=`<div style="margin-top:7px;"><button class="del" style="font-size:12px;color:var(--flag);" onclick="delShot(${i},${j})">🗑 删除这一杆</button></div>`;
+  s+=`</div>`;
+  return s;
 }
 function setPutts(i,d){startRoundIfNeeded();R.holes[i].putts=Math.max(0,R.holes[i].putts+d);saveCur();renderPlay();}
 function finishRound(){if(!R)return;if(R.holes.some(h=>h.shots.length)){rounds.push(R);saveRounds();}R=null;saveCur();startRoundIfNeeded();renderPlay();alert("本轮已存档，可继续新的一轮。");}
@@ -997,35 +1020,17 @@ function renderHoleCompact(i){
   });
   if(p.notes&&p.notes.length)s+=`<div class="pm-notes">${p.notes.map(n=>`<span class="pm-note">${n}</span>`).join("")}</div>`;
   s+=`</div>`;
-  // completed shots (all but last)
+  // completed shots (all but last) — 点击整行展开重新编辑
   const active=shots.length-1;
   shots.forEach((sh,j)=>{
     if(j>=active)return;
+    if(S.editKey===i+"-"+j){s+=shotEditorHTML(i,j,false);return;}
     const res=RESULTS.find(r=>r.k===sh.result)?.t||"";
     const distInfo=sh.dist?` · 打${sh.dist}码`:"";const remInfo=sh.rem?` · 剩${sh.rem}码`:"";
-    s+=`<div class="pm-prev"><div class="sn">${j+1}</div><div class="pi">${sh.club||"—"}${distInfo}${remInfo}${res?` · ${res}`:""}${sh.note?` · <em>${sh.note}</em>`:""}</div><button class="del" onclick="delShot(${i},${j})">×</button></div>`;
+    s+=`<div class="pm-prev" onclick="setEditShot(${i},${j})" style="cursor:pointer;"><div class="sn">${j+1}</div><div class="pi">${sh.club||"—"}${distInfo}${remInfo}${res?` · ${res}`:""}${sh.note?` · <em>${sh.note}</em>`:""}</div><span style="font-size:10px;color:var(--ink-soft);margin-right:4px;">✏️改</span><button class="del" onclick="event.stopPropagation();delShot(${i},${j})">×</button></div>`;
   });
   // active shot
-  if(shots.length>0){
-    const j=active,sh=shots[j],sugg=p.shots[j],ls=liveSuggest(i,j);
-    s+=`<div class="pm-cur">
-      <div class="pm-cur-title"><span>第 ${j+1} 杆${ls?` · 建议 ${ls.club}`:(sugg?` · 建议 ${sugg.clubName}`:"")}</span><button class="del" onclick="delShot(${i},${j})">×</button></div>
-      ${ls?`<div class="live-sg">🎯 按实际剩 <b>${ls.rem}码</b> → <b>${ls.club}</b>(${ls.clubYd}码)<div class="live-d">${ls.detail}</div>${ls.advice?`<div class="live-a">⚠️ ${ls.advice}</div>`:""}</div>`:""}
-      <div class="pm-hchips">${bag.map(c=>`<button class="chip ${sh.club===c.name?"on":""}" onclick="setShotClub(${i},${j},'${c.name}')">${c.name}</button>`).join("")}</div>
-      <div class="pm-rl">落点</div>
-      <div class="pm-hchips">${RESULTS.map(r=>`<button class="chip ${r.g} ${sh.result===r.k?"on":""}" onclick="setShotRes(${i},${j},'${r.k}')">${r.t}</button>`).join("")}</div>
-      <div class="pm-rl">方向 (可多选)</div>
-      <div class="pm-hchips">${DIRS.map(d=>`<button class="chip dir ${nd(sh.dir).includes(d.k)?"on":""}" onclick="setShotDir(${i},${j},'${d.k}')">${d.t}</button>`).join("")}</div>
-      <div class="pm-dist" style="flex-wrap:wrap;gap:6px;">
-        <button class="mini" onclick="markShotPos(${i},${j})" title="走到球边点一下,GPS 算这一杆距离">📍球位${sh.pos?` ✓±${sh.pos.acc}m`:""}</button>
-        ${sh.pos?`<button class="mini" onclick="clearShotPos(${i},${j})" title="清除本杆定位">✕</button>`:""}
-        <span class="pm-rl" style="margin:0 4px 0 4px;">距旗</span>
-        <input class="ydinput" type="number" inputmode="numeric" value="${sh.rem??""}" placeholder="码" onchange="setShotRem(${i},${j},this.value)" style="padding:5px;font-size:14px;width:62px;">
-        ${sh.dist!=null?`<span style="font-size:11px;color:var(--ink-soft);margin-left:4px;">本杆 ${sh.dist}码${sh.distSrc==="gps"?" ·GPS":sh.distSrc==="rem"?" ·反推":sh.distSrc==="manual"?" ·手填":""}</span>`:""}
-      </div>
-      <div style="margin-top:5px;"><div class="pm-rl">备注</div><input type="text" value="${(sh.note||"").replace(/"/g,"&quot;")}" placeholder="可选…" onblur="setShotNote(${i},${j},this.value)" style="display:block;width:100%;font-size:13px;padding:5px 8px;border:1.5px solid var(--rule);border-radius:4px;background:var(--paper);font-family:inherit;color:var(--ink);margin-top:3px;"></div>
-    </div>`;
-  }
+  if(shots.length>0){s+=shotEditorHTML(i,active,true);}
   // footer
   s+=`<div class="pm-footer">
     <div style="display:flex;align-items:center;">
