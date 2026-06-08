@@ -307,7 +307,7 @@
 
 <script>
 /* ===== portable storage (Claude artifact OR self-hosted PWA) ===== */
-const SYNC_KEYS=["golf:rounds","golf:curRound","golf:bag2","golf:course2","golf:trainPrefs","golf:checkins"];
+const SYNC_KEYS=["golf:rounds","golf:curRound","golf:bag2","golf:course2","golf:trainPrefs","golf:checkins","golf:courses"];
 function syncStateMap(){try{return JSON.parse(localStorage.getItem("_syncState")||"{}");}catch(e){return {};}}
 function setSyncState(k,s){const m=syncStateMap();m[k]=s;try{localStorage.setItem("_syncState",JSON.stringify(m));}catch(e){}}
 const store={
@@ -376,7 +376,7 @@ const DIRS=[{k:"left",t:"左"},{k:"fl",t:"偏左"},{k:"short",t:"短"},{k:"on",t
 
 let bag=[];
 let S={course:null,tee:null,windMph:0,firm:"medium",plans:[],current:0,holePin:[],holeWind:[],playMode:false,gameplan:null,trainPlan:null,tasksDone:[]};
-let R=null, rounds=[], checkins=[];
+let R=null, rounds=[], checkins=[], courses=[];
 const DEFAULT_PREFS={daysPerWeek:4,hoursPerDay:2,facilities:["range","green","course"],focusNote:""};
 let trainPrefs=JSON.parse(JSON.stringify(DEFAULT_PREFS));
 let trainWeek=0;
@@ -437,6 +437,7 @@ async function loadAll(){
   let cr=await store.get("golf:curRound"); if(cr&&cr.value&&cr.value!=="null")R=JSON.parse(cr.value);
   let tp=await store.get("golf:trainPrefs"); if(tp&&tp.value)trainPrefs=Object.assign(JSON.parse(JSON.stringify(DEFAULT_PREFS)),JSON.parse(tp.value));
   let ci=await store.get("golf:checkins"); checkins=ci&&ci.value?JSON.parse(ci.value):[];
+  let cs=await store.get("golf:courses"); courses=cs&&cs.value?JSON.parse(cs.value):[];
   await loadCoach();
   renderBag(); renderPlay();
 }
@@ -447,6 +448,29 @@ async function saveTrainPrefs(){await store.set("golf:trainPrefs",JSON.stringify
 async function saveBag(msg){collectBag();await store.set("golf:bag2",JSON.stringify(bag));
   if(msg){const m=document.getElementById("savedMsg");m.classList.add("show");setTimeout(()=>m.classList.remove("show"),1300);}}
 async function saveCourse(){await store.set("golf:course2",JSON.stringify({course:S.course,tee:S.tee}));}
+async function saveCoursesLib(){await store.set("golf:courses",JSON.stringify(courses));}
+function saveCurrentCourse(){
+  readScorecardInputs();
+  if(!S.course.name||!S.course.name.trim()){alert("先在「球场」填名字,再存为常打球场。");const nm=document.getElementById("courseName");if(nm)nm.focus();return;}
+  const name=S.course.name.trim();S.course.name=name;
+  const snap=JSON.parse(JSON.stringify({name,tees:S.course.tees,holes:S.course.holes,rating:S.course.rating||null,slope:S.course.slope||null,target:S.course.target||null}));
+  const idx=courses.findIndex(c=>c.name===name);
+  if(idx>=0){if(!confirm(`「${name}」已是常打球场,用当前数据更新它?`))return;courses[idx]=snap;}
+  else courses.push(snap);
+  saveCoursesLib();saveCourse();renderPlay();
+  alert("✅ 已存为常打球场。下次在「球场」这里直接选,不用重拍。");
+}
+function loadSavedCourse(name){
+  const c=courses.find(x=>x.name===name);if(!c)return;
+  S.course=JSON.parse(JSON.stringify({name:c.name,tees:c.tees,holes:c.holes,rating:c.rating||null,slope:c.slope||null,target:c.target||null}));
+  S.tee=(c.tees&&c.tees[0])||"默认";S.plans=[];S.gameplan=null;S.trainPlan=null;
+  saveCourse();renderPlay();
+}
+function deleteSavedCourse(){
+  const name=S.course.name;if(!name)return;
+  if(!confirm(`从常打球场删除「${name}」?(不影响已记录的成绩)`))return;
+  courses=courses.filter(c=>c.name!==name);saveCoursesLib();renderPlay();
+}
 async function saveCur(){await store.set("golf:curRound",R?JSON.stringify(R):"null");}
 async function saveRounds(){await store.set("golf:rounds",JSON.stringify(rounds));}
 
@@ -889,7 +913,14 @@ function renderPlay(){const w=document.getElementById("playWrap");
   // ---- setup view ----
   document.body.classList.remove("play-mode");
   let html=`<section class="card"><div class="card-body">
-    <div class="field"><label>球场</label><input id="courseName" value="${S.course.name||""}" placeholder="球场名 (可选)"></div>
+    <div class="field"><label>球场</label>
+      ${courses.length?`<select onchange="if(this.value)loadSavedCourse(this.value)" style="width:100%;margin-bottom:6px;padding:8px;border:1.5px solid var(--rule);border-radius:4px;background:var(--paper);color:var(--ink);"><option value="">📋 选常打球场…(${courses.length})</option>${courses.map(c=>`<option${c.name===S.course.name?" selected":""}>${esc(c.name)}</option>`).join("")}</select>`:""}
+      <div style="display:flex;gap:6px;">
+        <input id="courseName" value="${esc(S.course.name||"")}" placeholder="球场名 (拍完填,可存为常打)" style="flex:1;">
+        <button class="mini" onclick="saveCurrentCourse()" style="white-space:nowrap;">💾 存为常打</button>
+      </div>
+      ${courses.find(c=>c.name===S.course.name)?`<button class="mini" onclick="deleteSavedCourse()" style="margin-top:5px;color:var(--flag);border-color:var(--flag);">🗑 从常打删除此球场</button>`:""}
+    </div>
     <div class="row"><div class="field"><label>Tee 台</label><select onchange="changeTee(this.value)">${S.course.tees.map(t=>`<option ${t===S.tee?"selected":""}>${t}</option>`).join("")}</select></div>
       <div class="field"><label>风速 mph</label><input type="number" inputmode="numeric" value="${S.windMph}" onchange="S.windMph=+this.value||0"></div></div>
     <div class="field"><label>果岭软硬 (整场默认)</label><div style="display:flex;gap:6px;">${["soft","medium","firm"].map(f=>`<button class="mini ${S.firm===f?"on":""}" onclick="S.firm='${f}';renderPlay()">${{soft:"软",medium:"中",firm:"硬"}[f]}</button>`).join("")}</div></div>
