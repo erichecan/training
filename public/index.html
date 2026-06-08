@@ -369,7 +369,7 @@ const PRELOAD_COURSE={name:"Spring Valley Country Club, Columbia, SC (USGA Tees)
 const RESULTS=[{k:"fairway",t:"球道",g:"good"},{k:"rough",t:"长草",g:"meh"},{k:"fbunker",t:"球道沙坑",g:"bad"},
  {k:"fringe",t:"果岭边缘",g:"meh"},{k:"green",t:"果岭",g:"good"},{k:"gbunker",t:"果岭沙坑",g:"bad"},
  {k:"water",t:"水",g:"pen"},{k:"ob",t:"OB",g:"pen"},{k:"other",t:"其它",g:"meh"}];
-const DIRS=[{k:"left",t:"左"},{k:"short",t:"短"},{k:"on",t:"准"},{k:"long",t:"长"},{k:"right",t:"右"}];
+const DIRS=[{k:"left",t:"左"},{k:"fl",t:"偏左"},{k:"short",t:"短"},{k:"on",t:"准"},{k:"long",t:"长"},{k:"fr",t:"偏右"},{k:"right",t:"右"}];
 
 let bag=[];
 let S={course:null,tee:null,windMph:0,firm:"medium",plans:[],current:0,holePin:[],holeWind:[],playMode:false,gameplan:null,trainPlan:null,tasksDone:[]};
@@ -562,12 +562,50 @@ function nd(d){return Array.isArray(d)?d:(d?[d]:[]);}
 function setShotNote(i,j,v){if(R)R.holes[i].shots[j].note=v;saveCur();}
 function setHoleNote(i,v){if(R)R.holes[i].note=v;saveCur();}
 function setShotDir(i,j,k){const s=R.holes[i].shots[j];const d=[...nd(s.dir)];const idx=d.indexOf(k);if(idx>=0)d.splice(idx,1);else d.push(k);s.dir=d;saveCur();renderPlay();}
-function setShotDist(i,j,v){R.holes[i].shots[j].dist=v?+v:null;saveCur();}
+/* ===== GPS 打点击球距离(对标 Arccos/Shot Scope:相邻两点直线) ===== */
+function ydBetween(a,b){
+  if(!a||!b||a.lat==null||b.lat==null)return null;
+  const R0=6371000,rad=Math.PI/180;
+  const dLat=(b.lat-a.lat)*rad,dLng=(b.lng-a.lng)*rad,latM=(a.lat+b.lat)/2*rad;
+  const x=dLng*Math.cos(latM),y=dLat;
+  return Math.round(Math.sqrt(x*x+y*y)*R0/0.9144);
+}
+function markPos(cb){
+  if(!navigator.geolocation){cb(null,"设备不支持定位");return;}
+  navigator.geolocation.getCurrentPosition(
+    p=>cb({lat:p.coords.latitude,lng:p.coords.longitude,acc:Math.round(p.coords.accuracy),t:Date.now()}),
+    e=>cb(null,e.message||"无法获取位置"),
+    {enableHighAccuracy:true,timeout:12000,maximumAge:0});
+}
+function prevPos(i,j){const sh=R.holes[i].shots;return j===0?(R.holes[i].tee||null):((sh[j-1]&&sh[j-1].pos)||null);}
+function recalcShotDist(i,j){
+  const sh=R.holes[i].shots,p=S.plans[i];if(!sh[j])return;
+  if(sh[j].distSrc==="manual")return; // 用户手动覆盖,不自动改
+  const gps=ydBetween(prevPos(i,j),sh[j].pos);
+  if(gps!=null){sh[j].dist=gps;sh[j].distSrc="gps";return;}
+  const prevRem=j===0?((p&&p.hole)||null):(sh[j-1]&&sh[j-1].rem!=null?sh[j-1].rem:null);
+  sh[j].dist=(prevRem!=null&&sh[j].rem!=null)?prevRem-sh[j].rem:null;
+  sh[j].distSrc=sh[j].dist!=null?"rem":null;
+}
+function markTee(i){
+  startRoundIfNeeded();showOverlay("定位发球台…");
+  markPos((pos,err)=>{hideOverlay();
+    if(!pos){alert("定位失败:"+err+"。可继续手填距旗,系统按剩余反推。");return;}
+    R.holes[i].tee=pos;if(R.holes[i].shots[0])recalcShotDist(i,0);saveCur();renderPlay();});
+}
+function markShotPos(i,j){
+  startRoundIfNeeded();showOverlay("定位球位…");
+  markPos((pos,err)=>{hideOverlay();
+    if(!pos){alert("定位失败:"+err+"。可继续手填距旗,系统按剩余反推。");return;}
+    R.holes[i].shots[j].pos=pos;recalcShotDist(i,j);
+    if(R.holes[i].shots[j+1])recalcShotDist(i,j+1); // 这点也是下一杆的起点
+    saveCur();renderPlay();});
+}
+function setShotDist(i,j,v){const s=R.holes[i].shots[j];s.dist=v?+v:null;s.distSrc=v?"manual":null;saveCur();renderPlay();}
+function clearShotPos(i,j){const s=R.holes[i].shots[j];s.pos=null;s.distSrc=null;recalcShotDist(i,j);saveCur();renderPlay();}
 function setShotRem(i,j,v){
-  const shots=R.holes[i].shots,p=S.plans[i];
-  shots[j].rem=v?+v:null;
-  const prevRem=j===0?(p.hole||null):(shots[j-1].rem??null);
-  shots[j].dist=(prevRem!==null&&shots[j].rem!==null)?prevRem-shots[j].rem:null;
+  R.holes[i].shots[j].rem=v?+v:null;
+  recalcShotDist(i,j);
   saveCur();renderPlay();
 }
 function setPutts(i,d){startRoundIfNeeded();R.holes[i].putts=Math.max(0,R.holes[i].putts+d);saveCur();renderPlay();}
@@ -647,7 +685,7 @@ function clubTendency(club){const shots=allShots().filter(s=>s.club===club);
   const dist=shots.filter(s=>s.dist).map(s=>s.dist);
   const avg=dist.length?Math.round(dist.reduce((a,b)=>a+b,0)/dist.length):null;
   const spread=dist.length>1?Math.round((Math.max(...dist)-Math.min(...dist))/2):null;
-  return{samples:shots.length,dirN:dirs.length,left:cnt("left"),right:cnt("right"),shortN:cnt("short"),longN:cnt("long"),onN:cnt("on"),avg,spread};}
+  return{samples:shots.length,dirN:dirs.length,left:cnt("left")+cnt("fl"),right:cnt("right")+cnt("fr"),shortN:cnt("short"),longN:cnt("long"),onN:cnt("on"),avg,spread};}
 function tendencyNote(club,par,pin){const t=clubTendency(club);if(t.dirN<4&&!(t.spread&&t.samples>=4))return null;
   const side=t.right>t.left*1.5?"偏右":t.left>t.right*1.5?"偏左":null;
   const lng=t.longN>t.shortN*1.5?"偏长":t.shortN>t.longN*1.5?"偏短":null;
@@ -866,6 +904,8 @@ function renderHoleCompact(i){
     <span class="sep">|</span>
     <span class="pm-meta-lab">风</span>
     <div style="display:flex;gap:3px;">${[["none","无"],["into","逆"],["down","顺"],["cross","侧"]].map(([x,t])=>`<button class="mini wind ${S.holeWind[i]===x?"on":""}" onclick="setWind('${x}')">${t}</button>`).join("")}</div>
+    <span class="sep">|</span>
+    <button class="mini" onclick="markTee(${i})" title="开球前点一下,用于算开球距离">📍发球台${(R&&R.holes[i]&&R.holes[i].tee)?" ✓":""}</button>
   </div>`;
   // game-plan positioning (AI 整场博弈) if available
   if(S.gameplan){const gh=(S.gameplan.holes||[]).find(x=>x.no===h.no);
@@ -896,10 +936,12 @@ function renderHoleCompact(i){
       <div class="pm-hchips">${RESULTS.map(r=>`<button class="chip ${r.g} ${sh.result===r.k?"on":""}" onclick="setShotRes(${i},${j},'${r.k}')">${r.t}</button>`).join("")}</div>
       <div class="pm-rl">方向 (可多选)</div>
       <div class="pm-hchips">${DIRS.map(d=>`<button class="chip dir ${nd(sh.dir).includes(d.k)?"on":""}" onclick="setShotDir(${i},${j},'${d.k}')">${d.t}</button>`).join("")}</div>
-      <div class="pm-dist">
-        <span class="pm-rl" style="margin:0 6px 0 0;">距旗</span>
-        <input class="ydinput" type="number" inputmode="numeric" value="${sh.rem??""}" placeholder="码" onchange="setShotRem(${i},${j},this.value)" style="padding:5px;font-size:14px;width:68px;">
-        ${sh.dist!=null?`<span style="font-size:11px;color:var(--ink-soft);margin-left:6px;">本杆 ${sh.dist}码</span>`:""}
+      <div class="pm-dist" style="flex-wrap:wrap;gap:6px;">
+        <button class="mini" onclick="markShotPos(${i},${j})" title="走到球边点一下,GPS 算这一杆距离">📍球位${sh.pos?` ✓±${sh.pos.acc}m`:""}</button>
+        ${sh.pos?`<button class="mini" onclick="clearShotPos(${i},${j})" title="清除本杆定位">✕</button>`:""}
+        <span class="pm-rl" style="margin:0 4px 0 4px;">距旗</span>
+        <input class="ydinput" type="number" inputmode="numeric" value="${sh.rem??""}" placeholder="码" onchange="setShotRem(${i},${j},this.value)" style="padding:5px;font-size:14px;width:62px;">
+        ${sh.dist!=null?`<span style="font-size:11px;color:var(--ink-soft);margin-left:4px;">本杆 ${sh.dist}码${sh.distSrc==="gps"?" ·GPS":sh.distSrc==="rem"?" ·反推":sh.distSrc==="manual"?" ·手填":""}</span>`:""}
       </div>
       <div style="margin-top:5px;"><div class="pm-rl">备注</div><input type="text" value="${(sh.note||"").replace(/"/g,"&quot;")}" placeholder="可选…" onblur="setShotNote(${i},${j},this.value)" style="display:block;width:100%;font-size:13px;padding:5px 8px;border:1.5px solid var(--rule);border-radius:4px;background:var(--paper);font-family:inherit;color:var(--ink);margin-top:3px;"></div>
     </div>`;
