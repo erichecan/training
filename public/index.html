@@ -667,13 +667,13 @@ function holeStats(h){
 
 /* ===== QUICK SCORECARD ENTRY (训练/比赛快速记分) ===== */
 let statsFilter="all", QE=null;
-const QROWS=[{k:"yards",t:"码数"},{k:"par",t:"Par"},{k:"fir",t:"FIR",bool:1},{k:"gir",t:"GIR",bool:1},{k:"putts",t:"推杆"},{k:"chips",t:"切球"},{k:"score",t:"总杆"},{k:"note",t:"备注",text:1}];
+const QROWS=[{k:"yards",t:"码数"},{k:"par",t:"Par"},{k:"fir",t:"FIR",bool:1},{k:"gir",t:"GIR",bool:1},{k:"putts",t:"推杆"},{k:"chips",t:"切球"},{k:"score",t:"总杆"}];
 function roundsForStats(){return rounds.filter(rd=>statsFilter==="all"||(rd.kind||"match")===statsFilter);}
 function setStatsFilter(k){statsFilter=k;renderStats();}
 function statsFilterBar(){if(!rounds.length)return"";return `<div style="display:flex;gap:6px;margin-bottom:10px;">${[["all","全部"],["train","训练"],["match","比赛"]].map(([k,t])=>`<button class="mini ${statsFilter===k?"on":""}" onclick="setStatsFilter('${k}')">${t}</button>`).join("")}</div>`;}
 function openQuickEntry(){
   const src=(S.course&&S.course.holes&&S.course.holes.length)?S.course.holes:Array.from({length:18},(_,i)=>({no:i+1,par:4,yards:null}));
-  QE={date:new Date().toISOString().slice(0,10),kind:"train",courseName:(S.course&&S.course.name)||"训练",
+  QE={date:new Date().toISOString().slice(0,10),kind:"train",notes:"",courseName:(S.course&&S.course.name)||"训练",
     holes:src.map(h=>({no:h.no,par:h.par||4,yards:(h.yards&&S.tee&&h.yards[S.tee]!=null)?h.yards[S.tee]:"",fir:null,gir:null,putts:"",chips:"",score:"",note:""}))};
   renderStats();
 }
@@ -687,7 +687,7 @@ function saveQuickEntry(){
   const holes=QE.holes.map(h=>({no:h.no,par:+h.par||4,yards:h.yards!==""&&h.yards!=null?+h.yards:null,quick:true,
     fir:(+h.par>3)?(h.fir===true):null,gir:h.gir===true,putts:+h.putts||0,chips:+h.chips||0,score:h.score!==""?+h.score:0,note:h.note||"",shots:[]}));
   if(!holes.some(h=>h.score>0)){alert("至少填一个洞的总杆再保存。");return;}
-  const round={id:Date.now(),date:QE.date,courseName:QE.courseName||"训练",courseKey:(QE.courseName||"训练")+"|quick",tee:"",kind:QE.kind,quick:true,holes};
+  const round={id:Date.now(),date:QE.date,courseName:QE.courseName||"训练",courseKey:(QE.courseName||"训练")+"|quick",tee:"",kind:QE.kind,quick:true,notes:QE.notes||"",holes};
   rounds.push(round);saveRounds();QE=null;statsFilter="all";renderStats();
   alert("✅ 已保存这场快速记分。");
 }
@@ -721,6 +721,9 @@ function renderQuickEntry(){
     s+=`</tr>`;
   });
   s+=`</table>
+    <div style="margin-top:14px;"><div class="pm-rl" style="margin-bottom:5px;">📝 本场笔记</div>
+      <textarea onchange="setQEMeta('notes',this.value)" placeholder="整场心得:哪个洞出了什么状况、想改进的点、球场记忆…" style="width:100%;min-height:130px;font-size:13px;padding:9px;border:1.5px solid var(--rule);border-radius:6px;background:var(--paper);color:var(--ink);font-family:inherit;line-height:1.6;box-sizing:border-box;resize:vertical;">${esc(QE.notes||"")}</textarea>
+    </div>
     <div style="display:flex;gap:8px;margin-top:12px;">
       <button class="ghost full" onclick="saveQuickEntry()">保存这场</button>
       <button class="ghost full" style="color:var(--flag);border-color:var(--flag);" onclick="closeQuickEntry()">取消</button>
