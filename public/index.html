@@ -273,6 +273,9 @@
   .qe-na{color:var(--ink-soft);background:var(--paper-2);}
   .kind-tag{display:inline-block;font-size:9.5px;padding:1px 5px;border-radius:3px;margin-left:3px;vertical-align:middle;}
   .kind-tag.train{background:#e3f0e3;color:var(--green);}.kind-tag.match{background:#f0e6d6;color:#9a6a1a;}.kind-tag.quick{background:#e6e9f0;color:#4a5a8a;}
+  .live-sg{background:var(--paper-2);border-left:4px solid var(--green);border-radius:4px;padding:7px 9px;margin-bottom:8px;font-size:13px;}
+  .live-sg .live-d{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+  .live-sg .live-a{font-size:11.5px;color:var(--flag);margin-top:2px;}
 </style>
 </head>
 <body>
@@ -554,6 +557,18 @@ function startRoundIfNeeded(){if(!S.course)return;
   R={id:Date.now(),date:new Date().toISOString().slice(0,10),courseName:S.course.name||"球场",courseKey:courseKey(),tee:S.tee,
      holes:S.course.holes.map(h=>({no:h.no,par:h.par,yards:h.yards[S.tee],shots:[],putts:2,note:""}))};saveCur();}
 function suggestedClub(i){const p=S.plans[i],n=R.holes[i].shots.length;if(p&&p.shots&&p.shots[n])return p.shots[n].clubName;return"";}
+function liveSuggest(i,j){
+  if(j<1||!R||!R.holes[i])return null;
+  const sh=R.holes[i].shots,prev=sh[j-1];if(!prev||prev.rem==null||prev.rem<=0)return null;
+  const b=sb();if(b.length<1)return null;
+  const a=approachShot(j+1,"实时",b,prev.rem,S.holePin[i]||"mid",S.firm||"med",S.holeWind[i]||"none",S.windMph);
+  const lieMap={rough:"上一杆在长草,力量打折,宁可大半号",fbunker:"球道沙坑,先稳出来",gbunker:"沙坑,先上果岭",ob:"刚罚杆,这杆求稳",water:"刚罚杆,这杆求稳",fringe:"果岭边缘,可推或切滚"};
+  const dir=nd(prev.dir),bits=[];
+  if(lieMap[prev.result])bits.push(lieMap[prev.result]);
+  if(dir.includes("left")||dir.includes("fl"))bits.push("上杆偏左,瞄右一点");
+  if(dir.includes("right")||dir.includes("fr"))bits.push("上杆偏右,瞄左一点");
+  return {club:a.clubName,clubYd:a.clubYd,detail:a.detail,rem:prev.rem,advice:bits.join(";")};
+}
 function addShot(i){startRoundIfNeeded();R.holes[i].shots.push({club:suggestedClub(i),dist:null,result:"",dir:[],note:""});saveCur();renderPlay();}
 function delShot(i,j){R.holes[i].shots.splice(j,1);saveCur();renderPlay();}
 function setShotClub(i,j,c){R.holes[i].shots[j].club=c;saveCur();renderPlay();}
@@ -928,9 +943,10 @@ function renderHoleCompact(i){
   });
   // active shot
   if(shots.length>0){
-    const j=active,sh=shots[j],sugg=p.shots[j];
+    const j=active,sh=shots[j],sugg=p.shots[j],ls=liveSuggest(i,j);
     s+=`<div class="pm-cur">
-      <div class="pm-cur-title"><span>第 ${j+1} 杆${sugg?` · 建议 ${sugg.clubName}`:""}</span><button class="del" onclick="delShot(${i},${j})">×</button></div>
+      <div class="pm-cur-title"><span>第 ${j+1} 杆${ls?` · 建议 ${ls.club}`:(sugg?` · 建议 ${sugg.clubName}`:"")}</span><button class="del" onclick="delShot(${i},${j})">×</button></div>
+      ${ls?`<div class="live-sg">🎯 按实际剩 <b>${ls.rem}码</b> → <b>${ls.club}</b>(${ls.clubYd}码)<div class="live-d">${ls.detail}</div>${ls.advice?`<div class="live-a">⚠️ ${ls.advice}</div>`:""}</div>`:""}
       <div class="pm-hchips">${bag.map(c=>`<button class="chip ${sh.club===c.name?"on":""}" onclick="setShotClub(${i},${j},'${c.name}')">${c.name}</button>`).join("")}</div>
       <div class="pm-rl">落点</div>
       <div class="pm-hchips">${RESULTS.map(r=>`<button class="chip ${r.g} ${sh.result===r.k?"on":""}" onclick="setShotRes(${i},${j},'${r.k}')">${r.t}</button>`).join("")}</div>
