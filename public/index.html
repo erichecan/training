@@ -569,6 +569,17 @@ function generateAll(){collectBag();if(sb().length<2){alert("先去『球包』�
   S.plans=S.course.holes.map((h,i)=>computePlan(h,S.holePin[i],S.firm,S.holeWind[i],S.windMph));
   startRoundIfNeeded();S.current=0;S.playMode=true;saveCourse();renderPlay();}
 function exitPlayMode(){S.playMode=false;renderPlay();}
+function continueRound(){
+  if(!R){alert("当前没有进行中的一轮。");return;}
+  if(!S.course||!S.course.holes){alert("缺球场信息,先在『打球』选/导入球场。");switchView("play");return;}
+  if(!S.plans||!S.plans.length){ // 刷新后策略会丢,这里按当前球场重建,才能进打球页
+    S.holePin=S.course.holes.map((_,i)=>S.holePin[i]||"mid");
+    S.holeWind=S.course.holes.map((_,i)=>S.holeWind[i]||"none");
+    S.plans=S.course.holes.map((h,i)=>computePlan(h,S.holePin[i],S.firm,S.holeWind[i],S.windMph));
+  }
+  let idx=0;for(let k=0;k<R.holes.length;k++){if(R.holes[k].shots&&R.holes[k].shots.length)idx=k;}
+  S.current=Math.min(idx,S.plans.length-1);S.playMode=true;switchView("play");renderPlay();
+}
 function recomputeHole(i){S.plans[i]=computePlan(S.course.holes[i],S.holePin[i],S.firm,S.holeWind[i],S.windMph);renderPlay();}
 function ensureFirstShot(i){startRoundIfNeeded();if(R&&R.holes[i].shots.length===0){R.holes[i].shots.push({club:suggestedClub(i),dist:null,result:"",dir:[],note:""});saveCur();}}
 function setHole(i){S.current=i;window.scrollTo(0,0);if(S.playMode)ensureFirstShot(i);renderPlay();}
@@ -941,7 +952,7 @@ function renderPlay(){const w=document.getElementById("playWrap");
       ${S.course.holes.map(h=>`<tr><td class="hno">${h.no}</td><td><input class="scPar" type="number" inputmode="numeric" value="${h.par}"></td><td><input class="scYd" type="number" inputmode="numeric" value="${h.yards[S.tee]??""}"></td></tr>`).join("")}
       </tbody></table></details>
     <button class="primary" style="margin-top:14px;" onclick="generateAll()">⛳ 生成 18 洞策略</button>
-    ${S.plans.length?`<button class="ghost full" style="margin-top:10px;" onclick="S.playMode=true;renderPlay()">继续打球 › 第 ${S.course.holes[S.current].no} 洞</button>`:""}
+    ${(S.plans.length||R)?`<button class="ghost full" style="margin-top:10px;" onclick="${R&&!S.plans.length?"continueRound()":"S.playMode=true;renderPlay()"}">继续打球 › 第 ${S.course.holes[S.current]?S.course.holes[S.current].no:1} 洞</button>`:""}
     <div class="row" style="margin-top:10px;gap:8px;">
       <button class="ghost full" onclick="genGamePlan()">🎯 整场博弈(AI)</button>
       <button class="ghost full" onclick="switchView('train')">🏋️ 训练计划</button>
@@ -1063,7 +1074,8 @@ const h=S.course.holes[i],p=S.plans[i];const rh=R?R.holes[i]:null;const st=rh?ho
 function renderStats(){const w=document.getElementById("statsWrap");
   if(QE){w.innerHTML=renderQuickEntry();return;}
   let html=backupPanel()+`<button class="ghost full" style="margin:10px 0;" onclick="openQuickEntry()">➕ 快速记一场(誊计分卡)</button>`+statsFilterBar();
-  if(R&&R.holes.some(h=>h.shots.length)){html+=roundSummary()+`<div style="margin-top:10px;display:flex;gap:8px;">
+  if(R&&R.holes.some(h=>h.shots.length)){html+=roundSummary()+`<button class="primary" style="margin-top:10px;width:100%;" onclick="continueRound()">▶ 继续本轮</button>
+  <div style="margin-top:8px;display:flex;gap:8px;">
     <button class="ghost full" onclick="finishRound()">存档本轮</button>
     <button class="ghost full" style="color:var(--flag);border-color:var(--flag);" onclick="abandonRound()">放弃本轮</button>
   </div>`;}
