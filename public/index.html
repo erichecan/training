@@ -816,12 +816,12 @@ function coachError(err){const net=/fetch|Failed to fetch/i.test(err.message||""
 
 function buildStatsDigest(){
   const rs=[...roundsForStats()];if(R&&(statsFilter==="all"||statsFilter==="match"))rs.push(R);
-  const played=rs.filter(rd=>rd.holes.some(h=>h.shots.length));
+  const played=rs.filter(rd=>rd.holes.some(h=>holeStats(h).played));
   const shots=allShots();
   if(!played.length&&!shots.length)return{hasData:false};
-  let firM=0,firE=0,girM=0,girE=0,putts=0,holesPlayed=0,scrM=0,scrO=0,sandM=0,sandO=0,pen=0;
+  let firM=0,firE=0,girM=0,girE=0,putts=0,holesPlayed=0,scrM=0,scrO=0,sandM=0,sandO=0,pen=0,chipsT=0;
   const agg={};
-  rs.forEach(rd=>rd.holes.forEach(h=>{if(!h.shots.length)return;const st=holeStats(h);holesPlayed++;
+  rs.forEach(rd=>rd.holes.forEach(h=>{const st=holeStats(h);if(!st.played)return;holesPlayed++;chipsT+=st.chips||0;
     if(st.firElig){firE++;if(st.fir)firM++;}girE++;if(st.gir)girM++;putts+=st.putts;
     if(st.scrOpp){scrO++;if(st.scrOk)scrM++;}if(st.sandOpp){sandO++;if(st.sandOk)sandM++;}pen+=st.pen;
     const a=agg[h.no]=agg[h.no]||{sum:0,n:0,par:h.par};a.sum+=(st.score-h.par);a.n++;}));
@@ -834,7 +834,29 @@ function buildStatsDigest(){
   const pf=(m,e)=>e?Math.round(m/e*100):null;
   return{hasData:true,rounds:played.length,holesPlayed,fir:pf(firM,firE),gir:pf(girM,girE),
     scrambling:pf(scrM,scrO),sandSave:pf(sandM,sandO),puttsPerHole:holesPlayed?+(putts/holesPlayed).toFixed(2):null,
-    penalties:pen,weakHoles:weak,strongHoles:strong,clubs};
+    penalties:pen,chips:chipsT,chipsPerHole:holesPlayed?+(chipsT/holesPlayed).toFixed(2):null,weakHoles:weak,strongHoles:strong,clubs};
+}
+function statsOverviewPanel(){
+  const d=buildStatsDigest();if(!d.hasData)return"";
+  const rs=[...roundsForStats()];if(R&&(statsFilter==="all"||statsFilter==="match"))rs.push(R);
+  let totRel=0,fullRounds=0;
+  rs.forEach(rd=>{let sc=0,pr=0,pl=0;(rd.holes||[]).forEach(h=>{const st=holeStats(h);if(st.played){sc+=st.score;pr+=h.par;pl++;}});if(pl>=9){totRel+=(sc-pr);fullRounds++;}});
+  const avgRel=fullRounds?(totRel/fullRounds):null;
+  const pct=v=>v!=null?v+"%":"—";
+  const cell=(lab,val)=>`<div style="flex:1;min-width:78px;text-align:center;padding:9px 4px;background:var(--paper-2);border-radius:6px;"><div style="font-size:19px;font-weight:700;color:var(--green);">${val}</div><div style="font-size:10px;color:var(--ink-soft);margin-top:2px;">${lab}</div></div>`;
+  return `<section class="card"><div class="card-head"><h2>📊 数据总览</h2></div><div class="card-body">
+    <p class="small" style="margin-bottom:9px;color:var(--ink-soft);">${d.rounds} 场 · ${d.holesPlayed} 洞${statsFilter!=="all"?` · 仅${statsFilter==="train"?"训练":"比赛"}`:""}(含快速记分)</p>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+      ${cell("平均(相对Par)",avgRel!=null?(avgRel>=0?"+":"")+avgRel.toFixed(1):"—")}
+      ${cell("FIR 中球道",pct(d.fir))}
+      ${cell("GIR 标准上果岭",pct(d.gir))}
+      ${cell("推杆/洞",d.puttsPerHole??"—")}
+      ${cell("切球/洞",d.chipsPerHole??"—")}
+      ${cell("救球",pct(d.scrambling))}
+      ${cell("沙坑救球",pct(d.sandSave))}
+      ${cell("总罚杆",d.penalties)}
+    </div>
+  </div></section>`;
 }
 async function callCoach(kind,extra){
   const payload=Object.assign({
@@ -1106,7 +1128,7 @@ function renderStats(){const w=document.getElementById("statsWrap");
     <button class="ghost full" onclick="finishRound()">存档本轮</button>
     <button class="ghost full" style="color:var(--flag);border-color:var(--flag);" onclick="abandonRound()">放弃本轮</button>
   </div>`;}
-  html+=dispersionPanel()+clubAvgPanel();
+  html+=statsOverviewPanel()+dispersionPanel()+clubAvgPanel();
   const rsHist=roundsForStats();
   if(rsHist.length){html+=`<section class="card"><div class="card-head"><h2>历史轮次</h2></div><div class="card-body">`;
     rsHist.slice().reverse().forEach(rd=>{
