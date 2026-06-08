@@ -692,6 +692,17 @@ function setPutts(i,d){startRoundIfNeeded();R.holes[i].putts=Math.max(0,R.holes[
 function finishRound(){if(!R)return;if(R.holes.some(h=>h.shots.length)){rounds.push(R);saveRounds();}R=null;saveCur();startRoundIfNeeded();renderPlay();alert("本轮已存档，可继续新的一轮。");}
 function abandonRound(){if(!R)return;if(!confirm("放弃本轮？所有已记录的杆数将被清除，不存入统计。"))return;R=null;saveCur();startRoundIfNeeded();renderPlay();renderStats();}
 function deleteRoundById(id){if(!confirm("删除这场记录？该场的杆数数据将从统计中移除。"))return;const i=rounds.findIndex(r=>r.id===id);if(i>=0){rounds.splice(i,1);saveRounds();renderStats();}}
+function toggleRoundDetail(id){S.openRound=S.openRound===id?null:id;renderStats();}
+function roundDetailHTML(rd){
+  let s=`<div style="padding:4px 0 10px;"><table style="width:100%;font-size:11.5px;border-collapse:collapse;"><tr style="color:var(--ink-soft);text-align:left;"><th>洞</th><th>Par</th><th>杆</th><th>推</th><th>FIR</th><th>GIR</th></tr>`;
+  rd.holes.forEach(h=>{const st=holeStats(h);if(!st.played)return;const d=st.score-h.par;
+    s+=`<tr><td>${h.no}</td><td>${h.par}</td><td><b>${st.score}</b> <span style="color:${d>0?"var(--flag)":d<0?"var(--green)":"var(--ink-soft)"};">${d>0?"+"+d:d<0?d:"E"}</span></td><td>${st.putts}</td><td>${st.firElig?(st.fir?"✓":"✗"):"—"}</td><td>${st.gir?"✓":"✗"}</td></tr>`;
+    if(h.note)s+=`<tr><td colspan="6" style="color:var(--ink-soft);padding:1px 0 3px 4px;">📝 ${esc(h.note)}</td></tr>`;
+  });
+  s+=`</table>`;
+  if(rd.notes)s+=`<div style="margin-top:8px;font-size:12px;background:var(--paper-2);border-radius:4px;padding:7px 9px;"><b>📝 本场笔记</b><br>${esc(rd.notes).replace(/\n/g,"<br>")}</div>`;
+  s+=`</div>`;return s;
+}
 function holeStats(h){
   if(h.quick){const firElig=h.par>3;return{score:+h.score||0,pen:0,gir:h.gir===true,fir:firElig&&h.fir===true,firElig,putts:+h.putts||0,chips:+h.chips||0,scrOpp:false,scrOk:false,sandOpp:false,sandOk:false,played:(+h.score||0)>0};}
   const pen=h.shots.filter(s=>s.result==="water"||s.result==="ob").length;const score=h.shots.length+pen+h.putts;
@@ -774,7 +785,7 @@ function renderQuickEntry(){
 
 /* ===== DISPERSION / TENDENCY ===== */
 function allShots(){const rs=[...roundsForStats()];if(R&&(statsFilter==="all"||statsFilter==="match"))rs.push(R);const out=[];
-  rs.forEach(rd=>rd.holes.forEach(h=>h.shots.forEach((s,j)=>out.push({...s,par:h.par,idx:j}))));return out;}
+  rs.forEach(rd=>(rd.holes||[]).forEach(h=>(h.shots||[]).forEach((s,j)=>out.push({...s,par:h.par,idx:j}))));return out;}
 function clubTendency(club){const shots=allShots().filter(s=>s.club===club);
   const dirs=shots.filter(s=>nd(s.dir).length>0),cnt=t=>shots.filter(s=>nd(s.dir).includes(t)).length;
   const dist=shots.filter(s=>s.dist).map(s=>s.dist);
@@ -1103,11 +1114,12 @@ function renderStats(){const w=document.getElementById("statsWrap");
       const played=rd.holes.filter(h=>holeStats(h).played).length;
       const kindTag=(rd.kind==="train")?`<span class="kind-tag train">训练</span>`:`<span class="kind-tag match">比赛</span>`;
       const qTag=rd.quick?`<span class="kind-tag quick">速记</span>`:"";
-      html+=`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--rule);">
-        <div style="flex:1;"><div class="small">${rd.date} · ${esc(rd.courseName)} ${kindTag}${qTag}</div><div style="font-size:10.5px;color:var(--ink-soft);margin-top:1px;">${played}洞</div></div>
+      html+=`<div onclick="toggleRoundDetail(${rd.id})" style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--rule);cursor:pointer;">
+        <div style="flex:1;"><div class="small">${rd.date} · ${esc(rd.courseName)} ${kindTag}${qTag}</div><div style="font-size:10.5px;color:var(--ink-soft);margin-top:1px;">${played}洞 · ${S.openRound===rd.id?"收起 ▲":"点开看详情 ▼"}</div></div>
         <b>${tot} (${tot-par>=0?"+":""}${tot-par})</b>
-        <button class="del" style="font-size:14px;padding:4px 6px;" onclick="deleteRoundById(${rd.id})" title="删除此场">×</button>
-      </div>`;});
+        <button class="del" style="font-size:14px;padding:4px 6px;" onclick="event.stopPropagation();deleteRoundById(${rd.id})" title="删除此场">×</button>
+      </div>`;
+      if(S.openRound===rd.id)html+=roundDetailHTML(rd);});
     html+=`</div></section>`;}
   if(!html)html=`<div class="empty">还没有记录。去『打球』里开始记录每一杆。</div>`;
   w.innerHTML=html;}
