@@ -376,7 +376,7 @@ const RESULTS=[{k:"fairway",t:"球道",g:"good"},{k:"rough",t:"长草",g:"meh"},
 const DIRS=[{k:"left",t:"左"},{k:"fl",t:"偏左"},{k:"short",t:"短"},{k:"on",t:"准"},{k:"long",t:"长"},{k:"fr",t:"偏右"},{k:"right",t:"右"}];
 
 let bag=[];
-let S={course:null,tee:null,windMph:0,firm:"medium",plans:[],current:0,holePin:[],holeWind:[],playMode:false,gameplan:null,trainPlan:null,tasksDone:[],coursePage:false,editCourse:null,histCourse:null};
+let S={course:null,tee:null,windMph:0,firm:"medium",plans:[],current:0,holePin:[],holeWind:[],playMode:false,gameplan:null,trainPlan:null,tasksDone:[],coursePage:false,editCourse:null,histCourse:null,editBuf:null,editTee:null};
 let R=null, rounds=[], checkins=[], courses=[];
 const DEFAULT_PREFS={daysPerWeek:4,hoursPerDay:2,facilities:["range","green","course"],focusNote:""};
 let trainPrefs=JSON.parse(JSON.stringify(DEFAULT_PREFS));
@@ -475,14 +475,17 @@ function deleteSavedCourse(){
 }
 
 /* ===== 球场管理页(全屏) ===== */
-function openCoursePage(){S.coursePage=true;S.editCourse=null;S.histCourse=null;renderPlay();}
+function openCoursePage(){S.coursePage=true;S.editCourse=null;S.editBuf=null;S.histCourse=null;renderPlay();}
 function closeCoursePage(){S.coursePage=false;renderPlay();}
-function editCourseToggle(i){const c=courses[i];if(!c)return;S.editCourse=S.editCourse===c.name?null:c.name;S.histCourse=null;renderPlay();}
-function histCourseToggle(i){const c=courses[i];if(!c)return;S.histCourse=S.histCourse===c.name?null:c.name;S.editCourse=null;renderPlay();}
+function editCourseToggle(i){const c=courses[i];if(!c)return;
+  if(S.editCourse===c.name){S.editCourse=null;S.editBuf=null;return renderPlay();}
+  S.editCourse=c.name;S.editBuf=JSON.parse(JSON.stringify(c));S.editTee=(c.tees&&c.tees[0])||"默认";S.histCourse=null;renderPlay();}
+function setEditTee(t){S.editTee=t;renderPlay();}
+function histCourseToggle(i){const c=courses[i];if(!c)return;S.histCourse=S.histCourse===c.name?null:c.name;S.editCourse=null;S.editBuf=null;renderPlay();}
 function toggleCourseRound(id){S.openRound=S.openRound===id?null:id;renderPlay();}
 function deleteSavedCourseByName(i){const c=courses[i];if(!c)return;
   if(!confirm(`删除常打球场「${c.name}」?(不影响已记录的成绩)`))return;
-  courses.splice(i,1);saveCoursesLib();S.editCourse=null;S.histCourse=null;renderPlay();}
+  courses.splice(i,1);saveCoursesLib();S.editCourse=null;S.editBuf=null;S.histCourse=null;renderPlay();}
 function useCourseFromManager(i){const c=courses[i];if(!c)return;S.coursePage=false;loadSavedCourse(c.name);switchView("play");}
 function archiveCurrentToLib(){
   if(!S.course||!(S.course.name||"").trim()){alert("当前球场还没填名字。回打球页填好名字再存。");return;}
@@ -538,38 +541,36 @@ function courseCardHTML(c,i){
       <button class="mini" style="color:var(--flag);border-color:var(--flag);" onclick="deleteSavedCourseByName(${i})">🗑 删除</button>
       <button class="mini on" style="margin-left:auto;" onclick="useCourseFromManager(${i})">▶ 用这个打球</button>
     </div>`;
-  if(editing)s+=editCourseFormHTML(c,i,tee);
+  if(editing)s+=editCourseFormHTML(i);
   if(showHist)s+=courseHistHTML(c.name);
   s+=`</div></section>`;return s;
 }
-function editCourseFormHTML(c,i,tee){
+function editCourseFormHTML(i){
+  const c=S.editBuf;if(!c)return"";
+  const tees=c.tees&&c.tees.length?c.tees:["默认"];
+  let tee=S.editTee&&tees.includes(S.editTee)?S.editTee:tees[0];
   let s=`<div style="margin-top:10px;border-top:1px solid var(--rule);padding-top:10px;">
-    <div class="field"><label>球场名</label><input id="ecName" value="${esc(c.name)}" style="width:100%;"></div>
-    ${c.tees.length>1?`<p class="small" style="color:var(--ink-soft);">下面仅改 <b>${esc(tee)}</b> 台码数;Par 各台共用。</p>`:""}
-    <table class="sc-table"><thead><tr><th>洞</th><th>Par</th><th>码数(${esc(tee)})</th></tr></thead><tbody>`;
-  c.holes.forEach((h,k)=>{s+=`<tr><td class="hno">${h.no}</td><td><input class="scPar" data-ecpar="${k}" type="number" inputmode="numeric" value="${h.par}"></td><td><input class="scYd" data-ecyd="${k}" type="number" inputmode="numeric" value="${(h.yards&&h.yards[tee])??""}"></td></tr>`;});
+    <div class="field"><label>球场名</label><input value="${esc(c.name)}" oninput="S.editBuf.name=this.value" style="width:100%;"></div>`;
+  if(tees.length>1)s+=`<div class="field"><label>编辑哪个 Tee 的码数(Par 各台共用)</label><div style="display:flex;gap:6px;flex-wrap:wrap;">${tees.map(t=>`<button class="mini ${t===tee?"on":""}" onclick="setEditTee('${esc(t)}')">${esc(t)}</button>`).join("")}</div></div>`;
+  s+=`<table class="sc-table"><thead><tr><th>洞</th><th>Par</th><th>码数(${esc(tee)})</th></tr></thead><tbody>`;
+  c.holes.forEach((h,k)=>{s+=`<tr><td class="hno">${h.no}</td><td><input class="scPar" type="number" inputmode="numeric" value="${h.par}" onchange="S.editBuf.holes[${k}].par=+this.value||4"></td><td><input class="scYd" type="number" inputmode="numeric" value="${(h.yards&&h.yards[tee])??""}" onchange="S.editBuf.holes[${k}].yards['${esc(tee)}']=this.value?+this.value:null"></td></tr>`;});
   s+=`</tbody></table>
     <div class="row" style="margin-top:6px;">
-      <div class="field"><label>评级</label><input id="ecRating" type="number" inputmode="decimal" placeholder="可选" value="${c.rating||""}"></div>
-      <div class="field"><label>坡度</label><input id="ecSlope" type="number" inputmode="numeric" placeholder="可选" value="${c.slope||""}"></div>
-      <div class="field"><label>目标分</label><input id="ecTarget" type="number" inputmode="numeric" placeholder="可选" value="${c.target||""}"></div>
+      <div class="field"><label>评级</label><input type="number" inputmode="decimal" placeholder="可选" value="${c.rating||""}" onchange="S.editBuf.rating=+this.value||null"></div>
+      <div class="field"><label>坡度</label><input type="number" inputmode="numeric" placeholder="可选" value="${c.slope||""}" onchange="S.editBuf.slope=+this.value||null"></div>
+      <div class="field"><label>目标分</label><input type="number" inputmode="numeric" placeholder="可选" value="${c.target||""}" onchange="S.editBuf.target=this.value||null"></div>
     </div>
     <button class="primary" style="margin-top:10px;width:100%;" onclick="saveEditedCourse(${i})">💾 保存修改</button>
   </div>`;
   return s;
 }
 function saveEditedCourse(i){
-  const c=courses[i];if(!c)return;
-  const tee=(c.tees&&c.tees[0])||"默认";
-  const nm=(document.getElementById("ecName").value||"").trim();
+  const c=courses[i],buf=S.editBuf;if(!c||!buf)return;
+  const oldName=c.name,nm=(buf.name||"").trim();
   if(!nm){alert("球场名不能为空。");return;}
   if(courses.some((x,k)=>k!==i&&x.name===nm)){alert("常打库里已有同名球场,换个名字。");return;}
-  document.querySelectorAll('[data-ecpar]').forEach(inp=>{const k=+inp.dataset.ecpar;if(c.holes[k])c.holes[k].par=+inp.value||4;});
-  document.querySelectorAll('[data-ecyd]').forEach(inp=>{const k=+inp.dataset.ecyd;if(c.holes[k])c.holes[k].yards[tee]=inp.value?+inp.value:null;});
-  const oldName=c.name;c.name=nm;
-  c.rating=+document.getElementById("ecRating").value||null;
-  c.slope=+document.getElementById("ecSlope").value||null;
-  c.target=document.getElementById("ecTarget").value||null;
+  buf.name=nm;buf.holes.forEach(h=>{h.par=+h.par||4;});
+  courses[i]=JSON.parse(JSON.stringify(buf)); // 缓冲区含全部 tee 的码数,整体写回
   saveCoursesLib();
   if(oldName!==nm){ // 改名:迁移历史轮次,否则成绩会与球场断链
     let migrated=false;
@@ -578,11 +579,12 @@ function saveEditedCourse(i){
     if(R&&(R.courseName||"")===oldName){R.courseName=nm;R.courseKey=nm+"|"+(R.tee||"");saveCur();}
   }
   if(S.course&&S.course.name===oldName){
-    S.course=JSON.parse(JSON.stringify({name:c.name,tees:c.tees,holes:c.holes,rating:c.rating,slope:c.slope,target:c.target}));
+    const nc=courses[i];
+    S.course=JSON.parse(JSON.stringify({name:nc.name,tees:nc.tees,holes:nc.holes,rating:nc.rating,slope:nc.slope,target:nc.target}));
     if(!S.course.tees.includes(S.tee))S.tee=S.course.tees[0];
     S.plans=[];S.gameplan=null;S.trainPlan=null;saveCourse();
   }
-  S.editCourse=null;renderPlay();alert("✅ 已保存。");
+  S.editCourse=null;S.editBuf=null;renderPlay();alert("✅ 已保存。");
 }
 function courseHistHTML(name){
   const list=rounds.filter(rd=>(rd.courseName||"")===name);
