@@ -376,7 +376,7 @@ const RESULTS=[{k:"fairway",t:"球道",g:"good"},{k:"rough",t:"长草",g:"meh"},
 const DIRS=[{k:"left",t:"左"},{k:"fl",t:"偏左"},{k:"short",t:"短"},{k:"on",t:"准"},{k:"long",t:"长"},{k:"fr",t:"偏右"},{k:"right",t:"右"}];
 
 let bag=[];
-let S={course:null,tee:null,windMph:0,firm:"medium",plans:[],current:0,holePin:[],holeWind:[],playMode:false,gameplan:null,trainPlan:null,tasksDone:[]};
+let S={course:null,tee:null,windMph:0,firm:"medium",plans:[],current:0,holePin:[],holeWind:[],playMode:false,gameplan:null,trainPlan:null,tasksDone:[],coursePage:false,editCourse:null,histCourse:null};
 let R=null, rounds=[], checkins=[], courses=[];
 const DEFAULT_PREFS={daysPerWeek:4,hoursPerDay:2,facilities:["range","green","course"],focusNote:""};
 let trainPrefs=JSON.parse(JSON.stringify(DEFAULT_PREFS));
@@ -472,6 +472,132 @@ function deleteSavedCourse(){
   const name=S.course.name;if(!name)return;
   if(!confirm(`从常打球场删除「${name}」?(不影响已记录的成绩)`))return;
   courses=courses.filter(c=>c.name!==name);saveCoursesLib();renderPlay();
+}
+
+/* ===== 球场管理页(全屏) ===== */
+function openCoursePage(){S.coursePage=true;S.editCourse=null;S.histCourse=null;renderPlay();}
+function closeCoursePage(){S.coursePage=false;renderPlay();}
+function editCourseToggle(i){const c=courses[i];if(!c)return;S.editCourse=S.editCourse===c.name?null:c.name;S.histCourse=null;renderPlay();}
+function histCourseToggle(i){const c=courses[i];if(!c)return;S.histCourse=S.histCourse===c.name?null:c.name;S.editCourse=null;renderPlay();}
+function toggleCourseRound(id){S.openRound=S.openRound===id?null:id;renderPlay();}
+function deleteSavedCourseByName(i){const c=courses[i];if(!c)return;
+  if(!confirm(`删除常打球场「${c.name}」?(不影响已记录的成绩)`))return;
+  courses.splice(i,1);saveCoursesLib();S.editCourse=null;S.histCourse=null;renderPlay();}
+function useCourseFromManager(i){const c=courses[i];if(!c)return;S.coursePage=false;loadSavedCourse(c.name);switchView("play");}
+function archiveCurrentToLib(){
+  if(!S.course||!(S.course.name||"").trim()){alert("当前球场还没填名字。回打球页填好名字再存。");return;}
+  const name=S.course.name.trim();S.course.name=name;
+  if(courses.find(c=>c.name===name)){alert("常打库里已有同名球场。");return;}
+  courses.push(JSON.parse(JSON.stringify({name,tees:S.course.tees,holes:S.course.holes,rating:S.course.rating||null,slope:S.course.slope||null,target:S.course.target||null})));
+  saveCoursesLib();saveCourse();renderPlay();
+}
+function courseAgg(name){
+  const list=rounds.filter(rd=>(rd.courseName||"")===name);
+  if(R&&(R.courseName||"")===name&&R.holes.some(h=>holeStats(h).played))list.push(R);
+  let totScore=0,totPar=0,n=0;const hd={};
+  list.forEach(rd=>{let played=false;
+    rd.holes.forEach(h=>{const st=holeStats(h);if(!st.played)return;played=true;totScore+=st.score;totPar+=h.par;
+      const e=hd[h.no]||(hd[h.no]=[0,0]);e[0]+=st.score-h.par;e[1]++;});
+    if(played)n++;});
+  if(!n)return{n:0};
+  let weak=null,wd=-Infinity;Object.keys(hd).forEach(no=>{const a=hd[no][0]/hd[no][1];if(a>wd){wd=a;weak={no:+no,avg:a};}});
+  return{n,avgScore:Math.round(totScore/n),avgVsPar:Math.round((totScore-totPar)/n),weak};
+}
+function renderCoursePage(){
+  let body="";
+  if(S.course&&(S.course.name||"").trim()&&!courses.find(c=>c.name===S.course.name)){
+    body+=`<section class="card"><div class="card-body" style="display:flex;align-items:center;gap:10px;">
+      <div style="flex:1;"><b>当前:${esc(S.course.name)}</b><div class="small" style="color:var(--ink-soft);">还没存进常打库</div></div>
+      <button class="mini on" onclick="archiveCurrentToLib()">存入常打</button></div></section>`;
+  }
+  if(!courses.length){
+    body+=`<div class="import-box" style="margin-top:12px;"><div class="big">⛳</div><h3>还没有常打球场</h3><p class="small">在打球页拍记分卡或手动输入后,点「存为常打」,球场就会出现在这里集中管理。</p></div>`;
+  }else{
+    courses.forEach((c,i)=>body+=courseCardHTML(c,i));
+  }
+  return `<div class="pm-header">
+      <button class="pm-back" onclick="closeCoursePage()">← 返回</button>
+      <span class="pm-title">球场管理</span>
+      <span class="pm-prog">${courses.length} 个</span>
+    </div>
+    <div class="pm-scroll" style="padding:14px;">${body}</div>`;
+}
+function courseCardHTML(c,i){
+  const isCur=S.course&&S.course.name===c.name;
+  const tee=(c.tees&&c.tees[0])||"默认";
+  const parTot=c.holes.reduce((a,h)=>a+(+h.par||0),0);
+  const ydTot=c.holes.reduce((a,h)=>a+(+((h.yards&&h.yards[tee])||0)),0);
+  const ag=courseAgg(c.name),editing=S.editCourse===c.name,showHist=S.histCourse===c.name;
+  let s=`<section class="card" style="margin-bottom:12px;"><div class="card-body">
+    <h2 style="font-family:'Fraunces',serif;font-size:17px;">${esc(c.name)}${isCur?` <span class="kind-tag match">当前</span>`:""}</h2>
+    <div class="small" style="margin-top:2px;">${c.holes.length} 洞 · Par ${parTot} · ${ydTot} 码(${esc(tee)})${c.tees.length>1?` · ${c.tees.length} 个 Tee`:""}</div>
+    <div class="small" style="margin-top:2px;color:var(--ink-soft);">${ag.n?`打过 ${ag.n} 轮 · 平均 ${ag.avgScore} · 平均 ${ag.avgVsPar>=0?"+":""}${ag.avgVsPar}${ag.weak?` · 最弱 ${ag.weak.no} 号`:""}`:"还没在这里打过球"}</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;">
+      <button class="mini" onclick="editCourseToggle(${i})">${editing?"✕ 取消":"✏️ 编辑"}</button>
+      <button class="mini" onclick="histCourseToggle(${i})">${showHist?"✕ 收起":"📊 历史"}</button>
+      <button class="mini" style="color:var(--flag);border-color:var(--flag);" onclick="deleteSavedCourseByName(${i})">🗑 删除</button>
+      <button class="mini on" style="margin-left:auto;" onclick="useCourseFromManager(${i})">▶ 用这个打球</button>
+    </div>`;
+  if(editing)s+=editCourseFormHTML(c,i,tee);
+  if(showHist)s+=courseHistHTML(c.name);
+  s+=`</div></section>`;return s;
+}
+function editCourseFormHTML(c,i,tee){
+  let s=`<div style="margin-top:10px;border-top:1px solid var(--rule);padding-top:10px;">
+    <div class="field"><label>球场名</label><input id="ecName" value="${esc(c.name)}" style="width:100%;"></div>
+    ${c.tees.length>1?`<p class="small" style="color:var(--ink-soft);">下面仅改 <b>${esc(tee)}</b> 台码数;Par 各台共用。</p>`:""}
+    <table class="sc-table"><thead><tr><th>洞</th><th>Par</th><th>码数(${esc(tee)})</th></tr></thead><tbody>`;
+  c.holes.forEach((h,k)=>{s+=`<tr><td class="hno">${h.no}</td><td><input class="scPar" data-ecpar="${k}" type="number" inputmode="numeric" value="${h.par}"></td><td><input class="scYd" data-ecyd="${k}" type="number" inputmode="numeric" value="${(h.yards&&h.yards[tee])??""}"></td></tr>`;});
+  s+=`</tbody></table>
+    <div class="row" style="margin-top:6px;">
+      <div class="field"><label>评级</label><input id="ecRating" type="number" inputmode="decimal" placeholder="可选" value="${c.rating||""}"></div>
+      <div class="field"><label>坡度</label><input id="ecSlope" type="number" inputmode="numeric" placeholder="可选" value="${c.slope||""}"></div>
+      <div class="field"><label>目标分</label><input id="ecTarget" type="number" inputmode="numeric" placeholder="可选" value="${c.target||""}"></div>
+    </div>
+    <button class="primary" style="margin-top:10px;width:100%;" onclick="saveEditedCourse(${i})">💾 保存修改</button>
+  </div>`;
+  return s;
+}
+function saveEditedCourse(i){
+  const c=courses[i];if(!c)return;
+  const tee=(c.tees&&c.tees[0])||"默认";
+  const nm=(document.getElementById("ecName").value||"").trim();
+  if(!nm){alert("球场名不能为空。");return;}
+  if(courses.some((x,k)=>k!==i&&x.name===nm)){alert("常打库里已有同名球场,换个名字。");return;}
+  document.querySelectorAll('[data-ecpar]').forEach(inp=>{const k=+inp.dataset.ecpar;if(c.holes[k])c.holes[k].par=+inp.value||4;});
+  document.querySelectorAll('[data-ecyd]').forEach(inp=>{const k=+inp.dataset.ecyd;if(c.holes[k])c.holes[k].yards[tee]=inp.value?+inp.value:null;});
+  const oldName=c.name;c.name=nm;
+  c.rating=+document.getElementById("ecRating").value||null;
+  c.slope=+document.getElementById("ecSlope").value||null;
+  c.target=document.getElementById("ecTarget").value||null;
+  saveCoursesLib();
+  if(oldName!==nm){ // 改名:迁移历史轮次,否则成绩会与球场断链
+    let migrated=false;
+    rounds.forEach(rd=>{if((rd.courseName||"")===oldName){rd.courseName=nm;rd.courseKey=nm+"|"+(rd.tee||"");migrated=true;}});
+    if(migrated)saveRounds();
+    if(R&&(R.courseName||"")===oldName){R.courseName=nm;R.courseKey=nm+"|"+(R.tee||"");saveCur();}
+  }
+  if(S.course&&S.course.name===oldName){
+    S.course=JSON.parse(JSON.stringify({name:c.name,tees:c.tees,holes:c.holes,rating:c.rating,slope:c.slope,target:c.target}));
+    if(!S.course.tees.includes(S.tee))S.tee=S.course.tees[0];
+    S.plans=[];S.gameplan=null;S.trainPlan=null;saveCourse();
+  }
+  S.editCourse=null;renderPlay();alert("✅ 已保存。");
+}
+function courseHistHTML(name){
+  const list=rounds.filter(rd=>(rd.courseName||"")===name);
+  if(R&&(R.courseName||"")===name&&R.holes.some(h=>holeStats(h).played))list.push(R);
+  if(!list.length)return `<div class="small" style="margin-top:10px;border-top:1px solid var(--rule);padding-top:10px;color:var(--ink-soft);">这个球场还没有成绩记录。</div>`;
+  let s=`<div style="margin-top:10px;border-top:1px solid var(--rule);padding-top:4px;">`;
+  list.slice().reverse().forEach(rd=>{
+    const tot=rd.holes.reduce((a,h)=>a+holeStats(h).score,0),par=rd.holes.reduce((a,h)=>a+(holeStats(h).played?h.par:0),0);
+    const played=rd.holes.filter(h=>holeStats(h).played).length,live=R&&rd.id===R.id;
+    s+=`<div onclick="toggleCourseRound(${rd.id})" style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--rule);cursor:pointer;">
+      <div style="flex:1;"><div class="small">${rd.date}${live?" · 进行中":""}</div><div style="font-size:10.5px;color:var(--ink-soft);">${played}洞 · ${S.openRound===rd.id?"收起 ▲":"详情 ▼"}</div></div>
+      <b>${tot} (${tot-par>=0?"+":""}${tot-par})</b></div>`;
+    if(S.openRound===rd.id)s+=roundDetailHTML(rd);
+  });
+  s+=`</div>`;return s;
 }
 async function saveCur(){await store.set("golf:curRound",R?JSON.stringify(R):"null");}
 async function saveRounds(){await store.set("golf:rounds",JSON.stringify(rounds));}
@@ -997,6 +1123,8 @@ function renderDay(dd){
 
 /* ===== PLAY VIEW (plan + actual unified) ===== */
 function renderPlay(){const w=document.getElementById("playWrap");
+  // ---- course manager: full-screen ----
+  if(S.coursePage){document.body.classList.add("play-mode");w.innerHTML=renderCoursePage();return;}
   // ---- no course: import screen ----
   if(!S.course){
     document.body.classList.remove("play-mode");
@@ -1029,7 +1157,10 @@ function renderPlay(){const w=document.getElementById("playWrap");
         <input id="courseName" value="${esc(S.course.name||"")}" placeholder="球场名 (拍完填,可存为常打)" style="flex:1;">
         <button class="mini" onclick="saveCurrentCourse()" style="white-space:nowrap;">💾 存为常打</button>
       </div>
-      ${courses.find(c=>c.name===S.course.name)?`<button class="mini" onclick="deleteSavedCourse()" style="margin-top:5px;color:var(--flag);border-color:var(--flag);">🗑 从常打删除此球场</button>`:""}
+      <div style="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap;">
+        <button class="mini" onclick="openCoursePage()">⚙️ 管理球场</button>
+        ${courses.find(c=>c.name===S.course.name)?`<button class="mini" onclick="deleteSavedCourse()" style="color:var(--flag);border-color:var(--flag);">🗑 从常打删除此球场</button>`:""}
+      </div>
     </div>
     <div class="row"><div class="field"><label>Tee 台</label><select onchange="changeTee(this.value)">${S.course.tees.map(t=>`<option ${t===S.tee?"selected":""}>${t}</option>`).join("")}</select></div>
       <div class="field"><label>风速 mph</label><input type="number" inputmode="numeric" value="${S.windMph}" onchange="S.windMph=+this.value||0"></div></div>
