@@ -293,6 +293,7 @@
     <div class="add-club"><input id="newClub" placeholder="杆名"><input id="newTotal" type="number" inputmode="numeric" placeholder="total"><input id="newCarry" type="number" inputmode="numeric" placeholder="carry"><button class="ghost" onclick="addClub()">+</button></div>
     <div style="display:flex;align-items:center;gap:12px;margin-top:14px;"><button class="ghost full" onclick="saveBag(true)">保存球包</button><span class="saved" id="savedMsg">✓ 已保存</span></div>
   </div></section>
+  <div id="bagBackup"></div>
   <p class="footnote">球包、球场、记录都存在本设备；放到 Claude 外自托管时自动用浏览器本地存储。</p>
 </div></div>
 
@@ -327,7 +328,7 @@ async function syncAllToCloud(){
     try{ const r=await fetch("/api/kv/"+encodeURIComponent(k),{method:"PUT",headers:{"content-type":"application/json"},body:JSON.stringify({value:v})});
       if(!r.ok) throw new Error("HTTP "+r.status); setSyncState(k,"cloud"); ok++; }
     catch(e){ setSyncState(k,"local"); fail++; detail.push(k+": "+(e.message||"失败")); } }
-  try{renderStats();}catch(e){}
+  try{renderBackupBox();}catch(e){}
   alert(fail? `同步完成:成功 ${ok} 项,失败 ${fail} 项\n${detail.join("\n")}\n(失败多半是网络问题,联网后再点一次)` : `✅ 全部 ${ok} 项已同步到云端,换设备也不会丢了。`);
 }
 function exportData(){
@@ -619,7 +620,15 @@ function delClub(i){collectBag();bag.splice(i,1);renderBag();saveBag();}
 /* ===== view switch ===== */
 function switchView(v){["play","stats","train","tourn","bag"].forEach(x=>document.getElementById(x+"View").classList.toggle("on",v===x));
   ["Play","Stats","Train","Tourn","Bag"].forEach(x=>document.getElementById("tab"+x).classList.toggle("on",v===x.toLowerCase()));
-  if(v==="bag")collectBag(); if(v==="stats")renderStats(); if(v==="play")renderPlay(); if(v==="train")renderTraining(); if(v==="tourn")renderTourn();}
+  if(v==="bag"){collectBag();renderBackupBox();} if(v==="stats")renderStats(); if(v==="play")renderPlay(); if(v==="train")renderTrainView(); if(v==="tourn")renderTourn();}
+function renderBackupBox(){const b=document.getElementById("bagBackup");if(b)b.innerHTML=backupPanel();}
+/* 训练页两个分段:今日打卡(daily) / AI 周计划(ai) */
+function renderTrainView(){if(S.trainTab==="ai")renderTrain();else renderTraining();}
+function setTrainTab(t){S.trainTab=t;renderTrainView();}
+function trainTabsHTML(){return `<div style="display:flex;gap:6px;margin-top:14px;">
+  <button class="mini ${S.trainTab!=="ai"?"on":""}" style="flex:1;padding:9px 4px;font-size:13px;font-weight:700;" onclick="setTrainTab('daily')">📅 今日打卡</button>
+  <button class="mini ${S.trainTab==="ai"?"on":""}" style="flex:1;padding:9px 4px;font-size:13px;font-weight:700;" onclick="setTrainTab('ai')">🤖 AI 周计划</button>
+</div>`;}
 
 /* ===== scorecard input ===== */
 document.getElementById("fileInput").addEventListener("change",handleScan);
@@ -1045,9 +1054,9 @@ function renderGamePlanPanel(){const g=S.gameplan;if(!g)return"";
 
 /* ===== TRAINING VIEW ===== */
 function renderTrain(){const w=document.getElementById("trainWrap");
-  if(!S.course){w.innerHTML=`<div class="empty">先在『打球』里导入球场，再来生成训练计划。</div>`;return;}
-  if(!S.trainPlan){w.innerHTML=renderTrainSetup();return;}
-  w.innerHTML=renderTrainPlan()+`<button class="ghost full" style="margin-top:14px;" onclick="trainReconfig()">↻ 重新生成 / 改设置</button>
+  if(!S.course){w.innerHTML=trainTabsHTML()+`<div class="empty">先在『打球』里导入球场，再来生成训练计划。</div>`;return;}
+  if(!S.trainPlan){w.innerHTML=trainTabsHTML()+renderTrainSetup();return;}
+  w.innerHTML=trainTabsHTML()+renderTrainPlan()+`<button class="ghost full" style="margin-top:14px;" onclick="trainReconfig()">↻ 重新生成 / 改设置</button>
     <p class="footnote">打几轮记录后再生成，计划会按你最新的数据短板调整。</p>`;}
 function trainReconfig(){S.trainPlan=null;renderTrain();}
 function syncTrainForm(){
@@ -1168,17 +1177,17 @@ function renderPlay(){const w=document.getElementById("playWrap");
       <div class="field"><label>风速 mph</label><input type="number" inputmode="numeric" value="${S.windMph}" onchange="S.windMph=+this.value||0"></div></div>
     <div class="field"><label>果岭软硬 (整场默认)</label><div style="display:flex;gap:6px;">${["soft","medium","firm"].map(f=>`<button class="mini ${S.firm===f?"on":""}" onclick="S.firm='${f}';renderPlay()">${{soft:"软",medium:"中",firm:"硬"}[f]}</button>`).join("")}</div></div>
     <div class="row"><div class="field"><label>目标分数</label><input id="courseTarget" type="number" inputmode="numeric" placeholder="如 74" value="${S.course.target||""}" onchange="S.course.target=this.value;saveCourse()"></div>
-      <div class="field"><label>球场评级</label><input type="number" inputmode="decimal" placeholder="可选" value="${S.course.rating||""}" onchange="S.course.rating=+this.value||null;saveCourse()"></div>
-      <div class="field"><label>坡度</label><input type="number" inputmode="numeric" placeholder="可选" value="${S.course.slope||""}" onchange="S.course.slope=+this.value||null;saveCourse()"></div></div>
+      <div class="field"><label class="small" style="color:var(--ink-soft);">评级/坡度</label><div class="small" style="padding:8px 0;color:var(--ink-soft);">${S.course.rating||"–"} / ${S.course.slope||"–"} <span style="opacity:.7;">(在 ⚙️ 管理球场 里改)</span></div></div></div>
     <details${S.showScorecard?" open":""} ontoggle="S.showScorecard=this.open"><summary class="small" style="cursor:pointer;font-weight:700;">记分卡数据 (点开核对/修改)</summary>
       <table class="sc-table"><thead><tr><th>洞</th><th>Par</th><th>码数(${S.tee})</th></tr></thead><tbody id="scBody">
       ${S.course.holes.map((h,i)=>`<tr><td class="hno">${h.no}</td><td><input class="scPar" type="number" inputmode="numeric" value="${h.par}" onchange="setHolePar(${i},this.value)"></td><td><input class="scYd" type="number" inputmode="numeric" value="${h.yards[S.tee]??""}" onchange="setHoleYd(${i},this.value)"></td></tr>`).join("")}
       </tbody></table></details>
     <button class="primary" style="margin-top:14px;" onclick="generateAll()">⛳ 生成 18 洞策略</button>
+    <button class="ghost full" style="margin-top:10px;" onclick="switchView('stats');openQuickEntry()">✍️ 快速记一场(誊计分卡)</button>
     ${(S.plans.length||R)?`<button class="ghost full" style="margin-top:10px;" onclick="${R&&!S.plans.length?"continueRound()":"S.playMode=true;renderPlay()"}">继续打球 › 第 ${S.course.holes[S.current]?S.course.holes[S.current].no:1} 洞</button>`:""}
     <div class="row" style="margin-top:10px;gap:8px;">
       <button class="ghost full" onclick="genGamePlan()">🎯 整场博弈(AI)</button>
-      <button class="ghost full" onclick="switchView('train')">🏋️ 训练计划</button>
+      <button class="ghost full" onclick="S.trainTab='ai';switchView('train')">🏋️ AI 训练计划</button>
     </div>
     <button class="ghost full" style="margin-top:10px;" onclick="newCourse()">重新导入记分卡</button>
   </div></section>`;
@@ -1283,10 +1292,10 @@ const h=S.course.holes[i],p=S.plans[i];const rh=R?R.holes[i]:null;const st=rh?ho
 /* ===== STATS VIEW ===== */
 function renderStats(){const w=document.getElementById("statsWrap");
   if(QE&&!QE.paused){w.innerHTML=renderQuickEntry();return;}
-  let html=backupPanel();
+  let html="";
   if(QE&&QE.paused){const filled=QE.holes.filter(h=>h.score!==""&&h.score!=null).length;
     html+=`<div style="display:flex;gap:8px;margin:10px 0;"><button class="primary" style="flex:1;" onclick="resumeQuickEntry()">▶ 继续填写快速记分(已填${filled}洞)</button><button class="ghost" style="white-space:nowrap;" onclick="openQuickEntry()">➕ 重记</button></div>`;
-  }else{html+=`<button class="ghost full" style="margin:10px 0;" onclick="openQuickEntry()">➕ 快速记一场(誊计分卡)</button>`;}
+  }
   html+=statsFilterBar();
   if(R&&R.holes.some(h=>h.shots.length)){html+=roundSummary()+`<button class="primary" style="margin-top:10px;width:100%;" onclick="continueRound()">▶ 继续本轮</button>
   <div style="margin-top:8px;display:flex;gap:8px;">
@@ -1359,10 +1368,14 @@ const TOURNAMENTS=[
   }
 ];
 
+function tournPast(t){ // 「2025年7月」这类日期已过去的,自动当历史赛事,不用手工改 status
+  const m=/(\d{4})年(\d{1,2})月/.exec(t.date||"");if(!m)return t.status==="past";
+  const d=new Date();return +m[1]<d.getFullYear()||(+m[1]===d.getFullYear()&&+m[2]<d.getMonth()+1);
+}
 function renderTourn(){
   const w=document.getElementById("tournWrap");
-  const upcoming=TOURNAMENTS.filter(t=>t.status==="upcoming");
-  const past=TOURNAMENTS.filter(t=>t.status==="past");
+  const upcoming=TOURNAMENTS.filter(t=>t.status==="upcoming"&&!tournPast(t));
+  const past=TOURNAMENTS.filter(t=>t.status==="past"||tournPast(t));
   let h="";
 
   if(upcoming.length){
@@ -1456,7 +1469,7 @@ function renderTraining(){
   // ── streak banner ──
   const hi=streak>=3;
   const streakSub=streak===0?'今天开始第一步！':streak<3?'再坚持'+(3-streak)+'天解锁三连击':'继续！已连续'+streak+'天';
-  let html='<div style="background:'+(hi?'var(--green-2)':'var(--paper-2)')+';border-radius:6px;padding:12px 14px;margin-top:14px;display:flex;align-items:center;justify-content:space-between;">'
+  let html=trainTabsHTML()+'<div style="background:'+(hi?'var(--green-2)':'var(--paper-2)')+';border-radius:6px;padding:12px 14px;margin-top:10px;display:flex;align-items:center;justify-content:space-between;">'
     +'<div><div style="font-family:\'Fraunces\';font-size:22px;font-weight:700;color:'+(hi?'var(--paper)':'var(--ink)')+';">'+(streak>=1?'🔥':'⚡')+' '+streak+' 天连击</div>'
     +'<div style="font-size:11px;color:'+(hi?'rgba(244,240,228,.8)':'var(--ink-soft)')+';margin-top:2px;">'+streakSub+'</div></div>'
     +'<div style="display:flex;gap:3px;">'+wdots+'</div></div>';

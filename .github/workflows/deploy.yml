@@ -3,6 +3,13 @@ name: Deploy to Cloud Run
 on:
   push:
     branches: ["main"]
+    paths:
+      - "public/**"
+      - "server.js"
+      - "package.json"
+      - "package-lock.json"
+      - "Dockerfile"
+      - ".github/workflows/deploy.yml"
   workflow_dispatch:
 
 jobs:
