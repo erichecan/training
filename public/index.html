@@ -768,6 +768,17 @@ function thisRoundSignal(club){
   else if(shortN>=2&&shortN>longN)bits.push("偏短,宁可大半号");
   return bits.length?bits.join(";"):null;
 }
+/* 打法指引:旗位/果岭软硬/距离边界/球杆离散 → 取舍文案,不依赖历史 */
+function playStyleTips(rem,pin,firm,maxTotal,minTotal,spread){
+  const t=[];
+  if(maxTotal&&rem>maxTotal)t.push("够不到果岭,放到剩 ~90 码留个顺手距离");
+  else if(minTotal&&rem<=minTotal)t.push("很近,留上坡推,别打过旗");
+  if(pin==="front")t.push("前旗别冲,瞄果岭中部,落球后旗更安全");
+  else if(pin==="back")t.push("后旗可加半号,但别长");
+  if(spread&&spread>=8)t.push("这支飘,打中心别冲边旗");
+  if(firm==="firm")t.push("果岭硬,落短半号让球滚上去");
+  return t;
+}
 function liveSuggest(i,j){
   if(j<1||!R||!R.holes[i])return null;
   const sh=R.holes[i].shots,prev=sh[j-1];if(!prev||prev.rem==null||prev.rem<=0)return null;
