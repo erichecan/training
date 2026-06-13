@@ -783,13 +783,31 @@ function liveSuggest(i,j){
   if(j<1||!R||!R.holes[i])return null;
   const sh=R.holes[i].shots,prev=sh[j-1];if(!prev||prev.rem==null||prev.rem<=0)return null;
   const b=sb();if(b.length<1)return null;
-  const a=approachShot(j+1,"实时",b,prev.rem,S.holePin[i]||"mid",S.firm||"med",S.holeWind[i]||"none",S.windMph);
+  const rem=prev.rem,pin=S.holePin[i]||"mid",firm=S.firm||"med",wt=S.holeWind[i]||"none",mph=S.windMph;
+  // —— 选杆:增强① 历史优先,不足回退标称 ——
+  const hp=pickClubByHistory(rem);
+  let club,clubYd;const detailLines=[];
+  if(hp){
+    club=hp.club;clubYd=hp.clubYd;
+    detailLines.push(`你这距离 ${club} 打过 ${hp.n} 次,其中 ${hp.onN} 次上果岭(实测均 <b>${clubYd}码</b>)`);
+  }else{
+    const a=approachShot(j+1,"实时",b,rem,pin,firm,wt,mph);
+    club=a.clubName;clubYd=a.clubYd;detailLines.push(a.detail);
+  }
+  // —— 增强③ 打法细节(不依赖历史) ——
+  const maxTotal=b[0].total,minTotal=b[b.length-1].total,spread=clubTendency(club).spread;
+  playStyleTips(rem,pin,firm,maxTotal,minTotal,spread).forEach(t=>detailLines.push(t));
+  // —— 修正:球位 → 增强② 本场优先,退历史 ——
+  const adv=[];
   const lieMap={rough:"上一杆在长草,力量打折,宁可大半号",trees:"树下,先低弹道打出来回球道,别强求距离",fbunker:"球道沙坑,先稳出来",gbunker:"沙坑,先上果岭",ob:"刚罚杆,这杆求稳",water:"刚罚杆,这杆求稳",fringe:"果岭边缘,可推或切滚"};
-  const dir=nd(prev.dir),bits=[];
-  if(lieMap[prev.result])bits.push(lieMap[prev.result]);
-  if(dir.includes("left")||dir.includes("fl"))bits.push("上杆偏左,瞄右一点");
-  if(dir.includes("right")||dir.includes("fr"))bits.push("上杆偏右,瞄左一点");
-  return {club:a.clubName,clubYd:a.clubYd,detail:a.detail,rem:prev.rem,advice:bits.join(";")};
+  if(lieMap[prev.result])adv.push(lieMap[prev.result]);
+  const rt=thisRoundSignal(club);
+  if(rt)adv.push("【本场】"+rt);
+  else{const tn=tendencyNote(club,R.holes[i].par,pin);if(tn)adv.push("【历史】"+tn.replace(/^📈\s*/,""));}
+  const dir=nd(prev.dir);
+  if(!rt&&(dir.includes("left")||dir.includes("fl")))adv.push("上杆偏左,瞄右一点");
+  if(!rt&&(dir.includes("right")||dir.includes("fr")))adv.push("上杆偏右,瞄左一点");
+  return {club:club,clubYd:clubYd,detail:detailLines.join("<br>"),rem:rem,advice:adv.join(";")};
 }
 function addShot(i){startRoundIfNeeded();R.holes[i].shots.push({club:suggestedClub(i),dist:null,result:"",dir:[],note:""});saveCur();renderPlay();}
 function delShot(i,j){R.holes[i].shots.splice(j,1);S.editKey=null;saveCur();renderPlay();}
