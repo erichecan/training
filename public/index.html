@@ -740,6 +740,18 @@ function startRoundIfNeeded(){if(!S.course)return;
   R={id:Date.now(),date:new Date().toISOString().slice(0,10),courseName:S.course.name||"球场",courseKey:courseKey(),tee:S.tee,
      holes:S.course.holes.map(h=>({no:h.no,par:h.par,yards:h.yards[S.tee],shots:[],putts:2,note:""}))};saveCur();}
 function suggestedClub(i){const p=S.plans[i],n=R.holes[i].shots.length;if(p&&p.shots&&p.shots[n])return p.shots[n].clubName;return"";}
+/* 历史真实距离选杆:某距离段有 ≥3 杆样本时,按上果岭率(green+fringe*0.5)优先,并列看次数 */
+function pickClubByHistory(rem){
+  if(!rem||rem<=0)return null;
+  const hist=clubHistoryAt(rem);            // [{club,n,avg,res}], 已按 n 降序
+  const enough=hist.filter(h=>h.n>=3);
+  if(!enough.length)return null;
+  const scored=enough.map(h=>{
+    const g=(h.res.green||0)+(h.res.fringe||0)*0.5;
+    return {club:h.club, clubYd:h.avg, n:h.n, onN:(h.res.green||0)+(h.res.fringe||0), rate:g/h.n};
+  }).sort((a,b)=>b.rate-a.rate||b.n-a.n);
+  return scored[0];
+}
 function liveSuggest(i,j){
   if(j<1||!R||!R.holes[i])return null;
   const sh=R.holes[i].shots,prev=sh[j-1];if(!prev||prev.rem==null||prev.rem<=0)return null;
