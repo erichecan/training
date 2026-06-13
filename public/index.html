@@ -752,6 +752,22 @@ function pickClubByHistory(rem){
   }).sort((a,b)=>b.rate-a.rate||b.n-a.n);
   return scored[0];
 }
+/* 本轮手感:只看当前 R 里这支杆的击球,≥2 次同向/同偏才报,1 次偶发不报 */
+function thisRoundSignal(club){
+  if(!R||!club)return null;
+  const shots=[];
+  (R.holes||[]).forEach(h=>(h.shots||[]).forEach(s=>{if(s.club===club)shots.push(s);}));
+  if(shots.length<2)return null;
+  const cnt=t=>shots.filter(s=>nd(s.dir).includes(t)).length;
+  const left=cnt("left")+cnt("fl"), right=cnt("right")+cnt("fr");
+  const shortN=cnt("short"), longN=cnt("long");
+  const bits=[];
+  if(left>=2&&left>right)bits.push("这支老左曲,瞄右一点");
+  else if(right>=2&&right>left)bits.push("这支老右曲,瞄左一点");
+  if(longN>=2&&longN>shortN)bits.push("偏长,收半号");
+  else if(shortN>=2&&shortN>longN)bits.push("偏短,宁可大半号");
+  return bits.length?bits.join(";"):null;
+}
 function liveSuggest(i,j){
   if(j<1||!R||!R.holes[i])return null;
   const sh=R.holes[i].shots,prev=sh[j-1];if(!prev||prev.rem==null||prev.rem<=0)return null;
