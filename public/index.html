@@ -166,6 +166,14 @@
   .pm-tac.score{border-color:#2e7d46;background:rgba(46,125,70,.1);}
   .pm-tac.save{border-color:#c0392b;background:rgba(192,57,43,.09);}
   .pm-tac.neutral{border-color:var(--rule);}
+  .cm{margin:8px 13px 4px;border:1px solid var(--rule);border-radius:7px;background:var(--paper-2);overflow:hidden;}
+  .cm>summary{cursor:pointer;font-size:12.5px;font-weight:700;padding:8px 11px;color:var(--green-2);list-style:none;}
+  .cm>summary::-webkit-details-marker{display:none;}
+  .cm-bd{padding:4px 11px 10px;}
+  .cm-bad{background:rgba(192,57,43,.08);border-left:3px solid #c0392b;border-radius:5px;padding:7px 9px;font-weight:700;font-size:13px;margin-bottom:8px;}
+  .cm-ez{font-weight:400;font-size:11.5px;color:var(--ink-soft);margin-top:4px;}
+  .cm-mh{font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);font-weight:700;margin:2px 0 5px;}
+  .cm-m{font-size:13px;padding:3px 0;color:var(--ink);}
   .pm-note{font-size:10.5px;color:var(--ink-soft);background:var(--paper-2);border-radius:3px;padding:2px 6px;}
   .pm-rl{font-size:9px;font-weight:700;text-transform:uppercase;color:var(--ink-soft);margin:4px 0 3px;letter-spacing:.06em;}
   .pm-dist{display:flex;align-items:center;gap:8px;margin-top:4px;}
@@ -1271,6 +1279,22 @@ function renderPlay(){const w=document.getElementById("playWrap");
   w.innerHTML=html;}
 function changeTee(v){S.tee=v;S.plans=[];loadCoach().then(renderPlay);}
 function newCourse(){S.course=null;S.plans=[];S.gameplan=null;S.trainPlan=null;renderPlay();}
+/* 球童心法:情绪层(区别于 liveSuggest 的战术提示)——坏结果自动安抚 + 口袋卡 mantra。话术来自真实运动心理/球童资料,见 docs 话术库。 */
+const CADDIE_TALK={
+  bad:["甩掉它,后面还长","这洞翻篇了,就看下一杆","别担心,你能找回来","一杆定义不了你,你的反应才定义你"],
+  ez:"给自己几步路的情绪——想懊恼就懊恼,走到球前就翻篇,回到你的流程。",
+  mantra:["照我的流程做就够了","只打眼前这一杆","不管刚才怎样,每杆同一个流程","冷静+好奇:这球位和风要我怎么打?","我要打个果断的挥杆","这一杆我能打"]
+};
+function caddieMindHTML(i){
+  const rh=R?R.holes[i]:null,shots=rh?rh.shots:[];
+  const hadBad=shots.some(s=>{const r=RESULTS.find(x=>x.k===s.result);return r&&r.g==="bad";});
+  const ms=[0,1,2].map(k=>CADDIE_TALK.mantra[(i+k)%CADDIE_TALK.mantra.length]);
+  let inner="";
+  if(hadBad){const bl=CADDIE_TALK.bad[i%CADDIE_TALK.bad.length];
+    inner+=`<div class="cm-bad">「${bl}」<div class="cm-ez">${CADDIE_TALK.ez}</div></div>`;}
+  inner+=`<div class="cm-mh">口袋卡 · 站球后默念一句</div>`+ms.map(m=>`<div class="cm-m">「${m}」</div>`).join("");
+  return `<details class="cm"${hadBad?" open":""}><summary>🧠 球童心法${hadBad?" · 先稳住,翻篇":""}</summary><div class="cm-bd">${inner}</div></details>`;
+}
 function renderHoleCompact(i){
   const h=S.course.holes[i],p=S.plans[i];
   const rh=R?R.holes[i]:null,st=rh?holeStats(rh):null;
@@ -1329,6 +1353,7 @@ function renderHoleCompact(i){
     <span class="badge ${st.gir?"hit":"miss"}">${st.gir?"GIR✓":"未GIR"}</span>
     ${st.scrOpp?`<span class="badge ${st.scrOk?"hit":"miss"}">救球${st.scrOk?"✓":"✗"}</span>`:""}
     ${st.pen?`<span class="badge miss">+${st.pen}罚</span>`:""}</div>`;
+  s+=caddieMindHTML(i);
   return `<div class="pm-holecard">${s}</div>`;
 }
 
