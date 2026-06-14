@@ -772,7 +772,7 @@ function thisRoundSignal(club){
 function playStyleTips(rem,pin,firm,maxTotal,minTotal,spread){
   const t=[];
   if(maxTotal&&rem>maxTotal)t.push("够不到果岭,放到剩 ~90 码留个顺手距离");
-  else if(minTotal&&rem<=minTotal)t.push("很近,留上坡推,别打过旗");
+  else if(minTotal&&rem<=minTotal)t.push("比最短杆还近,收点力控距,别打过旗");
   if(pin==="front")t.push("前旗别冲,瞄果岭中部,落球后旗更安全");
   else if(pin==="back")t.push("后旗可加半号,但别长");
   if(spread&&spread>=8)t.push("这支飘,打中心别冲边旗");
@@ -783,7 +783,7 @@ function liveSuggest(i,j){
   if(j<1||!R||!R.holes[i])return null;
   const sh=R.holes[i].shots,prev=sh[j-1];if(!prev||prev.rem==null||prev.rem<=0)return null;
   const b=sb();if(b.length<1)return null;
-  const rem=prev.rem,pin=S.holePin[i]||"mid",firm=S.firm||"med",wt=S.holeWind[i]||"none",mph=S.windMph;
+  const rem=prev.rem,pin=S.holePin[i]||"mid",firm=S.firm||"medium",wt=S.holeWind[i]||"none",mph=S.windMph;
   // —— 选杆:增强① 历史优先,不足回退标称 ——
   const hp=pickClubByHistory(rem);
   let club,clubYd;const detailLines=[];
