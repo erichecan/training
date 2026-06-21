@@ -321,6 +321,7 @@
   <button id="tabTourn" onclick="switchView('tourn')"><span class="ic">🏆</span>比赛</button>
   <button id="tabBag" onclick="switchView('bag')"><span class="ic">🎒</span>球包</button>
 </div>
+<div id="verTag" style="position:fixed;top:3px;right:5px;font-size:9px;line-height:1;color:rgba(110,110,110,.45);z-index:9998;pointer-events:none;font-family:ui-monospace,monospace;">v—</div>
 <input type="file" id="fileInput" accept="image/*" style="display:none">
 <div class="overlay" id="overlay"><div class="spinner"><div class="dot"></div><p class="small" id="overlayMsg">正在识别记分卡…</p></div></div>
 
@@ -1894,7 +1895,17 @@ function renderTraining(){
   w.innerHTML=html;}
 
 loadAll();
-if("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js");
+/* 版本号(部署时由 GitHub Actions 注入 git SHA)+ Service Worker 自动更新 */
+const APP_VERSION="__BUILD_VERSION__";
+(function(){const vt=document.getElementById("verTag");if(vt)vt.textContent=(APP_VERSION.indexOf("__")>=0?"dev":APP_VERSION);})();
+if("serviceWorker" in navigator){
+  let _swRefreshing=false;
+  navigator.serviceWorker.addEventListener("controllerchange",()=>{if(_swRefreshing)return;_swRefreshing=true;location.reload();});
+  navigator.serviceWorker.register("/sw.js").then(reg=>{
+    reg.update();                                   // 每次打开即检查新版
+    setInterval(()=>reg.update(),30*60*1000);       // 之后每 30 分钟再查一次
+  }).catch(()=>{});
+}
 </script>
 </body>
 </html>

@@ -32,6 +32,14 @@ jobs:
 
       - run: gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
 
+      - name: Inject build version (git SHA)
+        run: |
+          VER="${GITHUB_SHA::8}"
+          sed -i "s/__BUILD_VERSION__/$VER/g" public/index.html public/sw.js
+          echo "Injected build version: $VER"
+          grep -n "caddie-$VER" public/sw.js
+          grep -n "APP_VERSION=\"$VER\"" public/index.html
+
       - name: Build & Push
         run: |
           docker build -t ${{ env.IMAGE }} .
