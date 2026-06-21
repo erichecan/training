@@ -1020,6 +1020,24 @@ function collectTrackHoles(rd){
     return{no:h.no,par:h.par,pts};
   }).filter(h=>h.pts.length>0);
 }
+/* 卫星图瓦片源:填了 Mapbox token(localStorage)就用 Mapbox 高清,否则用免费 Esri。 */
+function getMapboxToken(){return (localStorage.getItem('golf:mapboxToken')||'').trim();}
+function setMapboxToken(){
+  const cur=getMapboxToken();
+  const v=prompt("粘贴 Mapbox public token(pk. 开头)换高清卫星图。\n留空并确定 = 清除、用回 Esri。\ntoken 在 account.mapbox.com 拿。",cur);
+  if(v===null)return;
+  const t=v.trim();
+  if(t&&!t.startsWith('pk.')){alert("不像 Mapbox public token(应以 pk. 开头),没保存。");return;}
+  if(t)localStorage.setItem('golf:mapboxToken',t);else localStorage.removeItem('golf:mapboxToken');
+  const rid=_trackState?_trackState.roundId:null;
+  if(rid!=null){closeTrackMap();openTrackMap(rid);}
+  else alert(t?"✅ 已保存,下次看轨迹用 Mapbox 高清。":"已清除,用回 Esri。");
+}
+function mapTileLayer(){
+  const tk=getMapboxToken();
+  if(tk)return L.tileLayer(`https://api.mapbox.com/styles/v1/mapbox/satellite-v9/tiles/256/{z}/{x}/{y}@2x?access_token=${tk}`,{maxZoom:22,attribution:"© Mapbox © Maxar"});
+  return L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:21,maxNativeZoom:19,attribution:"Tiles © Esri"});
+}
 async function openTrackMap(roundId){
   const rd=(R&&R.id===roundId)?R:rounds.find(r=>r.id===roundId);
   if(!rd){alert("找不到这场记录。");return;}
@@ -1033,12 +1051,13 @@ async function openTrackMap(roundId){
   box.innerHTML=`<div style="position:absolute;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(20,28,22,.92);color:#fff;">
     <button onclick="closeTrackMap()" style="background:none;border:1.5px solid #fff;color:#fff;border-radius:6px;padding:5px 12px;font-size:14px;cursor:pointer;">← 返回</button>
     <span style="font-weight:700;font-size:14px;">🛰 ${esc(rd.courseName||"球场")} 轨迹</span>
+    <button onclick="setMapboxToken()" title="填 Mapbox token 换高清卫星图" style="background:none;border:1px solid #fff;color:#fff;border-radius:5px;padding:4px 9px;font-size:12px;cursor:pointer;">${getMapboxToken()?"高清 ✓":"换高清"}</button>
     <select id="trackHoleSel" onchange="trackFocusHole(this.value)" style="margin-left:auto;padding:5px 8px;border-radius:5px;border:none;font-size:13px;">
       <option value="all">全场</option>${holesPts.map(h=>`<option value="${h.no}">第${h.no}洞(${h.pts.length}点)</option>`).join("")}</select>
   </div><div id="trackMapCanvas" style="position:absolute;inset:0;"></div>`;
   const map=L.map("trackMapCanvas",{zoomControl:true,attributionControl:true});
-  L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:21,maxNativeZoom:19,attribution:"Tiles © Esri"}).addTo(map);
-  _trackState={map,holesPts};
+  mapTileLayer().addTo(map);
+  _trackState={map,holesPts,roundId};
   const colors=["#FFD166","#06D6A0","#EF476F","#118AB2","#F78C6B","#C77DFF"];
   const all=[];
   holesPts.forEach((h,hi)=>{
