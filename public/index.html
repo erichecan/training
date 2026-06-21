@@ -1020,8 +1020,10 @@ function collectTrackHoles(rd){
     return{no:h.no,par:h.par,pts};
   }).filter(h=>h.pts.length>0);
 }
-/* 卫星图瓦片源:填了 Mapbox token(localStorage)就用 Mapbox 高清,否则用免费 Esri。 */
-function getMapboxToken(){return (localStorage.getItem('golf:mapboxToken')||'').trim();}
+/* 卫星图瓦片源:默认用 Mapbox 高清(下面的 public token,需在 Mapbox 后台对它加 URL 域名限制);
+   想用自己的 token 可在「换高清」里填,存 localStorage 覆盖默认。留空清除则回退默认。 */
+const DEFAULT_MAPBOX_TOKEN="pk.eyJ1IjoiZXJpY2hlY2FuIiwiYSI6ImNtcW5idGx1bjFmZ3gycHEwOGU5NGZhbHoifQ.hUy_MZkLgUFq0TOuRUuRlw";
+function getMapboxToken(){return (localStorage.getItem('golf:mapboxToken')||DEFAULT_MAPBOX_TOKEN).trim();}
 function setMapboxToken(){
   const cur=getMapboxToken();
   const v=prompt("粘贴 Mapbox public token(pk. 开头)换高清卫星图。\n留空并确定 = 清除、用回 Esri。\ntoken 在 account.mapbox.com 拿。",cur);
