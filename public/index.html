@@ -632,6 +632,7 @@ function renderBag(){const g=document.getElementById("bagGrid");
   bag.forEach((c,i)=>g.insertAdjacentHTML("beforeend",
     `<input class="clubname" value="${c.name}" data-i="${i}" data-k="name"><input type="number" inputmode="numeric" value="${c.total}" data-i="${i}" data-k="total"><input type="number" inputmode="numeric" value="${c.carry}" data-i="${i}" data-k="carry"><button class="del" onclick="delClub(${i})">×</button>`));}
 function collectBag(){document.querySelectorAll('#bagGrid input').forEach(inp=>{const i=+inp.dataset.i,k=inp.dataset.k;
+  if(!bag[i])return;/* 防御:DOM 与内存球包不同步时跳过,绝不创建空洞/丢杆 */
   if(k==="name")bag[i].name=inp.value.trim()||"杆";else bag[i][k]=+inp.value||0;});}
 function addClub(){collectBag();const n=document.getElementById("newClub").value.trim(),t=+document.getElementById("newTotal").value,c=+document.getElementById("newCarry").value;
   if(n&&t){bag.push({name:n,total:t,carry:c||t-5});bag.sort((a,b)=>b.total-a.total);renderBag();saveBag();}
@@ -1629,7 +1630,7 @@ function clubAvgPanel(){const m=clubMap(),keys=Object.keys(m);if(!keys.length)re
     html+=`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--rule);"><span><b>${c}</b> <span class="small">×${arr.length}</span></span><span>实测 <b>${avg}</b>${bc?` <span class="small">/ 球包 ${bc.total}</span>`:""}</span></div>`;});
   html+=`<button class="ghost full" style="margin-top:12px;" onclick="applyClubAvgs()">用实测更新球包 Total</button></div></section>`;return html;}
 function applyClubAvgs(){const m=clubMap();Object.keys(m).forEach(c=>{const arr=m[c],avg=Math.round(arr.reduce((a,b)=>a+b,0)/arr.length),bc=bag.find(b=>b.name===c);if(bc){const d=avg-bc.total;bc.total=avg;bc.carry=Math.max(bc.carry+d,0);}});
-  bag.sort((a,b)=>b.total-a.total);saveBag();renderBag();S.plans=[];alert("球包已按实测更新。回『打球』重新生成策略会用新距离。");}
+  bag.sort((a,b)=>b.total-a.total);renderBag();saveBag();S.plans=[];alert("球包已按实测更新。回『打球』重新生成策略会用新距离。");}
 
 /* ===== tournament data ===== */
 const TOURNAMENTS=[

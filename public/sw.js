@@ -1,4 +1,4 @@
-const CACHE = "caddie-v15";
+const CACHE = "caddie-v16";
 const SHELL = ["/", "/index.html", "/config.js", "/manifest.json"];
 
 self.addEventListener("install", e => {
