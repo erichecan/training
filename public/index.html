@@ -294,6 +294,7 @@
   .live-sg .live-a{font-size:11.5px;color:var(--flag);margin-top:2px;}
   .hist-ref{font-size:11.5px;color:var(--ink-soft);background:var(--paper-2);border-radius:4px;padding:5px 8px;margin-bottom:8px;line-height:1.5;}
 </style>
+<script src="/config.js"></script>
 </head>
 <body>
 <header><div class="kicker">Yardage Caddie · 我的私用版</div><h1>袋中球童</h1></header>
@@ -1020,9 +1021,9 @@ function collectTrackHoles(rd){
     return{no:h.no,par:h.par,pts};
   }).filter(h=>h.pts.length>0);
 }
-/* 卫星图瓦片源:默认用 Mapbox 高清(下面的 public token,需在 Mapbox 后台对它加 URL 域名限制);
-   想用自己的 token 可在「换高清」里填,存 localStorage 覆盖默认。留空清除则回退默认。 */
-const DEFAULT_MAPBOX_TOKEN="pk.eyJ1IjoiZXJpY2hlY2FuIiwiYSI6ImNtcW5idGx1bjFmZ3gycHEwOGU5NGZhbHoifQ.hUy_MZkLgUFq0TOuRUuRlw";
+/* 卫星图瓦片源:默认用 config.js 里的 Mapbox public token(高清);用户也可在地图「换高清」里
+   填自己的 token 覆盖(存 localStorage)。config.js 没配 token 时回退到免费 Esri。 */
+const DEFAULT_MAPBOX_TOKEN=((window.APP_CONFIG&&window.APP_CONFIG.MAPBOX_TOKEN)||"").trim();
 function getMapboxToken(){return (localStorage.getItem('golf:mapboxToken')||DEFAULT_MAPBOX_TOKEN).trim();}
 function setMapboxToken(){
   const cur=getMapboxToken();

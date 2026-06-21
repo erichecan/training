@@ -1,5 +1,5 @@
-const CACHE = "caddie-v13";
-const SHELL = ["/", "/index.html", "/manifest.json"];
+const CACHE = "caddie-v14";
+const SHELL = ["/", "/index.html", "/config.js", "/manifest.json"];
 
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting()));
