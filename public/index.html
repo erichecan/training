@@ -562,6 +562,7 @@ function courseCardHTML(c,i){
       <button class="mini" onclick="editCourseToggle(${i})">${editing?"✕ 取消":"✏️ 编辑"}</button>
       <button class="mini" onclick="histCourseToggle(${i})">${showHist?"✕ 收起":"📊 历史"}</button>
       <button class="mini" style="color:var(--flag);border-color:var(--flag);" onclick="deleteSavedCourseByName(${i})">🗑 删除</button>
+      <button class="mini" onclick="openRecon(courses[${i}])">🛰 赛前看图</button>
       <button class="mini on" style="margin-left:auto;" onclick="useCourseFromManager(${i})">▶ 用这个打球</button>
     </div>`;
   if(editing)s+=editCourseFormHTML(i);
@@ -1001,7 +1002,7 @@ function finishRound(){if(!R)return;if(!R.holes.some(h=>h.shots.length)){alert("
 function abandonRound(){if(!R)return;if(!confirm("放弃本轮？所有已记录的杆数将被清除，不存入统计。"))return;R=null;saveCur();startRoundIfNeeded();S.playMode=false;renderPlay();renderStats();}
 
 /* ===== 卫星图轨迹复盘(Esri World Imagery,免费无 key;Leaflet 按需从 CDN 加载) ===== */
-let _leafletLoading=null,_trackState=null;
+let _leafletLoading=null,_trackState=null,_recon=null,_reconViewTimer=null;
 function loadLeaflet(){
   if(window.L)return Promise.resolve();
   if(_leafletLoading)return _leafletLoading;
@@ -1084,6 +1085,172 @@ function trackFocusHole(v){
   if(ll.length===1)st.map.setView(ll[0],18);else if(ll.length)st.map.fitBounds(ll,{padding:[60,60]});
 }
 function closeTrackMap(){const box=document.getElementById("trackMap");if(box){if(_trackState&&_trackState.map)_trackState.map.remove();box.remove();_trackState=null;}}
+
+/* ===== 赛前球场侦察(无 GPS,靠地址+卫星图逐洞做功课) ===== */
+const RECON_PT={bunker:{t:"沙坑",c:"#E0B04A"},water:{t:"水",c:"#3A8DDE"},dogleg:{t:"拐点",c:"#F4D35E"},target:{t:"理想落点",c:"#06D6A0"}};
+function ensureRecon(h){if(!h.recon)h.recon={tee:null,green:null,points:[],view:null};if(!h.recon.points)h.recon.points=[];return h.recon;}
+async function openRecon(course){
+  if(!course){alert("先选或建一个球场,再看图。");return;}
+  if(!course.holes||!course.holes.length){alert("这个球场还没有洞数据。");return;}
+  showOverlay("加载卫星地图…");
+  try{await loadLeaflet();}catch(e){hideOverlay();alert(e.message);return;}
+  hideOverlay();
+  let box=document.getElementById("reconMap");
+  if(!box){box=document.createElement("div");box.id="reconMap";box.style.cssText="position:fixed;inset:0;z-index:9999;background:#000;";document.body.appendChild(box);}
+  _recon={box,map:null,course,hole:0,mode:null,measureA:null,measureMarker:null,layers:[]};
+  box.innerHTML=reconChromeHTML(course);
+  const map=L.map("reconMapCanvas",{zoomControl:false,attributionControl:true});
+  L.control.zoom({position:"bottomright"}).addTo(map);
+  mapTileLayer().addTo(map);
+  _recon.map=map;
+  const c=course.center;
+  map.setView(c?[c.lat,c.lng]:[39.5,-98.35],c?15:4);
+  map.on("moveend",reconRememberView);
+  map.on("click",reconMapClick);
+  selectReconHole(0);
+}
+function closeRecon(){if(_recon){if(_recon.map)_recon.map.remove();if(_recon.box)_recon.box.remove();_recon=null;}}
+function reconChromeHTML(course){
+  const nav=course.holes.map((h,n)=>`<button id="rcH${n}" onclick="selectReconHole(${n})" style="flex:none;width:30px;height:30px;border-radius:50%;border:1.5px solid #fff;background:rgba(255,255,255,.12);color:#fff;font-weight:700;font-size:12px;cursor:pointer;">${h.no}</button>`).join("");
+  const tool=(m,label)=>`<button id="rcM_${m}" onclick="reconSetMode('${m}')" style="flex:none;border:1.5px solid #fff;background:rgba(255,255,255,.1);color:#fff;border-radius:6px;padding:5px 9px;font-size:12.5px;cursor:pointer;">${label}</button>`;
+  return `<div style="position:absolute;top:0;left:0;right:0;z-index:1000;background:rgba(20,28,22,.94);color:#fff;padding:8px 12px;">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button onclick="closeRecon()" style="background:none;border:1.5px solid #fff;color:#fff;border-radius:6px;padding:5px 11px;font-size:14px;cursor:pointer;">← 返回</button>
+      <span style="font-weight:700;font-size:14px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">🛰 ${esc(course.name||"球场")} · 赛前看图</span>
+      <button onclick="reconSetToken()" title="填 Mapbox token 换高清卫星图" style="background:none;border:1px solid #fff;color:#fff;border-radius:5px;padding:4px 8px;font-size:11px;cursor:pointer;">${getMapboxToken()?"高清 ✓":"换高清"}</button>
+    </div>
+    <div style="display:flex;gap:6px;margin-top:7px;">
+      <input id="reconAddr" value="${esc(course.address||"")}" placeholder="输入球场地址,定位卫星图" style="flex:1;padding:6px 9px;border-radius:5px;border:none;font-size:13px;">
+      <button onclick="reconLocate()" style="flex:none;border:none;background:#2E7D46;color:#fff;border-radius:5px;padding:6px 14px;font-size:13px;font-weight:700;cursor:pointer;">定位</button>
+    </div>
+    <div style="display:flex;gap:5px;overflow-x:auto;margin-top:7px;padding-bottom:2px;">${nav}</div>
+    <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">${tool("tee","📍发球台")}${tool("green","⛳果岭")}${tool("point","⚠️关键点")}${tool("measure","📏量距")}</div>
+    <div id="reconInfo" style="margin-top:6px;font-size:12px;line-height:1.5;color:#cfe;"></div>
+  </div>
+  <div id="reconMapCanvas" style="position:absolute;inset:0;"></div>`;
+}
+function reconHl(m,on){const b=document.getElementById("rcM_"+m);if(b){b.style.background=on?"#2E7D46":"rgba(255,255,255,.1)";b.style.borderColor=on?"#2E7D46":"#fff";}}
+function reconSetToken(){const before=getMapboxToken();setMapboxToken();if(_recon&&getMapboxToken()!==before){const c=_recon.course;closeRecon();openRecon(c);}}
+function selectReconHole(n){
+  if(!_recon)return;
+  _recon.hole=n;_recon.mode=null;_recon.measureA=null;clearMeasureTmp();
+  _recon.course.holes.forEach((h,k)=>{const b=document.getElementById("rcH"+k);if(b){b.style.background=k===n?"#2E7D46":"rgba(255,255,255,.12)";b.style.borderColor=k===n?"#2E7D46":"#fff";}});
+  ["tee","green","point","measure"].forEach(m=>reconHl(m,false));
+  const h=_recon.course.holes[n],r=ensureRecon(h);
+  if(r.view)_recon.map.setView([r.view.lat,r.view.lng],r.view.zoom);
+  else if(_recon.course.center)_recon.map.setView([_recon.course.center.lat,_recon.course.center.lng],15);
+  reconRenderMarkers();reconUpdateInfo();
+}
+function reconSetMode(m){
+  if(!_recon)return;
+  const was=_recon.mode;
+  ["tee","green","point","measure"].forEach(x=>reconHl(x,false));
+  _recon.measureA=null;clearMeasureTmp();
+  if(was===m){_recon.mode=null;reconUpdateInfo();return;}
+  _recon.mode=m;reconHl(m,true);
+  const tip={tee:"点地图放置发球台",green:"点地图放置果岭中心",point:"点地图添加关键点,再选类型",measure:"依次点两点,量直线码数"}[m];
+  const el=document.getElementById("reconInfo");if(el)el.innerHTML=`<span style="color:#ffd166;">▸ ${esc(tip)}</span>`;
+}
+function clearMeasureTmp(){if(_recon&&_recon.measureMarker){_recon.map.removeLayer(_recon.measureMarker);_recon.measureMarker=null;}}
+function reconPickType(){
+  const v=prompt("关键点类型:\n1 = 沙坑\n2 = 水\n3 = 拐点\n4 = 理想落点","4");
+  if(v===null)return null;
+  return ({"1":"bunker","2":"water","3":"dogleg","4":"target"})[(v||"").trim()]||"target";
+}
+function reconMapClick(e){
+  if(!_recon||!_recon.mode)return;
+  const h=_recon.course.holes[_recon.hole],r=ensureRecon(h),ll={lat:e.latlng.lat,lng:e.latlng.lng};
+  if(_recon.mode==="tee"){r.tee=ll;_recon.mode=null;reconHl("tee",false);}
+  else if(_recon.mode==="green"){r.green=ll;_recon.mode=null;reconHl("green",false);}
+  else if(_recon.mode==="point"){const t=reconPickType();if(!t)return;r.points.push({lat:ll.lat,lng:ll.lng,type:t});}
+  else if(_recon.mode==="measure"){
+    if(!_recon.measureA){_recon.measureA=ll;_recon.measureMarker=L.circleMarker([ll.lat,ll.lng],{radius:5,color:"#fff",weight:2,fillColor:"#ffd166",fillOpacity:1}).addTo(_recon.map);return;}
+    const yd=ydBetween(_recon.measureA,ll);
+    const line=L.polyline([[_recon.measureA.lat,_recon.measureA.lng],[ll.lat,ll.lng]],{color:"#ffd166",weight:3,dashArray:"6,5"}).addTo(_recon.map);
+    const mid=[(_recon.measureA.lat+ll.lat)/2,(_recon.measureA.lng+ll.lng)/2];
+    const tip=L.marker(mid,{icon:L.divIcon({className:"",html:`<div style="background:#ffd166;color:#000;font-weight:700;font-size:12px;padding:2px 6px;border-radius:4px;white-space:nowrap;">${yd} 码</div>`,iconSize:[1,1]})}).addTo(_recon.map);
+    _recon.layers.push(line,tip);clearMeasureTmp();_recon.measureA=null;return;
+  }
+  reconSave();reconRenderMarkers();reconUpdateInfo();
+}
+function reconClearLayers(){if(!_recon)return;(_recon.layers||[]).forEach(l=>_recon.map.removeLayer(l));_recon.layers=[];}
+function reconRenderMarkers(){
+  if(!_recon)return;
+  reconClearLayers();
+  const h=_recon.course.holes[_recon.hole],r=ensureRecon(h),map=_recon.map;
+  if(r.tee){const m=L.circleMarker([r.tee.lat,r.tee.lng],{radius:8,color:"#fff",weight:2,fillColor:"#2E7D46",fillOpacity:1}).addTo(map).bindPopup(`<b>📍 发球台</b><br><button onclick="reconClearTeeGreen('tee')" style="margin-top:4px;border:1px solid #c00;color:#c00;background:none;border-radius:4px;padding:2px 8px;cursor:pointer;">删除</button>`);_recon.layers.push(m);}
+  if(r.green){const m=L.circleMarker([r.green.lat,r.green.lng],{radius:8,color:"#fff",weight:2,fillColor:"#EF476F",fillOpacity:1}).addTo(map).bindPopup(`<b>⛳ 果岭中心</b><br><button onclick="reconClearTeeGreen('green')" style="margin-top:4px;border:1px solid #c00;color:#c00;background:none;border-radius:4px;padding:2px 8px;cursor:pointer;">删除</button>`);_recon.layers.push(m);}
+  (r.points||[]).forEach((p,idx)=>{
+    const meta=RECON_PT[p.type]||RECON_PT.target;
+    const dT=r.tee?ydBetween(r.tee,p):null,dG=r.green?ydBetween(r.green,p):null;
+    const dist=[dT!=null?`距台 ${dT} 码`:"",dG!=null?`距果岭 ${dG} 码`:""].filter(Boolean).join(" · ");
+    const m=L.circleMarker([p.lat,p.lng],{radius:7,color:"#fff",weight:2,fillColor:meta.c,fillOpacity:1}).addTo(map).bindPopup(`<b>${meta.t}</b>${dist?`<br><span style="font-size:12px;">${dist}</span>`:""}<br><button onclick="reconDelPoint(${idx})" style="margin-top:4px;border:1px solid #c00;color:#c00;background:none;border-radius:4px;padding:2px 8px;cursor:pointer;">删除</button>`);
+    _recon.layers.push(m);
+  });
+}
+function reconClearTeeGreen(which){const h=_recon.course.holes[_recon.hole],r=ensureRecon(h);r[which]=null;_recon.map.closePopup();reconSave();reconRenderMarkers();reconUpdateInfo();}
+function reconDelPoint(idx){const h=_recon.course.holes[_recon.hole],r=ensureRecon(h);r.points.splice(idx,1);_recon.map.closePopup();reconSave();reconRenderMarkers();reconUpdateInfo();}
+function reconRememberView(){
+  if(!_recon||!_recon.map)return;
+  const h=_recon.course.holes[_recon.hole];if(!h)return;
+  const c=_recon.map.getCenter();
+  ensureRecon(h).view={lat:c.lat,lng:c.lng,zoom:_recon.map.getZoom()};
+  // 拖动/缩放会高频触发 moveend:视角即时存内存,落库防抖(停手 700ms 后写一次)
+  if(_reconViewTimer)clearTimeout(_reconViewTimer);
+  _reconViewTimer=setTimeout(()=>{_reconViewTimer=null;reconSave();},700);
+}
+function reconUpdateInfo(){
+  if(!_recon)return;const el=document.getElementById("reconInfo");if(!el)return;
+  const h=_recon.course.holes[_recon.hole],r=ensureRecon(h);
+  const tee0=_recon.course.tees&&_recon.course.tees[0];
+  const official=tee0&&h.yards?h.yards[tee0]:null;
+  let parts=[`<b style="color:#fff;">第 ${h.no} 洞</b> · Par ${h.par}`];
+  if(r.tee&&r.green)parts.push(`看图全长 <b style="color:#fff;">${ydBetween(r.tee,r.green)} 码</b>${official?`(卡上 ${official})`:""}`);
+  else parts.push(`<span style="color:#ffd166;">标发球台+果岭算全长</span>`);
+  let html=parts.join(" · ");
+  if(r.points&&r.points.length){
+    html+="<br>"+r.points.map(p=>{const meta=RECON_PT[p.type]||RECON_PT.target;const dT=r.tee?ydBetween(r.tee,p):null,dG=r.green?ydBetween(r.green,p):null;return `<span style="color:${meta.c};">●</span> ${meta.t}${dT!=null?` 距台 ${dT}`:""}${dG!=null?` 距果岭 ${dG}`:""}`;}).join(" · ");
+  }
+  el.innerHTML=html;
+}
+function reconSave(){
+  const c=_recon&&_recon.course;if(!c)return;
+  if(c===S.course)saveCourse();
+  const li=courses.findIndex(x=>x.name===c.name);
+  if(li>=0){if(courses[li]!==c)courses[li]=c;saveCoursesLib();}
+}
+async function geocodeAddress(q){
+  // 多候选:原始地址 + 去掉中文国家后缀/规整逗号的版本(Nominatim 对 "...29223美国" 这类混写常查不到)
+  const cleaned=q.replace(/[，﹐]/g,",").replace(/\s*(美国|中国|加拿大|澳大利亚|英国|日本|韩国)\s*$/,"").trim();
+  const variants=cleaned&&cleaned!==q?[q,cleaned]:[q];
+  const tk=getMapboxToken();
+  if(tk){for(const v of variants){
+    try{
+      const r=await fetch(`https://api.mapbox.com/search/geocode/v6/forward?q=${encodeURIComponent(v)}&limit=1&access_token=${tk}`);
+      if(r.ok){const j=await r.json();const f=j.features&&j.features[0];if(f&&f.geometry&&f.geometry.coordinates){const a=f.geometry.coordinates;return{lat:a[1],lng:a[0]};}}
+    }catch(e){}
+  }}
+  for(const v of variants){
+    try{
+      const r=await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(v)}`,{headers:{Accept:"application/json"}});
+      if(r.ok){const j=await r.json();if(j&&j[0])return{lat:+j[0].lat,lng:+j[0].lon};}
+    }catch(e){}
+  }
+  return null;
+}
+function reconLocate(){
+  if(!_recon)return;
+  const q=((document.getElementById("reconAddr")||{}).value||"").trim();
+  if(!q){alert("先填球场地址。");return;}
+  showOverlay("定位球场…");
+  geocodeAddress(q).then(pos=>{
+    hideOverlay();
+    if(!pos){alert("没定位到「"+q+"」。\n可换更完整的地址(带城市/州),或直接手动拖动地图找到球场。");return;}
+    _recon.course.address=q;_recon.course.center={lat:pos.lat,lng:pos.lng};
+    reconSave();
+    _recon.map.flyTo([pos.lat,pos.lng],15);
+  });
+}
 function deleteRoundById(id){if(!confirm("删除这场记录？该场的杆数数据将从统计中移除。"))return;const i=rounds.findIndex(r=>r.id===id);if(i>=0){rounds.splice(i,1);saveRounds();renderStats();}}
 function toggleRoundDetail(id){S.openRound=S.openRound===id?null:id;renderStats();}
 function roundDetailHTML(rd){
@@ -1433,6 +1600,7 @@ function renderPlay(){const w=document.getElementById("playWrap");
       </div>
       <div style="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap;">
         <button class="mini" onclick="openCoursePage()">⚙️ 管理球场</button>
+        <button class="mini" onclick="openRecon(S.course)">🛰 赛前看图</button>
         ${courses.find(c=>c.name===S.course.name)?`<button class="mini" onclick="deleteSavedCourse()" style="color:var(--flag);border-color:var(--flag);">🗑 从常打删除此球场</button>`:""}
       </div>
     </div>
