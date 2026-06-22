@@ -1039,9 +1039,10 @@ function setMapboxToken(){
   if(rid!=null){closeTrackMap();openTrackMap(rid);}
   else alert(t?"✅ 已保存,下次看轨迹用 Mapbox 高清。":"已清除,用回 Esri。");
 }
+function mapBasePref(){return localStorage.getItem("golf:mapBase")||"auto";} // auto|mapbox|esri
+function mapBaseIsMapbox(){const p=mapBasePref();return !!getMapboxToken()&&(p==="mapbox"||p==="auto");}
 function mapTileLayer(){
-  const tk=getMapboxToken();
-  if(tk)return L.tileLayer(`https://api.mapbox.com/styles/v1/mapbox/satellite-v9/tiles/256/{z}/{x}/{y}@2x?access_token=${tk}`,{maxZoom:22,attribution:"© Mapbox © Maxar"});
+  if(mapBaseIsMapbox())return L.tileLayer(`https://api.mapbox.com/styles/v1/mapbox/satellite-v9/tiles/256/{z}/{x}/{y}@2x?access_token=${getMapboxToken()}`,{maxZoom:22,attribution:"© Mapbox © Maxar"});
   return L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxZoom:21,maxNativeZoom:19,attribution:"Tiles © Esri"});
 }
 async function openTrackMap(roundId){
@@ -1101,8 +1102,8 @@ async function openRecon(course){
   box.innerHTML=reconChromeHTML(course);
   const map=L.map("reconMapCanvas",{zoomControl:false,attributionControl:true});
   L.control.zoom({position:"bottomright"}).addTo(map);
-  mapTileLayer().addTo(map);
   _recon.map=map;
+  _recon.baseLayer=mapTileLayer().addTo(map);
   const c=course.center;
   map.setView(c?[c.lat,c.lng]:[39.5,-98.35],c?15:4);
   map.on("moveend",reconRememberView);
@@ -1117,7 +1118,8 @@ function reconChromeHTML(course){
     <div style="display:flex;align-items:center;gap:8px;">
       <button onclick="closeRecon()" style="background:none;border:1.5px solid #fff;color:#fff;border-radius:6px;padding:5px 11px;font-size:14px;cursor:pointer;">← 返回</button>
       <span style="font-weight:700;font-size:14px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">🛰 ${esc(course.name||"球场")} · 赛前看图</span>
-      <button onclick="reconSetToken()" title="填 Mapbox token 换高清卫星图" style="background:none;border:1px solid #fff;color:#fff;border-radius:5px;padding:4px 8px;font-size:11px;cursor:pointer;">${getMapboxToken()?"高清 ✓":"换高清"}</button>
+      <button onclick="reconToggleBase()" id="reconBaseBtn" title="切换卫星图来源(Mapbox / Esri,选更清楚的)" style="background:none;border:1px solid #fff;color:#fff;border-radius:5px;padding:4px 8px;font-size:11px;cursor:pointer;white-space:nowrap;">${reconBaseLabel()}</button>
+      <button onclick="reconSetToken()" title="填自己的 Mapbox token" style="background:none;border:1px solid #fff;color:#fff;border-radius:5px;padding:4px 7px;font-size:11px;cursor:pointer;">⚙</button>
     </div>
     <div style="display:flex;gap:6px;margin-top:7px;">
       <input id="reconAddr" value="${esc(course.address||"")}" placeholder="输入球场地址,定位卫星图" style="flex:1;padding:6px 9px;border-radius:5px;border:none;font-size:13px;">
@@ -1131,6 +1133,16 @@ function reconChromeHTML(course){
 }
 function reconHl(m,on){const b=document.getElementById("rcM_"+m);if(b){b.style.background=on?"#2E7D46":"rgba(255,255,255,.1)";b.style.borderColor=on?"#2E7D46":"#fff";}}
 function reconSetToken(){const before=getMapboxToken();setMapboxToken();if(_recon&&getMapboxToken()!==before){const c=_recon.course;closeRecon();openRecon(c);}}
+function reconBaseLabel(){return "🗺 "+(mapBaseIsMapbox()?"Mapbox":"Esri");}
+function reconToggleBase(){
+  localStorage.setItem("golf:mapBase",mapBaseIsMapbox()?"esri":"mapbox");
+  if(_recon&&_recon.map){
+    if(_recon.baseLayer)_recon.map.removeLayer(_recon.baseLayer);
+    _recon.baseLayer=mapTileLayer().addTo(_recon.map);
+    if(_recon.baseLayer.bringToBack)_recon.baseLayer.bringToBack();
+  }
+  const b=document.getElementById("reconBaseBtn");if(b)b.textContent=reconBaseLabel();
+}
 function selectReconHole(n){
   if(!_recon)return;
   _recon.hole=n;_recon.mode=null;_recon.measureA=null;clearMeasureTmp();
@@ -1219,10 +1231,12 @@ function reconSave(){
   const li=courses.findIndex(x=>x.name===c.name);
   if(li>=0){if(courses[li]!==c)courses[li]=c;saveCoursesLib();}
 }
-async function geocodeAddress(q){
-  // 多候选:原始地址 + 去掉中文国家后缀/规整逗号的版本(Nominatim 对 "...29223美国" 这类混写常查不到)
+async function geocodeAddress(q,name){
+  // 多候选,提高命中球场本体:球场名+地址 → 原地址 → 去中文国家后缀版 → 球场名单独
+  // (纯街道地址常被解析到门牌点;带球场名更易直接命中 POI;Nominatim 对 "...29223美国" 混写也查不到)
   const cleaned=q.replace(/[，﹐]/g,",").replace(/\s*(美国|中国|加拿大|澳大利亚|英国|日本|韩国)\s*$/,"").trim();
-  const variants=cleaned&&cleaned!==q?[q,cleaned]:[q];
+  const seen={},variants=[];
+  [name&&q?name+", "+q:"",q,cleaned!==q?cleaned:"",name||""].forEach(v=>{if(v&&!seen[v]){seen[v]=1;variants.push(v);}});
   const tk=getMapboxToken();
   if(tk){for(const v of variants){
     try{
@@ -1243,12 +1257,12 @@ function reconLocate(){
   const q=((document.getElementById("reconAddr")||{}).value||"").trim();
   if(!q){alert("先填球场地址。");return;}
   showOverlay("定位球场…");
-  geocodeAddress(q).then(pos=>{
+  geocodeAddress(q,_recon.course.name).then(pos=>{
     hideOverlay();
     if(!pos){alert("没定位到「"+q+"」。\n可换更完整的地址(带城市/州),或直接手动拖动地图找到球场。");return;}
     _recon.course.address=q;_recon.course.center={lat:pos.lat,lng:pos.lng};
     reconSave();
-    _recon.map.flyTo([pos.lat,pos.lng],15);
+    _recon.map.flyTo([pos.lat,pos.lng],14); // 拉远些方便一眼确认球场并微调
   });
 }
 function deleteRoundById(id){if(!confirm("删除这场记录？该场的杆数数据将从统计中移除。"))return;const i=rounds.findIndex(r=>r.id===id);if(i>=0){rounds.splice(i,1);saveRounds();renderStats();}}
