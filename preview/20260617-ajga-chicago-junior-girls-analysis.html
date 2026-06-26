@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AJGA 芝加哥青少年全明星赛 2026 · 女子组分析报告</title>
+<style>
+  :root{
+    --bg:#0f1419; --panel:#1a212b; --panel2:#222c38; --line:#2e3a48;
+    --ink:#e8edf2; --ink2:#9fb0c0; --ink3:#6b7c8c;
+    --green:#2ecc71; --green-bg:rgba(46,204,113,.14);
+    --red:#ff5c5c; --red-bg:rgba(255,92,92,.14);
+    --amber:#ffb648; --amber-bg:rgba(255,182,72,.14);
+    --blue:#4aa3ff; --accent:#bf2c37;
+    --par:#7d8ea0;
+    --maxw:1100px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:32px 20px 80px}
+  header.hero{border-bottom:1px solid var(--line);padding-bottom:24px;margin-bottom:32px}
+  .tag{display:inline-block;background:var(--accent);color:#fff;font-size:12px;font-weight:700;
+    letter-spacing:.05em;padding:4px 10px;border-radius:4px;margin-bottom:14px}
+  h1{font-size:28px;margin:0 0 8px;line-height:1.25}
+  .sub{color:var(--ink2);font-size:15px}
+  .meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+  .chip{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 14px;font-size:13px}
+  .chip b{color:var(--ink);font-size:15px}
+  .chip span{color:var(--ink3);display:block;font-size:11px;letter-spacing:.04em;text-transform:uppercase}
+  h2{font-size:21px;margin:44px 0 16px;padding-left:12px;border-left:4px solid var(--accent)}
+  h3{font-size:16px;margin:24px 0 10px;color:var(--ink)}
+  p{color:var(--ink2);font-size:14.5px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:16px 0}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin:6px 0}
+  th,td{padding:8px 6px;text-align:center;border-bottom:1px solid var(--line)}
+  th{color:var(--ink3);font-weight:600;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase}
+  td.name,th.name{text-align:left;white-space:nowrap}
+  .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  tbody tr:hover{background:var(--panel2)}
+  .pos{color:var(--ink3);font-size:12px}
+  .good{color:var(--green)}.bad{color:var(--red)}.warn{color:var(--amber)}
+  .pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700}
+  .pill.cut{background:var(--red-bg);color:var(--red)}
+  .pill.adv{background:var(--green-bg);color:var(--green)}
+  /* hole table */
+  .holetab td,.holetab th{padding:6px 4px;font-size:12.5px;min-width:30px}
+  .holetab .lbl{text-align:left;color:var(--ink3);white-space:nowrap;font-size:11.5px}
+  .seg{background:var(--panel2);font-weight:700;color:var(--ink2)}
+  .par-row td{color:var(--par)}
+  .ydg-row td{color:var(--ink3);font-size:11px}
+  .sc-e{background:rgba(255,182,72,.22);color:#ffd27d;font-weight:700;border-radius:4px}
+  .sc-b{background:var(--green-bg);color:var(--green);font-weight:700;border-radius:4px}
+  .sc-p{color:var(--ink2)}
+  .sc-bo{background:rgba(255,92,92,.12);color:#ff9b9b;border-radius:4px}
+  .sc-d{background:var(--red-bg);color:var(--red);font-weight:700;border-radius:4px}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--ink3);margin:10px 0 0}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .dot{width:12px;height:12px;border-radius:3px;display:inline-block}
+  /* difficulty bars */
+  .holebar{display:flex;align-items:center;gap:10px;margin:5px 0;font-size:13px}
+  .holebar .hl{width:118px;color:var(--ink2);flex-shrink:0;font-size:12.5px}
+  .holebar .track{flex:1;height:20px;background:var(--panel2);border-radius:4px;position:relative;overflow:hidden}
+  .holebar .fill{position:absolute;top:0;bottom:0;border-radius:4px}
+  .holebar .val{width:64px;text-align:right;flex-shrink:0;font-variant-numeric:tabular-nums;font-size:12.5px}
+  .hard .fill{background:linear-gradient(90deg,#ff7a45,#ff5c5c)}
+  .easy .fill{background:linear-gradient(90deg,#2ecc71,#27d17c)}
+  .mid-line{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink3);left:50%;opacity:.5}
+  ul{color:var(--ink2);font-size:14px;padding-left:20px}
+  li{margin:6px 0}
+  .diag{border-left:3px solid var(--line);padding:4px 0 4px 16px;margin:14px 0}
+  .diag.adv{border-color:var(--green)}
+  .diag.cut{border-color:var(--red)}
+  .diag h3{margin-top:0}
+  .key{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin:12px 0}
+  .key b{color:var(--amber)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:720px){.grid2{grid-template-columns:1fr}h1{font-size:23px}}
+  footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);color:var(--ink3);font-size:12.5px}
+  footer a{color:var(--blue);text-decoration:none}
+  .note{font-size:12.5px;color:var(--ink3);font-style:italic}
+  .takeaway{background:linear-gradient(135deg,rgba(191,44,55,.16),rgba(74,163,255,.10));
+    border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin:18px 0}
+  .takeaway h3{margin-top:0;color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <span class="tag">AJGA · 赛事数据分析</span>
+    <h1>芝加哥青少年全明星锦标赛 2026 · 女子组</h1>
+    <div class="sub">Chicago Junior All-Star Championship — Girls Division ｜ Phillips Park Golf Course, Aurora, IL</div>
+    <div class="meta">
+      <div class="chip"><span>球场设置</span><b>Par 72 · 5,523 yd</b></div>
+      <div class="chip"><span>参赛 / 晋级</span><b>36 人 → 28 人</b></div>
+      <div class="chip"><span>R1 场均</span><b>76.2 杆</b></div>
+      <div class="chip"><span>R2 场均</span><b>77.9 杆</b></div>
+      <div class="chip"><span>分析对象</span><b>5 位华裔小将</b></div>
+    </div>
+  </header>
+
+  <p class="note">说明：逐洞成绩、码数、Par 均来自 AJGA 官方计分系统逐人抓取（女子组全部 36 人）。每洞「场均」为 R1+R2 合计、剔除未完成洞后实算；下方 5 位球员总杆已与官方榜单逐一核对吻合。</p>
+
+  <!-- ========== 一、总览 ========== -->
+  <h2>一、5 位球员总览</h2>
+  <div class="card scroll">
+    <table>
+      <thead><tr>
+        <th class="name">球员</th><th>R1</th><th>R2</th><th>总杆</th><th>成绩</th><th>名次</th><th class="name">关键特征</th>
+      </tr></thead>
+      <tbody>
+        <tr><td class="name">Keisha Han <span class="pos">(2031)</span></td><td>78</td><td class="good"><b>70</b></td><td>148</td><td>+4</td><td><span class="pill adv">T4 晋级</span></td><td class="name">R2 暴涨 8 杆、后九 33，全场唯一逆势大反弹</td></tr>
+        <tr><td class="name">Zhixin Lu <span class="pos">(2032)</span></td><td>73</td><td class="bad">77</td><td>150</td><td>+6</td><td><span class="pill adv">T11 晋级</span></td><td class="name">R1 稳，R2 三个 double 崩盘</td></tr>
+        <tr><td class="name">Katherine Xia <span class="pos">(2030)</span></td><td>73</td><td class="bad">80</td><td>153</td><td>+9</td><td><span class="pill adv">T18 晋级</span></td><td class="name">R1 好，R2 短洞 + 中段连环丢分</td></tr>
+        <tr><td class="name">Zixi (Cocomi) Wang <span class="pos">(2031)</span></td><td>73</td><td class="bad">80</td><td>153</td><td>+9</td><td><span class="pill adv">T18 晋级</span></td><td class="name">短 Par3 反复丢分，前九两轮都弱</td></tr>
+        <tr><td class="name">Amanda Zhang <span class="pos">(2030)</span></td><td>78</td><td class="bad">80</td><td>158</td><td>+14</td><td><span class="pill cut">CUT 未晋级</span></td><td class="name">两个爆洞（3 号 +3）拖垮整轮</td></tr>
+        <tr style="opacity:.7"><td class="name">— 冠军 Beverley Cui</td><td>70</td><td>73</td><td>143</td><td class="good">−1</td><td>1</td><td class="name">参照标杆：Par5 全吃干净</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ========== 二、球场难度地图 ========== -->
+  <h2>二、球场难度地图：难点洞 vs 送分洞</h2>
+  <p>下图为各洞场均相对 Par 的偏离（正数=难，负数=易），中线为 Par。</p>
+
+  <div class="grid2">
+    <div class="card">
+      <h3 class="bad">🔴 最难 5 洞</h3>
+      <div id="hardBars"></div>
+    </div>
+    <div class="card">
+      <h3 class="good">🟢 最易 / 送分 5 洞</h3>
+      <div id="easyBars"></div>
+    </div>
+  </div>
+
+  <div class="card scroll">
+    <h3>全 18 洞难度明细</h3>
+    <table id="diffTable">
+      <thead><tr><th>洞</th><th>Par</th><th>码数</th><th>场均</th><th>较 Par</th><th>难度排名</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="key">
+    <p style="margin:0 0 8px"><b>三个结构性结论</b></p>
+    <ul style="margin:0">
+      <li><b>送分洞 = 4 个 Par5 + 短 Par4（11 号）。</b>尤其 <b>16 号</b>（Par5 仅 415 码，场均 4.64，全场唯一打到 par 以下）是最大抓鸟机会。前列选手就靠把 Par5 全吃干净拉开身位。</li>
+      <li><b>短 Par3 是隐形杀手。</b>12 号(150y)、4 号(144y)、10 号(147y)全进难度前 7，连 104 码的 2 号都频频吃 bogey——果岭难守，距离短反而麻痹人。</li>
+      <li><b>7 号 Par4（354 码）是全场第一难洞。</b>5 人里有 3 人在此吃 double，正确策略是「当难洞防守，保 par 即赚」。</li>
+    </ul>
+  </div>
+
+  <!-- ========== 三、逐人逐洞 ========== -->
+  <h2>三、逐人逐洞诊断（vs 场均）</h2>
+  <div class="legend card" style="padding:12px 18px">
+    <span><i class="dot" style="background:rgba(255,182,72,.6)"></i>鹰或更好</span>
+    <span><i class="dot" style="background:var(--green)"></i>小鸟</span>
+    <span><i class="dot" style="background:var(--panel2);border:1px solid var(--line)"></i>标准杆</span>
+    <span><i class="dot" style="background:rgba(255,92,92,.4)"></i>柏忌(+1)</span>
+    <span><i class="dot" style="background:var(--red)"></i>双柏忌+(≥+2)</span>
+  </div>
+  <div id="playerCards"></div>
+
+  <!-- ========== 四、共性与建议 ========== -->
+  <h2>四、五人共性 &amp; 给训练的建议</h2>
+  <div class="card scroll">
+    <table>
+      <thead><tr><th class="name">共性问题</th><th class="name">证据</th><th class="name">训练 / 赛前对策</th></tr></thead>
+      <tbody>
+        <tr><td class="name"><b>送分 Par5 没吃干净 / 反而爆洞</b></td><td class="name">Lu 18号 +2、Amanda 3号 +3、Keisha R1 两个 Par5 bogey</td><td class="name">重点练两杆布局 + 第三杆 80–120 码 wedge；Par5 力争半数抓鸟、绝不超 bogey</td></tr>
+        <tr><td class="name"><b>短 Par3 反复失手</b></td><td class="name">2 / 4 / 10 / 12 号几乎人人中招</td><td class="name">练 100–150 码精准铁杆到小果岭 + 果岭周围沙坑救球；心态上「短洞≠易洞」</td></tr>
+        <tr><td class="name"><b>7 号（全场最难 Par4）频繁 double</b></td><td class="name">Lu / Xia / Amanda R2 均在此 +2</td><td class="name">赛前定策略：当难洞防守，求稳上果岭两推保 par，绝不贪攻</td></tr>
+        <tr><td class="name"><b>R2 普遍退步（场均 +1.7）</b></td><td class="name">仅 Keisha 逆势 −8</td><td class="name">压力 / 续航问题。以 Keisha 的 R2 为「第二轮如何反弹」范本复盘</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="takeaway">
+    <h3>一句话总结</h3>
+    <p style="color:var(--ink);font-size:15px;margin:0">这套球场不靠长度吃人（仅 5,523 码），赢在 <b style="color:var(--amber)">短铁精度 + Par5 把握 + 不打爆洞</b>。几位选手底子都在（多人 R1 打 73），差距几乎全部来自「机会洞没拿下 + 个别洞爆大数字」，而非技术全面落后——这恰恰是<b style="color:var(--amber)">最可训练、最快见效</b>的部分。</p>
+  </div>
+
+  <footer>
+    <p><b>数据来源</b><br>
+    · <a href="https://www.ajga.org/tournaments/2026066/leaderboard" target="_blank">AJGA 官方计分系统（逐人 scorecard 接口实抓）</a><br>
+    · <a href="https://www.phillipsparkaurora.com/" target="_blank">Phillips Park Golf Course 官网</a><br>
+    · <a href="https://course.bluegolf.com/bluegolf/course/course/phillipsparkgolfcourse/overview.htm" target="_blank">Phillips Park 球场布局 · BlueGolf 数据库</a></p>
+    <p>报告生成日期：2026-06-17　|　分析范围：R1（6/16）+ R2（6/17）</p>
+  </footer>
+
+</div>
+
+<script>
+const DATA = {"PAR":[4,3,5,3,4,4,4,4,5,3,4,3,4,4,5,5,3,5],"YDG":[345,104,463,144,333,333,354,294,473,147,316,150,333,298,483,415,110,428],"avgR1":[4.42,3.19,5.31,3.33,4.25,4.25,4.53,4.33,5.14,3.33,3.81,3.61,4.03,4.47,5.22,4.47,3.33,5.14],"avgR2":[4.33,3.39,5.69,3.44,4.47,4.58,4.89,4.39,5.22,3.42,4.17,3.42,4.25,4.28,5,4.81,3.31,4.89],"avgAll":[4.38,3.29,5.5,3.39,4.36,4.42,4.71,4.36,5.18,3.38,3.99,3.51,4.14,4.38,5.11,4.64,3.32,5.01],"players":{"Keisha Han":{"R1":{"holes":[5,2,5,3,5,4,4,5,5,4,3,3,4,5,6,5,4,6],"out":38,"in":40,"total":78},"R2":{"holes":[5,3,5,3,4,4,4,4,5,3,4,3,3,4,4,4,4,4],"out":37,"in":33,"total":70}},"Zhixin Lu":{"R1":{"holes":[4,3,5,3,4,4,4,4,6,3,4,4,4,4,6,5,2,4],"out":37,"in":36,"total":73},"R2":{"holes":[4,5,4,3,4,4,6,4,5,3,4,4,3,4,5,5,3,7],"out":39,"in":38,"total":77}},"Katherine Xia":{"R1":{"holes":[4,3,5,4,4,4,4,4,5,4,4,3,4,4,5,4,3,5],"out":37,"in":36,"total":73},"R2":{"holes":[4,4,6,3,5,4,6,4,5,3,4,5,5,4,6,5,2,5],"out":41,"in":39,"total":80}},"Zixi (Cocomi) Wang":{"R1":{"holes":[4,4,6,3,3,5,3,4,4,4,4,3,4,4,5,4,3,6],"out":36,"in":37,"total":73},"R2":{"holes":[4,4,5,4,4,5,5,5,7,3,4,4,4,4,6,4,3,5],"out":43,"in":37,"total":80}},"Amanda Zhang":{"R1":{"holes":[5,3,5,4,5,4,4,4,5,3,5,4,5,4,6,4,3,5],"out":39,"in":39,"total":78},"R2":{"holes":[4,3,8,4,4,5,6,5,4,3,4,4,5,4,5,5,3,4],"out":43,"in":37,"total":80}}}};
+
+const DIAG = {
+  "Keisha Han":{cls:"adv",t:"78→70，T4 — 教科书级反弹",pts:[
+    "<b>R1（78）</b>：8 个 bogey、几乎无鸟，全是「碎柏忌」；丢分集中在送分洞没抓住（15、18 号 Par5 都 bogey）+ 短 Par3 失误（10、17 号）。",
+    "<b>R2（70）</b>：抓 4 鸟（13/15/16/18，全是 Par5 与送分洞！），后九仅 33 杆。",
+    "<b>诊断</b>：R1 输在「机会洞没拿下 + 短铁不稳」，R2 全修正。最值得学习的一轮——把 Par5 吃下、短铁站稳，立刻进前四。"]},
+  "Zhixin Lu":{cls:"adv",t:"73→77，T11 — R2 三个 double 崩盘",pts:[
+    "R1 很稳（73，无 double）；R2 崩在 2 号 Par3 +2、7 号难洞 +2、18 号送分 Par5 打 7（+2）。",
+    "<b>诊断</b>：18 号本是送分洞却爆洞（比场均多 2.11 杆）最致命——在该进攻的机会洞反而出大数字。底子最好，关键是消灭单洞爆洞。"]},
+  "Katherine Xia":{cls:"adv",t:"73→80，T18 — 短洞 + 中段连环丢",pts:[
+    "R1 不错（73）；R2 滑到 80：2 号、12 号两个短 Par3 合计丢 3 杆（12 号 +2），7 号 +2，再加 13/15 连续掉。",
+    "<b>诊断</b>：短 Par3 是命门（R1 也在 4/10 号短三杆 bogey）。短铁进攻精度 + 短洞救球是首要训练项。"]},
+  "Zixi (Cocomi) Wang":{cls:"adv",t:"73→80，T18 — 104 码的 2 号成心魔 + 前九弱",pts:[
+    "2 号洞（仅 104 码！）R1、R2 都 bogey，全场最短却反复丢分；前九两轮 36/43 偏弱，R2 9 号 Par5 打 7（+2）。",
+    "<b>诊断</b>：(a) 超短 Par3 的心理 / 精度问题；(b) 开局前九热身不足。建议赛前充分热短铁、前几洞当「保 par 启动」。"]},
+  "Amanda Zhang":{cls:"cut",t:"78→80，未晋级 — 爆洞拖垮",pts:[
+    "R2 3 号 Par5 打 8（+3，比场均多 2.31 杆）+ 7 号 +2，单这两洞就丢掉晋级线；R1 还在 11 号送分短 Par4 吃 bogey。",
+    "<b>诊断</b>：「大数字」是唯一也是最大的问题。par 能力够（多数洞接近场均），但每轮一个爆洞 = 直接出局。止损能力比进攻更优先。"]}
+};
+
+function scClass(s,p){ if(s===0)return ''; const d=s-p; if(d<=-2)return 'sc-e'; if(d===-1)return 'sc-b'; if(d===0)return 'sc-p'; if(d===1)return 'sc-bo'; return 'sc-d'; }
+
+// difficulty bars
+function diffBars(){
+  const arr=DATA.avgAll.map((a,h)=>({h:h+1,par:DATA.PAR[h],ydg:DATA.YDG[h],avg:a,over:+(a-DATA.PAR[h]).toFixed(2)}));
+  const ranked=[...arr].sort((a,b)=>b.over-a.over);
+  const rank={}; ranked.forEach((o,i)=>rank[o.h]=i+1);
+  const maxAbs=Math.max(...arr.map(o=>Math.abs(o.over)));
+  function bar(o,type){
+    const w=Math.abs(o.over)/maxAbs*50; // half-track
+    const side = o.over>=0 ? `left:50%;width:${w}%` : `right:50%;width:${w}%`;
+    return `<div class="holebar ${type}">
+      <div class="hl">第${o.h}洞 · Par${o.par} · ${o.ydg}y</div>
+      <div class="track"><div class="mid-line"></div><div class="fill" style="${side}"></div></div>
+      <div class="val ${o.over>=0?'bad':'good'}">${o.over>=0?'+':''}${o.over.toFixed(2)}</div>
+    </div>`;
+  }
+  document.getElementById('hardBars').innerHTML = ranked.slice(0,5).map(o=>bar(o,'hard')).join('');
+  document.getElementById('easyBars').innerHTML = ranked.slice(-5).reverse().map(o=>bar(o,'easy')).join('');
+
+  // full table
+  const tb=document.querySelector('#diffTable tbody');
+  tb.innerHTML = arr.map(o=>{
+    const cls = rank[o.h]<=5?'bad':(rank[o.h]>=15?'good':'');
+    return `<tr><td><b>${o.h}</b></td><td>${o.par}</td><td>${o.ydg}</td><td>${o.avg.toFixed(2)}</td>
+      <td class="${o.over>=0?'bad':'good'}">${o.over>=0?'+':''}${o.over.toFixed(2)}</td>
+      <td class="${cls}">#${rank[o.h]}</td></tr>`;
+  }).join('');
+}
+
+// per-player hole tables
+function holeTable(name){
+  const p=DATA.players[name];
+  const holes=['1','2','3','4','5','6','7','8','9','OUT','10','11','12','13','14','15','16','17','18','IN','TOT'];
+  function row(label,vals,kind,roundKey){
+    let cells='';
+    let idx=0;
+    for(let i=0;i<21;i++){
+      if(i===9){ // OUT
+        cells+=`<td class="seg">${roundKey?p[roundKey].out:DATA.PAR.slice(0,9).reduce((a,b)=>a+b,0)}</td>`;
+      } else if(i===19){
+        cells+=`<td class="seg">${roundKey?p[roundKey].in:DATA.PAR.slice(9).reduce((a,b)=>a+b,0)}</td>`;
+      } else if(i===20){
+        cells+=`<td class="seg">${roundKey?p[roundKey].total:72}</td>`;
+      } else {
+        const v=vals[idx];
+        if(kind==='score'){
+          const cl=scClass(v,DATA.PAR[idx]);
+          cells+=`<td class="${cl}">${v||'-'}</td>`;
+        } else if(kind==='par'){ cells+=`<td>${v}</td>`; }
+        else { cells+=`<td>${v}</td>`; }
+        idx++;
+      }
+    }
+    return `<tr class="${kind==='par'?'par-row':kind==='ydg'?'ydg-row':''}"><td class="lbl">${label}</td>${cells}</tr>`;
+  }
+  let html=`<div class="scroll"><table class="holetab">
+    <thead><tr><th class="lbl"></th>${holes.map(h=>`<th class="${(h==='OUT'||h==='IN'||h==='TOT')?'seg':''}">${h}</th>`).join('')}</tr></thead><tbody>`;
+  html+=row('Par',DATA.PAR,'par',null);
+  html+=row('码数',DATA.YDG,'ydg',null);
+  html+=row('R1 成绩',p.R1.holes,'score','R1');
+  html+=row('R2 成绩',p.R2.holes,'score','R2');
+  html+=`</tbody></table></div>`;
+  return html;
+}
+
+function playerCards(){
+  const order=["Keisha Han","Zhixin Lu","Katherine Xia","Zixi (Cocomi) Wang","Amanda Zhang"];
+  document.getElementById('playerCards').innerHTML = order.map(name=>{
+    const d=DIAG[name];
+    return `<div class="card">
+      <div class="diag ${d.cls}"><h3>${name} <span style="color:var(--ink3);font-weight:400;font-size:14px">— ${d.t.split(' — ')[1]||''}</span></h3></div>
+      ${holeTable(name)}
+      <ul style="margin-top:14px">${d.pts.map(x=>`<li>${x}</li>`).join('')}</ul>
+    </div>`;
+  }).join('');
+}
+
+diffBars();
+playerCards();
+</script>
+</body>
+</html>

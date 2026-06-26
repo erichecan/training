@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>家长球童实战手册 · Parent Caddie Playbook</title>
+<style>
+  :root{
+    --fairway:#0b3d2e; --fairway-2:#124a38; --green:#1f7a52; --green-soft:#e7f0ea;
+    --cream:#f6f2e8; --paper:#fffdf8; --ink:#1c241f; --ink-soft:#56615a;
+    --sand:#c9a227; --sand-soft:#f3e7c4; --flag:#b3402f; --flag-soft:#f6e3df;
+    --line:#e2ddd0; --shadow:0 1px 2px rgba(11,61,46,.06),0 8px 24px rgba(11,61,46,.08);
+    --radius:16px;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;background:var(--cream);color:var(--ink);
+    font-family:"Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    line-height:1.65;font-size:16px;-webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:0 18px 80px}
+  h1,h2,h3{line-height:1.25;letter-spacing:-.01em}
+  a{color:var(--green);text-decoration:none}
+
+  /* HERO */
+  header.hero{
+    background:radial-gradient(120% 140% at 80% -10%,#1d6e4c 0%,var(--fairway) 55%,#082c21 100%);
+    color:#f3efe3;padding:48px 18px 40px;position:relative;overflow:hidden;
+  }
+  header.hero::after{content:"";position:absolute;inset:auto 0 -2px 0;height:14px;
+    background:repeating-linear-gradient(90deg,#0a3528 0 28px,#0e4232 28px 56px)}
+  .hero-inner{max-width:920px;margin:0 auto;position:relative;z-index:2}
+  .eyebrow{font-size:13px;letter-spacing:.22em;text-transform:uppercase;color:var(--sand);font-weight:700;margin:0 0 12px}
+  header.hero h1{font-size:clamp(28px,5.4vw,44px);margin:0 0 14px;font-weight:800}
+  header.hero p.lead{font-size:clamp(15px,2.4vw,18px);color:#d7e6dd;max-width:640px;margin:0 0 26px}
+  .pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:660px}
+  .pillar{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:14px}
+  .pillar .n{font-size:12px;color:var(--sand);font-weight:700;letter-spacing:.1em}
+  .pillar b{display:block;font-size:15px;margin:4px 0 2px;color:#fff}
+  .pillar span{font-size:12.5px;color:#bcd2c6;line-height:1.5}
+  @media(max-width:620px){.pillars{grid-template-columns:1fr}}
+
+  .meta-bar{max-width:920px;margin:0 auto;padding:12px 18px;display:flex;flex-wrap:wrap;gap:8px 18px;
+    font-size:12.5px;color:var(--ink-soft);border-bottom:1px solid var(--line)}
+  .meta-bar b{color:var(--ink)}
+
+  /* SECTION */
+  section{margin:44px 0 0}
+  .sec-head{display:flex;align-items:flex-start;gap:14px;margin:0 0 18px}
+  .sec-num{flex:none;width:42px;height:42px;border-radius:11px;background:var(--fairway);color:var(--sand);
+    font-weight:800;font-size:19px;display:grid;place-items:center;box-shadow:var(--shadow)}
+  .sec-head h2{font-size:clamp(20px,3.4vw,26px);margin:4px 0 2px}
+  .sec-head p{margin:0;color:var(--ink-soft);font-size:14.5px}
+
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px 22px;box-shadow:var(--shadow);margin:0 0 16px}
+  .card h3{margin:0 0 12px;font-size:17px;display:flex;align-items:center;gap:9px}
+  .card h3 .ic{font-size:19px}
+
+  /* do / dont two-col */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:680px){.grid2{grid-template-columns:1fr}}
+  .panel{border-radius:14px;padding:18px 20px;border:1px solid}
+  .panel.do{background:var(--green-soft);border-color:#bcd9c8}
+  .panel.dont{background:var(--flag-soft);border-color:#e8c4bc}
+  .panel h4{margin:0 0 12px;font-size:15px;font-weight:800;display:flex;align-items:center;gap:8px}
+  .panel.do h4{color:#15663f}.panel.dont h4{color:#9a2f20}
+  .panel ul{margin:0;padding:0;list-style:none}
+  .panel li{position:relative;padding:7px 0 7px 26px;font-size:14.5px;border-top:1px dashed rgba(0,0,0,.07)}
+  .panel li:first-child{border-top:0}
+  .panel.do li::before{content:"✓";position:absolute;left:0;top:7px;color:var(--green);font-weight:800}
+  .panel.dont li::before{content:"✕";position:absolute;left:2px;top:7px;color:var(--flag);font-weight:800}
+
+  /* alert */
+  .alert{border-left:4px solid var(--flag);background:var(--flag-soft);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin:0 0 16px;font-size:14.5px}
+  .alert b{color:#9a2f20}
+  .note{border-left:4px solid var(--sand);background:var(--sand-soft);border-radius:0 12px 12px 0;
+    padding:14px 18px;margin:0 0 16px;font-size:14.5px}
+
+  /* script cards */
+  .say{display:grid;grid-template-columns:1fr;gap:10px;margin:8px 0 0}
+  .say-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:680px){.say-row{grid-template-columns:1fr}}
+  .bubble{border-radius:12px;padding:12px 14px;font-size:14px}
+  .bubble.good{background:var(--green-soft);border:1px solid #bcd9c8}
+  .bubble.bad{background:#faf0ee;border:1px solid #e8c4bc;color:#5d5450}
+  .bubble .tag{display:block;font-size:11px;font-weight:800;letter-spacing:.08em;margin-bottom:4px;text-transform:uppercase}
+  .bubble.good .tag{color:#15663f}.bubble.bad .tag{color:#9a2f20}
+
+  /* checklist */
+  .check{list-style:none;margin:0;padding:0}
+  .check li{display:flex;gap:11px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--line);font-size:14.5px}
+  .check li:first-child{border-top:0}
+  .box{flex:none;width:19px;height:19px;border:2px solid var(--green);border-radius:5px;margin-top:2px}
+
+  /* steps */
+  .steps{counter-reset:s;margin:0;padding:0;list-style:none}
+  .steps>li{position:relative;padding:4px 0 18px 44px;border-left:2px solid var(--line);margin-left:14px}
+  .steps>li:last-child{border-left-color:transparent}
+  .steps>li::before{counter-increment:s;content:counter(s);position:absolute;left:-15px;top:0;
+    width:30px;height:30px;border-radius:50%;background:var(--green);color:#fff;font-weight:800;font-size:14px;display:grid;place-items:center}
+  .steps>li b{display:block;margin-bottom:2px;font-size:15px}
+  .steps>li span{font-size:14px;color:var(--ink-soft)}
+
+  /* quote */
+  .quote{background:var(--fairway-2);color:#eef5f0;border-radius:14px;padding:20px 22px;margin:0 0 16px;position:relative}
+  .quote p{margin:0 0 8px;font-size:16px;font-style:italic;line-height:1.6}
+  .quote cite{font-size:13px;color:var(--sand);font-style:normal;font-weight:700}
+
+  /* stat */
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media(max-width:680px){.stats{grid-template-columns:1fr}}
+  .stat{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow)}
+  .stat .big{font-size:22px;font-weight:800;color:var(--fairway);line-height:1.2}
+  .stat .lbl{font-size:13.5px;color:var(--ink-soft);margin-top:6px}
+
+  /* footnote ref */
+  .ref{font-size:11px;vertical-align:super;color:var(--green);font-weight:800;cursor:default;margin-left:2px}
+  .badge{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.04em;padding:2px 8px;border-radius:20px;vertical-align:middle}
+  .b-primary{background:#dff0e6;color:#15663f}
+  .b-secondary{background:#fbecc8;color:#7a5b09}
+  .b-blog{background:#eee;color:#555}
+
+  /* sources */
+  .src-tbl{width:100%;border-collapse:collapse;font-size:13px}
+  .src-tbl td{padding:9px 8px;border-top:1px solid var(--line);vertical-align:top}
+  .src-tbl td.n{color:var(--green);font-weight:800;width:30px}
+  .src-tbl a{word-break:break-all}
+
+  footer{margin:56px 0 0;padding-top:22px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink-soft)}
+
+  @media print{
+    body{background:#fff;font-size:12px}
+    header.hero{background:var(--fairway)!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .card,.panel,.stat,.quote,.pillar,.bubble{box-shadow:none}
+    section{break-inside:avoid}
+    .no-print{display:none}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-inner">
+    <p class="eyebrow">Parent Caddie Playbook · 深度调研版</p>
+    <h1>家长球童实战手册</h1>
+    <p class="lead">写给有竞技目标的青少年（尤其女子精英组）高尔夫球手的父母。把「父母」和「球童」两个角色分清楚——这一页帮你在比赛日同时做对三件事。</p>
+    <div class="pillars">
+      <div class="pillar"><span class="n">支柱 01</span><b>守住规则边界</b><span>知道能给什么建议、哪条线一站就罚两杆</span></div>
+      <div class="pillar"><span class="n">支柱 02</span><b>做好场上支持</b><span>码数 · 风 · 选杆 · 果岭线 · 节奏</span></div>
+      <div class="pillar"><span class="n">支柱 03</span><b>管住情绪边界</b><span>鼓励 ≠ 施压；你的反应决定她的发挥</span></div>
+    </div>
+  </div>
+</header>
+
+<div class="meta-bar">
+  <span>📅 调研日期 <b>2026-06-25</b></span>
+  <span>🔎 方法 <b>6 角度 · 26 来源 · 110 条声明 · 对抗式三票验证</b></span>
+  <span>✅ 通过验证 <b>24 / 25</b></span>
+  <span>⚖️ 规则基准 <b>USGA Rules of Golf 2023 · AJGA Hardcard</b></span>
+</div>
+
+<div class="wrap">
+
+<!-- 1 规则 -->
+<section>
+  <div class="sec-head">
+    <div class="sec-num">1</div>
+    <div><h2>规则速查：你能做什么 / 绝不能做什么</h2>
+    <p>USGA Rule 10 + AJGA 专项规则——这是「合法的帮助」与「两杆罚」之间的红线。</p></div>
+  </div>
+
+  <div class="alert">
+    <b>⛔ 先确认你今天到底能不能下场当球童。</b> AJGA 锦标赛<strong>默认禁止</strong>球员在一轮中使用球童，除非经 AJGA 全国总部专门授权<span class="ref">[2]</span>。US Kids Golf 仅对 8 岁以下强制球童，更大年龄段可选<span class="ref">[8]</span>。报名/赛前务必核对当年最新 hardcard 与该场赛事的 Notice to Players。
+  </div>
+
+  <div class="grid2">
+    <div class="panel do">
+      <h4>✅ 球童（含家长球童）合法可做</h4>
+      <ul>
+        <li>击球前给出<b>任何建议</b>：选杆、果岭线、目标、球形、策略<span class="ref">[1]</span></li>
+        <li>报<b>码数</b>、指出障碍/地形/风——这属「公开信息」，谁都能给<span class="ref">[1]</span></li>
+        <li>帮忙<b>找球</b>、移除散置障碍物与可移动妨碍物<span class="ref">[1]</span></li>
+        <li>修复果岭上的击球痕/旧洞痕<span class="ref">[1]</span></li>
+        <li>在果岭上<b>标记、拿起、放回、擦球</b><span class="ref">[1]</span></li>
+      </ul>
+    </div>
+    <div class="panel dont">
+      <h4>✕ 一旦触碰立即罚杆 / 不被允许</h4>
+      <ul>
+        <li><b>对准目标</b>：球员开始站位到击球完成，球童不得故意站在球后击球线延长线上帮其瞄准（Rule 10.2b(4)，瞄准必须球员独自完成）<span class="ref">[3]</span></li>
+        <li>向<b>同组其他球员</b>问建议——一轮里只能问自己的球童<span class="ref">[1]</span></li>
+        <li>（AJGA 观众身份）给球员任何建议；<b>哪怕用母语闲聊</b>都可能被判为 advice，罚两杆<span class="ref">[2]</span></li>
+        <li>无授权下场当球童（AJGA 违规 = general penalty 两杆）<span class="ref">[2]</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="note">
+    <b>🟡 关键纠偏（别用过时说法吓自己）。</b> Rule 10.2b(4) 的「退开也不能免罚」旧措辞已被 2019-02-06 官方澄清<strong>逆转</strong>：球员若在站位后退开、重新站位，可避免违规。该违规历史上只是个别高曝光案例（如李昊桐、McCarthy），并非「频繁被罚」——理解原则即可，不必草木皆兵<span class="ref">[3]</span>。
+  </div>
+
+  <div class="alert">
+    <b>❌ 一条被研究否定的流言：</b>「比赛规则禁止家长与球员接触，所以最好的支持就是沉默地在场、只听不说。」——此说法在验证中被 0:3 否决。证据显示孩子其实<strong>需要</strong>赛前/赛后被恰当地用语言支持；问题不在「说不说」，而在「<strong>说什么、什么时机说</strong>」（见第 4 节）<span class="ref">[7]</span>。
+  </div>
+</section>
+
+<!-- 2 场上职责 -->
+<section>
+  <div class="sec-head">
+    <div class="sec-num">2</div>
+    <div><h2>场上球童 SOP：每一杆你负责的事</h2>
+    <p>核心职责是把决策的「信息负担」从孩子肩上接过来，让她只管挥杆。</p></div>
+  </div>
+
+  <div class="card">
+    <h3><span class="ic">🎒</span>球童的核心职责清单（贯穿整轮）</h3>
+    <p style="margin:0 0 12px;color:var(--ink-soft);font-size:14px">职业球童的职责覆盖：球场管理 · 球位/草况判断 · 风况 · 码数计算 · 选杆 · 目标指定 · 球形 · 规则 · 礼仪 · 果岭阅读<span class="ref">[4]</span>。家长球童把这些做扎实，就已经超过大多数同龄选手的支持水平。</p>
+    <ul class="check">
+      <li><span class="box"></span><b>码数三件套</b>：永远确认到旗杆、到障碍、到 lay-up 点的距离<span class="ref">[5]</span></li>
+      <li><span class="box"></span><b>选杆要综合</b>：码数 + 球位 lie + 风 + 海拔/高差，而不是「默认几号杆」<span class="ref">[5]</span></li>
+      <li><span class="box"></span><b>只在被问时给建议</b>：球童是支持角色，建议在球员开口时给，不主动塞<span class="ref">[5]</span></li>
+      <li><span class="box"></span><b>守护节奏与 routine</b>：球童的行为直接影响球员心理状态、击球前流程与进入「心流」的能力<span class="ref">[4]</span></li>
+      <li><span class="box"></span><b>当好规则/礼仪的第二双眼睛</b>：记分、确认规则程序、避免无意违规</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3><span class="ic">⛳</span>每洞推荐流程</h3>
+    <ol class="steps">
+      <li><b>发球台：先定策略，再选杆</b><span>看球洞图与风，定「目标落点」而非「方向」。把决定权交给她——你提供信息，她拍板。</span></li>
+      <li><b>第二杆：报数 + 给选项</b><span>「147 到旗，逆风半档，果岭后沿有沙坑」——给事实和一个建议，让她确认。</span></li>
+      <li><b>果岭：一起读线，但她瞄准</b><span>可以讨论坡度与速度，但站位瞄准是她独自的事（Rule 10.2b(4)）。</span></li>
+      <li><b>击球后：先沉默 2 秒</b><span>无论好坏，先让结果落地。你的即时反应会被她全程读取（见第 3 节）。</span></li>
+      <li><b>走向下一洞：清零</b><span>把上一洞翻篇，用一句中性的「下一个」重置节奏，不复盘技术。</span></li>
+    </ol>
+  </div>
+</section>
+
+<!-- 3 情绪边界 -->
+<section>
+  <div class="sec-head">
+    <div class="sec-num">3</div>
+    <div><h2>情绪边界：家长球童最危险、也最值钱的部分</h2>
+    <p>这是家长当球童独有的雷区——你既是教练席又是情感锚点，稍有不慎，「鼓励」就被读成「压力」。</p></div>
+  </div>
+
+  <div class="quote">
+    <p>“你在每一杆、每一洞、每一轮之后的反应，对你和孩子能享受多少这轮球，有着巨大的影响。”</p>
+    <cite>— 家长球童实操指南（operation36 / golfstateofmind 共识）<span class="ref">[6]</span></cite>
+  </div>
+
+  <div class="grid2">
+    <div class="panel do">
+      <h4>✅ 守住边界的做法</h4>
+      <ul>
+        <li>开赛前在心里<b>切换角色</b>：今天我是球童，不是教练、不是裁判她的父母<span class="ref">[8]</span></li>
+        <li>保持<b>一致、最小化</b>的反应模板——赢球别狂喜，丢杆别变脸<span class="ref">[6]</span></li>
+        <li>把你的情绪和她的成绩<b>解绑</b>：你的开心不取决于她打多少杆<span class="ref">[9]</span></li>
+        <li>技术问题<b>留给教练</b>，或留到赛后很久之后再谈<span class="ref">[10]</span></li>
+        <li>多问<b>开放式问题</b>，让她先开口、先思考</li>
+      </ul>
+    </div>
+    <div class="panel dont">
+      <h4>✕ 把鼓励变成压力的雷区</h4>
+      <ul>
+        <li>把<b>幸福绑在表现上</b>——会大幅放大压力，她反而打不出水平<span class="ref">[9]</span></li>
+        <li>轮中做<b>挥杆技术指导/批评每一杆</b><span class="ref">[10]</span></li>
+        <li><b>抢话</b>：在她回应前就插嘴，很少给她反思空间（车上观察的典型反面教材）<span class="ref">[7]</span></li>
+        <li>把「鼓励」和「施压」混为一谈——这条线极易模糊，是头号风险<span class="ref">[6]</span></li>
+        <li>用施压换短期成绩——在高尔夫里是青少年<b>倦怠与退出</b>的有据驱动因素<span class="ref">[11]</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 4 话术 -->
+<section>
+  <div class="sec-head">
+    <div class="sec-num">4</div>
+    <div><h2>话术卡：该说什么 / 别这样说</h2>
+    <p>研究反复指出：问题几乎从不是「说太多」，而是「时机错了、方式错了」。时机不对的支持会被孩子直接读成批评<span class="ref">[7]</span>。</p></div>
+  </div>
+
+  <div class="card">
+    <h3><span class="ic">🕐</span>赛前 · 帮她「身心就位」，别灌技术</h3>
+    <p style="margin:0 0 4px;color:var(--ink-soft);font-size:14px">青少年女球手明确偏好：赛前希望家长帮自己放松、建立信心；而不是临场被纠动作<span class="ref">[12]</span>。</p>
+    <div class="say-row">
+      <div class="bubble good"><span class="tag">这样说</span>“你练习轮的攻果岭手感很好，按计划打就行，我帮你盯码数。”</div>
+      <div class="bubble bad"><span class="tag">别这样</span>“记得收杆别停、别像上次那样左曲——今天一定要进前十。”</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="ic">⛳</span>轮中 · 给事实和选项，把拍板权留给她</h3>
+    <div class="say-row">
+      <div class="bubble good"><span class="tag">这样说</span>“152 到旗，顺风一档，安全区在左侧。你想打哪个目标？”</div>
+      <div class="bubble bad"><span class="tag">别这样</span>“这个必须上果岭，别又保守。你刚才那杆怎么回事？”</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3><span class="ic">🏁</span>赛后 · 先正面反馈，再加「可改进信息」</h3>
+    <p style="margin:0 0 4px;color:var(--ink-soft);font-size:14px">青少年女球手赛后想要的：正面反馈 + 一条可改进的具体信息——不是流水账复盘<span class="ref">[12]</span>。</p>
+    <div class="say-row">
+      <div class="bubble good"><span class="tag">这样说</span>“今天短杆救球很顶。想不想聊聊几个三推的果岭？”（让她选）</div>
+      <div class="bubble bad"><span class="tag">别这样</span>（在回家车上不停说）“第 3 洞、第 7 洞、第 12 洞你都……”</div>
+    </div>
+  </div>
+
+  <div class="note">
+    <b>🟡 一个反直觉的观察。</b> 录像编码研究发现：在往返赛事/训练的车上，<strong>家长说得比孩子多</strong>，常在孩子回应前抢话，几乎不问开放式反思问题<span class="ref">[7]</span>。把车程变成「她主导、你倾听」，比任何场上技巧都更能保护亲子关系。
+  </div>
+</section>
+
+<!-- 5 赛前准备 -->
+<section>
+  <div class="sec-head">
+    <div class="sec-num">5</div>
+    <div><h2>赛前准备：把比赛在练习轮里先打一遍</h2>
+    <p>准备充分感会直接转化为自信<span class="ref">[13]</span>。这是家长球童能创造最大价值、又完全不踩情绪雷区的环节。</p></div>
+  </div>
+
+  <div class="card">
+    <h3><span class="ic">🛰️</span>球场侦察 + Yardage Book 工作流</h3>
+    <ol class="steps">
+      <li><b>先量自己的「标准码数」</b><span>用测距仪/发球机记录每支杆的稳定 carry 距离——没有这个，码数本无从谈起<span class="ref">[14]</span>。</span></li>
+      <li><b>打一轮练习轮侦察</b><span>AJGA 建议和同组对手打练习轮熟悉球场<span class="ref">[15]</span>；每个 par4/par5 都试开 driver，找最佳落点<span class="ref">[16]</span>。</span></li>
+      <li><b>建立每洞「发球台策略」</b><span>逐洞记录关键目标距离、危险区、lay-up 点；职业 Open 码数本一个洞能记几十个洒水头距离<span class="ref">[16]</span>——你不必那么细，但方向一致。</span></li>
+      <li><b>用航拍/卫星图补盲区</b><span>没有 GPS 标记时，用 Google Earth / 卫星图先看每洞形状与落点策略<span class="ref">[16]</span>。</span></li>
+      <li><b>赛前 10 分钟法则</b><span>AJGA 建议至少提前 10 分钟到发球台<span class="ref">[15]</span>——把热身和心理准备从容地留够。</span></li>
+    </ol>
+  </div>
+
+  <div class="note" style="border-left-color:var(--green);background:var(--green-soft)">
+    💡 <b>呼应你的 App。</b> 这正是 yardage-caddie「赛前看图」侦察功能的用武之地：输入球场地址/名称 + 各洞距离 → 在没有 GPS 标记前，先逐洞看卫星图、做标记、量距，把上面的工作流装进口袋。
+  </div>
+</section>
+
+<!-- 6 职业球童 -->
+<section>
+  <div class="sec-head">
+    <div class="sec-num">6</div>
+    <div><h2>顶尖球童的智慧：好球童到底好在哪</h2>
+    <p>Bones Mackay、Steve Williams 这些传奇球童的共识，几乎都能直接翻译成家长球童的行为准则。</p></div>
+  </div>
+
+  <div class="quote">
+    <p>“不，老虎，相信我，这个推杆是左向右。”</p>
+    <cite>— Steve Williams 在 1999 PGA 锦标赛果岭上推翻 Tiger Woods，事后被证明正确，从此建立 100% 互信<span class="ref">[17]</span></cite>
+  </div>
+
+  <div class="card">
+    <h3><span class="ic">🧭</span>四条可直接照搬的原则</h3>
+    <ul class="check">
+      <li><span class="box"></span><b>最重要的能力是「读懂你的球员」</b>：她的性格、心理倾向、当下需要什么<span class="ref">[18]</span>。</li>
+      <li><span class="box"></span><b>平等讨论，把自我放一边</b>：像平等伙伴一样聊这一杆，绝不动摇她的信心<span class="ref">[19]</span>。</li>
+      <li><span class="box"></span><b>因人施「激」</b>：分辨她此刻需要被鼓励还是被推一把，找到能点燃她的「触发词」<span class="ref">[18]</span>。</li>
+      <li><span class="box"></span><b>诚实进言，而非附和</b>：为了不被怪罪而点头是最容易的，但好球童在关键处说真话<span class="ref">[17]</span>。</li>
+    </ul>
+  </div>
+
+  <div class="note">
+    一句话总结职业球童的角色定义：「好球童远不止是背包的——他是<b>激励者、鼓励者、督促者、参谋和顾问</b>。」<span class="ref">[19]</span> 这份职位描述，恰好就是一个好的家长球童该努力的方向。
+  </div>
+</section>
+
+<!-- 7 心理学证据 -->
+<section>
+  <div class="sec-head">
+    <div class="sec-num">7</div>
+    <div><h2>运动心理学证据：为什么上面这些是对的</h2>
+    <p>不是鸡汤——以下来自同行评审研究，含两篇专门针对女子青少年高尔夫球手的论文。</p></div>
+  </div>
+
+  <div class="stats" style="margin-bottom:16px">
+    <div class="stat"><div class="big">845 名</div><div class="lbl">14–18 岁运动员的 SEM 研究：家长<b>鼓励/强化</b>显著正向预测内在动机、自我效能、自我调节<span class="ref">[20]</span></div></div>
+    <div class="stat"><div class="big">61 名</div><div class="lbl">7 国女子青少年球手、14 个焦点小组：归纳出三类<b>不支持行为</b>——情感伤害、身体伤害、<b>施压</b><span class="ref">[11]</span></div></div>
+    <div class="stat"><div class="big">24 名</div><div class="lbl">6 国高水平女子青少年球手的家长访谈：六类支持（情感/实际/技术/财务/组织/反思）<span class="ref">[21]</span></div></div>
+  </div>
+
+  <div class="grid2">
+    <div class="panel do">
+      <h4>✅ 与「好结果」正相关</h4>
+      <ul>
+        <li>家长<b>鼓励与强化</b> → 内在动机 ↑、自我效能 ↑、自我调节 ↑<span class="ref">[20]</span></li>
+        <li>赛前帮助<b>身心准备</b> + 赛后<b>正面反馈 + 改进信息</b><span class="ref">[12]</span></li>
+        <li>反思性支持（多问、少灌）→ 她自己长出判断力</li>
+      </ul>
+    </div>
+    <div class="panel dont">
+      <h4>✕ 与「坏结果」相关</h4>
+      <ul>
+        <li><b>过度/控制性指导</b> → 内在动机 ↓、损害教练-运动员关系<span class="ref">[20]</span></li>
+        <li><b>施压</b> → 倦怠与退出的有据驱动因素<span class="ref">[11]</span></li>
+        <li><b>过度介入</b>或<b>零互动</b>——两个极端都被退出的女球手列为压力源<span class="ref">[11]</span></li>
+        <li>时机不对的支持 → 被孩子直接误读为<b>批评</b><span class="ref">[21]</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 仍待解答 -->
+<section>
+  <div class="sec-head">
+    <div class="sec-num">?</div>
+    <div><h2>这轮调研仍未充分解答的问题</h2>
+    <p>诚实标注证据薄弱处，避免把推断当结论。</p></div>
+  </div>
+  <div class="card">
+    <ul class="check">
+      <li><span class="box" style="border-color:var(--sand)"></span>家长同时身兼<b>球童 + 教练</b>时，如何与孩子的专业教练划清边界，避免「过度指导损害教练-运动员关系」？</li>
+      <li><span class="box" style="border-color:var(--sand)"></span>AJGA 之外（USGA Junior、IMG、各国巡回赛）的球童规则差异？家长获得「球童授权」的具体条件与流程？</li>
+      <li><span class="box" style="border-color:var(--sand)"></span>「沉默的力量」的最优剂量——何时该说、何时闭嘴——是否有针对高尔夫场上情境的量化指引（而非仅来自团队运动车程观察的推断）？</li>
+      <li><span class="box" style="border-color:var(--sand)"></span>赛前准备方法学（侦察流程、yardage book、洞别策略）目前多来自实操博客，缺少针对家长球童的高强度实证方案。</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 来源 -->
+<section>
+  <div class="sec-head">
+    <div class="sec-num">§</div>
+    <div><h2>来源与可信度</h2>
+    <p><span class="badge b-primary">一手/官方</span> 规则与机构政策、同行评审研究 · <span class="badge b-secondary">二手媒体</span> 权威媒体引述具名职业人士 · <span class="badge b-blog">实操博客</span> 教练/家长经验，作操作参考</p></div>
+  </div>
+  <div class="card">
+    <table class="src-tbl">
+      <tr><td class="n">1</td><td><span class="badge b-primary">官方</span> USGA Rule 10（建议与帮助、球童）<br><a href="https://www.usga.org/content/usga/home-page/custom-search-pages/rules/2019-golf-rules-and-interpretations/fr-rule-10.html">usga.org · Rule 10 全文</a></td></tr>
+      <tr><td class="n">2</td><td><span class="badge b-primary">官方</span> AJGA Hardcard（2025-01 修订）+ 好家长准则<br><a href="https://www.ajga.org/player-policies/hardcard">ajga.org/player-policies/hardcard</a> · <a href="https://www.ajga.org/news/setting-the-standard-for-good-golf-parenting">setting-the-standard-for-good-golf-parenting</a></td></tr>
+      <tr><td class="n">3</td><td><span class="badge b-primary">官方</span> USGA 关于「球童站位」规则的说明（2019-02 澄清）<br><a href="https://www.usga.org/articles/2019/02/golf-usga-caddie-standing-behind-player-rules.html">usga.org · caddie standing behind player</a></td></tr>
+      <tr><td class="n">4</td><td><span class="badge b-secondary">二手</span> Keiser University 高尔夫学院：球童的角色<br><a href="https://collegeofgolf.keiseruniversity.edu/the-role-of-caddies-in-professional-golf/">collegeofgolf.keiseruniversity.edu</a></td></tr>
+      <tr><td class="n">5</td><td><span class="badge b-blog">博客</span> Under Armour Playbooks / golfhubz：球童职责完整指南<br><a href="https://www.underarmour.com/en-us/t/playbooks/golf/what-does-a-golf-caddie-do-the-complete-guide/">underarmour.com</a> · <a href="https://golfhubz.com/the-role-and-responsibilities-of-a-golf-caddie/">golfhubz.com</a></td></tr>
+      <tr><td class="n">6</td><td><span class="badge b-blog">博客</span> Operation 36：给家长球童的 3 个建议<br><a href="https://operation36.golf/parents-of-junior-golfers/3-tips-if-you-are-caddying-for-your-junior-golfer/">operation36.golf</a></td></tr>
+      <tr><td class="n">7</td><td><span class="badge b-primary">同行评审</span> 「Supporting my daughter…」青少年高尔夫家长支持（JASP 2024）<br><a href="https://www.tandfonline.com/doi/full/10.1080/10413200.2024.2344841">tandfonline · 10.1080/10413200.2024.2344841</a> · 车程观察见 <a href="https://www.sciencedirect.com/science/article/abs/pii/S1469029221002132">PSE 2021</a></td></tr>
+      <tr><td class="n">8</td><td><span class="badge b-blog">博客</span> The Junior Golfer：如何做一个好的家长球童（US Kids 年龄规则）<br><a href="https://thejuniorgolfer.com/how-to-be-a-good-parent-caddy/">thejuniorgolfer.com</a></td></tr>
+      <tr><td class="n">9</td><td><span class="badge b-blog">博客</span> Golf State of Mind：给青少年球手家长的建议<br><a href="https://golfstateofmind.com/advice-parent-of-a-junior-golfer/">golfstateofmind.com</a></td></tr>
+      <tr><td class="n">10</td><td><span class="badge b-blog">博客</span> Karina Golf Coaching：家长的 Do's & Don'ts<br><a href="https://karinagolfcoaching.com/dos-and-donts/">karinagolfcoaching.com</a></td></tr>
+      <tr><td class="n">11</td><td><span class="badge b-primary">同行评审</span> 女子青少年高尔夫中不支持性家长行为（JASP 2023）<br><a href="https://www.tandfonline.com/doi/abs/10.1080/10413200.2023.2166155">tandfonline · 10.1080/10413200.2023.2166155</a></td></tr>
+      <tr><td class="n">12</td><td><span class="badge b-primary">同行评审</span> Knight et al.（经 PSE 2021 引述）：青少年女运动员的家长支持偏好<br><a href="https://www.sciencedirect.com/science/article/abs/pii/S1469029221002132">sciencedirect.com</a></td></tr>
+      <tr><td class="n">13</td><td><span class="badge b-blog">博客</span> Golf State of Mind：赛前准备模块（准备感 → 自信）<br><a href="https://golfstateofmind.com/courses/ultimate-mental-game-training-program-for-golf/lessons/module-5-pre-round-preparation-setting-yourself-up-for-success/">golfstateofmind.com · module 5</a></td></tr>
+      <tr><td class="n">14</td><td><span class="badge b-blog">博客</span> Eric J. MacDonald PGA：构建 yardage book 系统<br><a href="https://www.ericjmacdonaldpga.com/post/building-a-yardage-book-system-how-to-make-smart-decisions-on-the-course">ericjmacdonaldpga.com</a></td></tr>
+      <tr><td class="n">15</td><td><span class="badge b-primary">官方</span> AJGA：为 AJGA 赛事准备你的青少年球手<br><a href="https://www.ajga.org/parents/preparing-your-junior-golfer-for-an-ajga-tournament">ajga.org/parents</a></td></tr>
+      <tr><td class="n">16</td><td><span class="badge b-blog">博客</span> The Left Rough（练习轮策略）· Golf Monthly（职业码数本揭秘）<br><a href="https://theleftrough.com/golf-practice-round/">theleftrough.com</a> · <a href="https://www.golfmonthly.com/features/5-secrets-of-the-players-open-yardage-book">golfmonthly.com</a></td></tr>
+      <tr><td class="n">17</td><td><span class="badge b-secondary">二手</span> bunkered.co.uk：Steve Williams 谈与 Tiger 建立 100% 互信<br><a href="https://www.bunkered.co.uk/golf-news/that-was-the-moment-tiger-had-100-trust-in-me/">bunkered.co.uk</a></td></tr>
+      <tr><td class="n">18</td><td><span class="badge b-secondary">二手</span> Golf Digest「Undercover Caddie」谈 Bones Mackay（被引述观点）<br><a href="https://www.golfdigest.com/story/undercover-caddie-jim-mackay-best-of-an-era">golfdigest.com</a></td></tr>
+      <tr><td class="n">19</td><td><span class="badge b-blog">博客</span> LinkedIn：世界顶级球童的领导力启示<br><a href="https://www.linkedin.com/pulse/3-leadership-lessons-from-worlds-greatest-caddie-chris-gaborit">linkedin.com</a></td></tr>
+      <tr><td class="n">20</td><td><span class="badge b-primary">同行评审</span> 家长行为与青少年运动员动机/自我效能（PMC6611332，团队运动样本，作通则）<br><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6611332/">pmc.ncbi.nlm.nih.gov</a></td></tr>
+      <tr><td class="n">21</td><td><span class="badge b-primary">同行评审</span> 六类家长支持 + 「时机不对被读成批评」（JASP 2024，同 [7]）<br><a href="https://www.tandfonline.com/doi/full/10.1080/10413200.2024.2344841">tandfonline · 10.1080/10413200.2024.2344841</a></td></tr>
+    </table>
+  </div>
+
+  <div class="note">
+    <b>使用须知。</b> ① 规则以 USGA 2023 现行框架为准（2026-06 仍有效），赛前请核对当年最新 AJGA hardcard 与赛事 Notice to Players。② 两篇最对口的女子高尔夫研究全文有付费墙，个别细节（如具体年龄区间）为合理推断。③ <span class="badge b-blog">博客</span>类来源用于操作参考，不作实证结论；Bones 的「最重要能力」表述在验证中为 2:1，应理解为「被引述的专家观点」而非排名定论。
+  </div>
+</section>
+
+<footer>
+  <p><b>家长球童实战手册</b> · 基于 deep-research 多源调研（6 角度 · 26 来源 · 110 条声明 · 对抗式三票验证 · 24/25 通过）综合生成 · 调研日期 2026-06-25。</p>
+  <p class="no-print">本页为纯静态文档，无外部依赖，可离线打开、可直接打印（浏览器 Cmd/Ctrl+P）带到球场。内容为信息整理，不构成专业指导；规则以官方文本为最终依据。</p>
+</footer>
+
+</div>
+</body>
+</html>
