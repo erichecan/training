@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sylvania Country Club · AJGA Qualifier 女子组 4 年球场分析</title>
+<style>
+  :root{
+    --bg:#0f1419; --panel:#1a212b; --panel2:#222c38; --line:#2e3a48;
+    --ink:#e8edf2; --ink2:#9fb0c0; --ink3:#6b7c8c;
+    --green:#2ecc71; --green-bg:rgba(46,204,113,.14);
+    --red:#ff5c5c; --red-bg:rgba(255,92,92,.14);
+    --amber:#ffb648; --amber-bg:rgba(255,182,72,.14);
+    --blue:#4aa3ff; --accent:#bf2c37;
+    --par:#7d8ea0;
+    --maxw:1100px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:32px 20px 80px}
+  header.hero{border-bottom:1px solid var(--line);padding-bottom:24px;margin-bottom:32px}
+  .tag{display:inline-block;background:var(--accent);color:#fff;font-size:12px;font-weight:700;
+    letter-spacing:.05em;padding:4px 10px;border-radius:4px;margin-bottom:14px}
+  h1{font-size:26px;margin:0 0 8px;line-height:1.3}
+  .sub{color:var(--ink2);font-size:15px}
+  .meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+  .chip{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 14px;font-size:13px}
+  .chip b{color:var(--ink);font-size:15px}
+  .chip span{color:var(--ink3);display:block;font-size:11px;letter-spacing:.04em;text-transform:uppercase}
+  h2{font-size:21px;margin:44px 0 16px;padding-left:12px;border-left:4px solid var(--accent)}
+  h3{font-size:16px;margin:24px 0 10px;color:var(--ink)}
+  p{color:var(--ink2);font-size:14.5px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:16px 0}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin:6px 0}
+  th,td{padding:8px 6px;text-align:center;border-bottom:1px solid var(--line)}
+  th{color:var(--ink3);font-weight:600;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase}
+  td.name,th.name{text-align:left;white-space:nowrap}
+  .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  tbody tr:hover{background:var(--panel2)}
+  .good{color:var(--green)}.bad{color:var(--red)}.warn{color:var(--amber)}
+  .holebar{display:flex;align-items:center;gap:10px;margin:5px 0;font-size:13px}
+  .holebar .hl{width:128px;color:var(--ink2);flex-shrink:0;font-size:12.5px}
+  .holebar .track{flex:1;height:20px;background:var(--panel2);border-radius:4px;position:relative;overflow:hidden}
+  .holebar .fill{position:absolute;top:0;bottom:0;border-radius:4px}
+  .holebar .val{width:64px;text-align:right;flex-shrink:0;font-variant-numeric:tabular-nums;font-size:12.5px}
+  .hard .fill{background:linear-gradient(90deg,#ff7a45,#ff5c5c)}
+  .easy .fill{background:linear-gradient(90deg,#2ecc71,#27d17c)}
+  .mid-line{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink3);left:50%;opacity:.5}
+  ul{color:var(--ink2);font-size:14px;padding-left:20px}
+  li{margin:6px 0}
+  .key{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin:12px 0}
+  .key b{color:var(--amber)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:720px){.grid2{grid-template-columns:1fr}h1{font-size:21px}}
+  footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);color:var(--ink3);font-size:12.5px}
+  footer a{color:var(--blue);text-decoration:none}
+  .note{font-size:12.5px;color:var(--ink3);font-style:italic}
+  .takeaway{background:linear-gradient(135deg,rgba(191,44,55,.16),rgba(74,163,255,.10));
+    border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin:18px 0}
+  .takeaway h3{margin-top:0;color:var(--ink)}
+  .barmini{display:inline-flex;height:14px;border-radius:3px;overflow:hidden;width:100%;min-width:80px}
+  .barmini span{display:block;height:100%}
+  .legend2{display:flex;flex-wrap:wrap;gap:12px;font-size:11.5px;color:var(--ink3);margin-top:8px}
+  .legend2 i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <span class="tag">AJGA Qualifier · 球场层面分析</span>
+    <h1>Sylvania Country Club · AJGA Qualifier 女子组</h1>
+    <div class="sub">Qualifier – AJGA Northwestern Holding Junior Open（原名 AJGA Dana Incorporated Junior Open）｜ Sylvania Country Club, Sylvania, OH</div>
+    <div class="meta">
+      <div class="chip"><span>球场设置(女子)</span><b>Par 72 · 5,881 yd</b></div>
+      <div class="chip"><span>覆盖年份</span><b>2019 / 2020 / 2021 / 2025</b></div>
+      <div class="chip"><span>样本量</span><b>89 人次单轮</b></div>
+      <div class="chip"><span>赛制</span><b>单轮 18 洞 Stroke Play</b></div>
+      <div class="chip"><span>数据来源</span><b>AJGA 官方计分系统(逐洞抓取)</b></div>
+    </div>
+  </header>
+
+  <a href="20260709-sylvania-cc-ajga-main-event-analysis.html" style="display:inline-block;margin-bottom:20px;color:var(--blue);font-size:13px;text-decoration:none">→ 查看正赛(6年173人/510轮)分析报告</a>
+
+  <p class="note">说明：AJGA Qualifier 逐洞成绩默认需要 AJGA 球员/教练账号登录才能展开，本报告数据在已登录状态下逐人抓取（女子组全部参赛选手），2019/2020/2021/2025 共 4 年、89 人次单轮成绩，逐洞 Par/码数与官方一致，总杆已与官方榜单逐一核对吻合。2023 年该球场举办的是正赛（非 Qualifier），未计入本报告。2022/2023/2024 未查到该球场的女子组 Qualifier 记录。</p>
+
+  <!-- ========== 一、历年概览 ========== -->
+  <h2>一、历年 Qualifier 概览</h2>
+  <div class="card scroll">
+    <table>
+      <thead><tr>
+        <th>年份</th><th>参赛人数</th><th>晋级人数</th><th>晋级线(总杆)</th><th>场均总杆</th><th>最低杆</th><th>最高杆</th>
+      </tr></thead>
+      <tbody>
+        <tr><td><b>2019</b></td><td>27</td><td>5</td><td class="warn">77 (+5)</td><td>81.31</td><td class="good">73</td><td class="bad">94</td></tr>
+        <tr><td><b>2020</b></td><td>23</td><td>3</td><td class="warn">79 (+7)</td><td>82.10</td><td class="good">74</td><td class="bad">94</td></tr>
+        <tr><td><b>2021</b></td><td>19</td><td>4</td><td class="warn">75 (+3)</td><td>79.32</td><td class="good">70</td><td class="bad">100</td></tr>
+        <tr><td><b>2025</b></td><td>23</td><td>4</td><td class="warn">83 (+11)</td><td>81.87</td><td class="good">70</td><td class="bad">94</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="key">
+    <p style="margin:0 0 8px"><b>晋级线波动大，不能只盯一年的参照值</b></p>
+    <ul style="margin:0">
+      <li>4 年晋级线从 <b>+3（2021）到 +11（2025）</b>不等，晋级名额也从 3 到 5 人浮动——晋级线本质是"当年当场那批人现场发挥"的产物，不是球场固有难度的稳定映射。</li>
+      <li>但场均总杆常年稳定在 <b>79–82（+7～+10）</b>区间，说明球场本身的绝对难度是稳定的，浮动的是"顶尖几人当天谁没崩"。</li>
+      <li>4 年最低杆两次都是 <b>70（-2）</b>——这基本就是这批年龄段女子选手在这个球场能打出的现实天花板，可作为目标参考。</li>
+    </ul>
+  </div>
+
+  <!-- ========== 二、球场难度地图 ========== -->
+  <h2>二、球场难度地图：4 年 89 人次汇总</h2>
+  <p>下图为各洞场均相对 Par 的偏离（正数=难，负数=易），中线为 Par；样本合并 2019/2020/2021/2025 全部女子组成绩。</p>
+
+  <div class="grid2">
+    <div class="card">
+      <h3 class="bad">🔴 最难 5 洞</h3>
+      <div id="hardBars"></div>
+    </div>
+    <div class="card">
+      <h3 class="good">🟢 最易 / 送分 5 洞</h3>
+      <div id="easyBars"></div>
+    </div>
+  </div>
+
+  <div class="card scroll">
+    <h3>全 18 洞难度明细 + 成绩分布</h3>
+    <table id="diffTable">
+      <thead><tr><th>洞</th><th>Par</th><th>码数</th><th>场均</th><th>较 Par</th><th>难度排名</th><th class="name">成绩分布(鸟/Par/柏忌/双柏忌+)</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div class="legend2">
+      <span><i style="background:#2ecc71"></i>小鸟或更好</span>
+      <span><i style="background:#4a5b6e"></i>标准杆</span>
+      <span><i style="background:#ffb648"></i>柏忌</span>
+      <span><i style="background:#ff5c5c"></i>双柏忌+</span>
+    </div>
+  </div>
+
+  <div class="key">
+    <p style="margin:0 0 8px"><b>三个结构性结论</b></p>
+    <ul style="margin:0">
+      <li><b>1 号洞（Par4，346y）是全场隐藏杀手，且是"开局杀手"。</b>89 轮里场均 +1.09，全场最难，89 次里只出现 <b>1 次小鸟</b>、却有 <b>26 次双柏忌以上</b>（近 3 成）。作为第一洞，直接决定了很多人当天的心态基调——赛前必须专门针对 1 号洞做暖场演练，不能"边打边热"。</li>
+      <li><b>18 号洞（Par4，371y）是"收尾杀手"，89 轮零小鸟。</b>难度排第 2（+0.92），89 次里没有一次小鸟，40 次柏忌 + 18 次双柏忌以上。开局难、收尾也难，这球场对"情绪稳定性"要求极高。</li>
+      <li><b>16 号洞（Par5，414y）是压倒性的头号送分洞。</b>难度排名倒数第 1（+0.09，全场唯一逼近 par 的洞），89 次里出现 <b>19 次小鸟 + 1 次老鹰</b>——送分程度和 SVCC/Chicago 报告里同类型"短 Par5"如出一辙，是抓分的核心战场。</li>
+    </ul>
+  </div>
+
+  <!-- ========== 三、给训练/赛前的建议 ========== -->
+  <h2>三、球场特征 → 训练与赛前策略</h2>
+  <div class="card scroll">
+    <table>
+      <thead><tr><th class="name">球场特征</th><th class="name">证据</th><th class="name">训练 / 赛前对策</th></tr></thead>
+      <tbody>
+        <tr><td class="name"><b>开局(1号)与收尾(18号)是全场两大难关，且都零/近零小鸟</b></td><td class="name">1号 +1.09(#1难)，18号 +0.92(#2难)，18号 89轮零小鸟</td><td class="name">练习场专门模拟"第一杆冷启动"；赛前热身不省略；心理预案——1号/18号目标只设定"保 par 不崩"，不强求进攻</td></tr>
+        <tr><td class="name"><b>16 号 Par5 是全场唯一的确定性得分点</b></td><td class="name">89轮中19鸟+1鹰，难度垫底</td><td class="name">重点打磨两杆到位 + 短打推攻，把这一洞当"计划内抓鸟洞"对待，其余 Par5(2号/4号/8号/17号)难度都明显更高，不能一概而论</td></tr>
+        <tr><td class="name"><b>2 号 Par5(450y)看似送分实则偏难</b></td><td class="name">难度排#3(+0.69)，与许多短Par4接近</td><td class="name">不要默认"Par5=送分洞"，450y二杆攻果岭失败率高，稳健布局优先于一味强攻</td></tr>
+        <tr><td class="name"><b>晋级线年际波动大(+3~+11)，不能死记一个数字</b></td><td class="name">2021 晋级线75，2025 晋级线83，相差8杆</td><td class="name">赛前心态锚点应是"打出自己接近70-75的最好轮次"，而非盯着某一年的具体晋级分数；场均79-82是常态基线</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ========== 四、水障碍视觉证据 ========== -->
+  <h2>四、是不是因为有水？—— 卫星图实测</h2>
+  <p>去卫星图上确认了一下。答案：<b style="color:var(--ink)">是的，水是真实存在的结构性因素</b>，但不是"每洞都靠水"，而是集中在几个特定位置。</p>
+
+  <div class="card">
+    <img src="20260709-assets/clubhouse-water.jpg" alt="Sylvania CC 会所区卫星图" style="width:100%;border-radius:8px;display:block;margin-bottom:10px">
+    <p style="margin:4px 0 0">俱乐部会所正后方就是 <b style="color:var(--ink)">Ten Mile Creek（官方历史资料原名）/ 地图标注 Ottawa River</b> 的一段支流，紧贴会所转弯而过。球场官网原文提到该球场"alongside the scenic Ten Mile Creek"建成——水系是设计原生结构，不是后来加的装饰。会所紧邻区域正是 1 号发球台 / 18 号果岭一带的动线。</p>
+  </div>
+
+  <div class="card">
+    <img src="20260709-assets/course-overview.jpg" alt="Sylvania CC 全场卫星图" style="width:100%;border-radius:8px;display:block;margin-bottom:10px">
+    <p style="margin:4px 0 0">拉远看整体：Ottawa River 沿球场东侧边界贯穿南北，另外会所区域有一段蜿蜒溪流穿过多个球道。树木遮挡下无法在卫星图上逐洞精确标出水线落点，但结合"第一节·难度地图"的数据看，<b style="color:var(--ink)">水系位置和最难/最反常的几个洞高度重合</b>（见下方距离建模章节的交叉验证）。</p>
+  </div>
+
+  <div class="key">
+    <p style="margin:0"><b>结论</b>：水不是笼罩全场的因素，而是精准打在了 <b>1 号（开局）、18 号（收尾）、2 号（Par5）</b>这几个洞上——这也是为什么这几洞的"双柏忌率"会显著偏离球洞长度本身该有的难度（详见下一节）。</p>
+  </div>
+
+  <!-- ========== 五、柏忌 vs 双柏忌拆解 ========== -->
+  <h2>五、柏忌 vs 双柏忌拆解：三种"洞型"，三种教训</h2>
+  <p>把每洞的柏忌率和双柏忌+率分开看（而不是只看"较 Par 平均"），能看出球洞在用<b style="color:var(--ink)">哪种方式</b>制造杆数——这直接决定训练时该练什么。</p>
+
+  <div class="card scroll">
+    <table>
+      <thead><tr><th>洞型</th><th class="name">代表洞</th><th>柏忌率</th><th>双柏忌+率</th><th class="name">信号解读</th></tr></thead>
+      <tbody>
+        <tr><td><b style="color:var(--red)">陷阱型</b></td><td class="name">2 号 Par5 450y</td><td>18.0%</td><td class="bad"><b>23.6%</b></td><td class="name">柏忌率全场倒数第2低，双柏忌率却排第2高——"平时打得挺顺，一旦踩雷就是大数字"的典型信号。大概率是某条具体路线上埋了水/沙坑，正常走位没事，一旦贪线或风向偏了就直接掉进去。</td></tr>
+        <tr><td><b style="color:var(--amber)">温水煮青蛙型</b></td><td class="name">7 号 Par4 320y</td><td class="bad"><b>48.3%</b></td><td>10.1%</td><td class="name">全场柏忌率最高，但双柏忌率不算突出。320y 是全场最短 Par4 之一，理应轻松，却几乎一半人吃柏忌——不是打不到，是打不准（窄球道/小果岭/角度刁），典型的"松懈型丢分"，心理上最容易被忽视。</td></tr>
+        <tr><td><b style="color:var(--red)">全面碾压型</b></td><td class="name">1 号 / 18 号 Par4</td><td class="bad">47.2% / 44.9%</td><td class="bad"><b>29.2% / 20.2%</b></td><td class="name">柏忌率和双柏忌率都名列前茅——不是单一原因，而是水障碍 + 长度 + 心理压力（开局/收尾）叠加。这两洞需要的不是技术突破，而是<b>战略降级</b>：主动接受保par甚至柏忌，避免用进攻姿态去博一个小概率的鸟。</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="key">
+    <p style="margin:0 0 8px"><b>三条教训</b></p>
+    <ul style="margin:0">
+      <li><b>陷阱型洞（2号）</b>：教训是"不要用平时的进攻线路应付它"——需要单独制定这一洞的保守路线，把双柏忌的尾部风险砍掉，哪怕牺牲一点鸟的机会。</li>
+      <li><b>温水煮青蛙型洞（7号）</b>：教训是"短≠松"——短洞恰恰需要更专注的攻果岭策略和选杆纪律，很多人在这类洞上心理松懈导致选杆/瞄准出错。</li>
+      <li><b>全面碾压型洞（1号/18号）</b>：教训是"不要试图用技术弥补，用策略绕开"——开球更保守（球道木/铁木代替一号木）、进攻果岭时瞄准果岭中间大安全区而非旗杆，把这两洞的目标改成"不爆洞"而非"抓机会"。</li>
+    </ul>
+  </div>
+
+  <!-- ========== 六、距离建模推断：什么样的失误在制造这些成绩 ========== -->
+  <h2>六、距离建模推断：开球、二杆、大致是什么样的失误</h2>
+  <p class="note">⚠️ 重要说明：AJGA Qualifier 不公开逐杆 / 击球追踪数据（无真实开球距离、上果岭数、失误类型记录），以下是<b>基于公开的美国青少年女子高尔夫击球距离统计做的建模估算</b>，不是实测数据。用途是给训练重点提供方向，不是精确诊断。</p>
+
+  <div class="card">
+    <h3>建模假设</h3>
+    <ul style="margin:0">
+      <li><b>中段选手</b>（对应本报告场均 79-82 杆左右的大多数人）：开球总距离估算 <b>~175 码</b></li>
+      <li><b>争线选手</b>（对应晋级线附近、70-75 杆水平）：开球总距离估算 <b>~195 码</b></li>
+      <li>Par5 按"开球 + 球道木/长铁上球道 + 第三杆攻果岭"的三杆结构估算（争线选手部分洞可两杆攻果岭）</li>
+      <li>数据来源：公开青少年女子高尔夫击球距离统计（非本赛事实测），仅作相对比较用</li>
+    </ul>
+  </div>
+
+  <div class="card scroll">
+    <h3>18 洞攻果岭剩余距离建模 × 实际难度交叉验证</h3>
+    <table>
+      <thead><tr><th>洞</th><th>Par</th><th>码数</th><th class="name">中段选手攻果岭剩余</th><th class="name">争线选手攻果岭剩余</th><th>难度排名</th><th class="name">推断信号</th></tr></thead>
+      <tbody>
+        <tr><td><b>1</b></td><td>4</td><td>346</td><td>171y(长铁)</td><td>151y(中铁)</td><td class="bad">#1</td><td class="name">距离不长，难度却全场最高 → <b>非距离因素</b>(水障碍+窄球道+小果岭+开局心理)</td></tr>
+        <tr><td><b>2</b></td><td>5</td><td>450</td><td>125y(短挖起)</td><td>90y(挖起)</td><td class="bad">#3</td><td class="name">第三杆本应是送分距离，双柏忌率却全场第2高 → <b>典型障碍陷阱</b>，不是打不到而是踩雷</td></tr>
+        <tr><td><b>3</b></td><td>3</td><td>159</td><td>159y(全洞)</td><td>159y(全洞)</td><td class="bad">#5</td><td class="name">中距离Par3标准杆型，难度偏高 → <b>果岭/沙坑防守强</b>，精度问题而非距离问题</td></tr>
+        <tr><td><b>7</b></td><td>4</td><td>320</td><td>145y(中铁)</td><td>125y(短铁)</td><td class="bad">#4</td><td class="name">全场最短Par4之一，柏忌率却最高 → <b>选杆/瞄准松懈</b>，短距离不等于易打</td></tr>
+        <tr><td><b>13</b></td><td>4</td><td>365</td><td>190y(球道木/长铁)</td><td>170y(长铁)</td><td class="warn">#7</td><td class="name">攻果岭距离偏长 → <b>典型"长二杆精度下降"</b>型难度</td></tr>
+        <tr><td><b>15</b></td><td>4</td><td>363</td><td>188y(球道木/长铁)</td><td>168y(长铁)</td><td class="warn">#8</td><td class="name">同上，长二杆型难度</td></tr>
+        <tr><td><b>18</b></td><td>4</td><td>371</td><td>196y(球道木)</td><td>176y(长铁)</td><td class="bad">#2</td><td class="name">全场最长的Par4二杆攻果岭距离 → <b>距离+水+收尾心理三重叠加</b>，零小鸟印证极难保住小球杆数</td></tr>
+        <tr><td><b>16</b></td><td>5</td><td>414</td><td>89y(小挖起)</td><td>54y(短挖起)</td><td class="good">#18</td><td class="name">三杆结构下第三杆已是精准短挖起距离 → <b>公认送分洞</b>，19次小鸟印证</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="key">
+    <p style="margin:0 0 8px"><b>三类失误归因（按洞型分组）</b></p>
+    <ul style="margin:0">
+      <li><b>① 距离并不长、难度却很高的洞（1、3、7号）</b>：推断主要失误类型是<b>方向控制/选杆纪律</b>，不是打不远。训练重点应放在中短铁的方向精度和果岭阅读，而非增加击球距离。</li>
+      <li><b>② 二杆攻果岭距离偏长的洞（13、15、18号）</b>：推断主要失误类型是<b>中长铁/球道木攻果岭的距离控制</b>——这类杆法本身容错率低，球速快、旋转少，容易长短两端脱靶。训练重点是 150-190y 球道木/长铁的落点稳定性。</li>
+      <li><b>③ 障碍陷阱型洞（2号，某种程度上1、18号也叠加此因素）</b>：推断主要失误类型不是执行精度，而是<b>决策/路线选择</b>——选手可能沿用了"平时的进攻线路"而没有为这个洞单独规划保守路线。训练重点是赛前球场功课与逐洞策略预案，而非单纯技术层面。</li>
+    </ul>
+  </div>
+
+  <div class="takeaway">
+    <h3>一句话总结</h3>
+    <p style="color:var(--ink);font-size:15px;margin:0">这套球场的女子组难度呈明显<b style="color:var(--amber)">"两端难、中段有机会"</b>格局：开局 1 号和收尾 18 号是心理与技术双重考验，几乎没人能在这两洞讨到便宜；16 号 Par5 则是全场公认的送分洞，能不能抓住它往往决定当天成绩的上限。水系（Ten Mile Creek / Ottawa River）在会所周边确实存在且真实影响 1/18/2 号洞，但并非笼罩全场；其余大部分洞的难度更多来自<b style="color:var(--amber)">果岭防守和二杆精度</b>而非水障碍本身。4 年场均稳定在 +7～+10，真正拉开差距的是<b style="color:var(--amber)">开局是否稳住、收尾是否顶住、16 号是否吃满、以及能否针对 2 号这类陷阱洞单独制定保守策略</b>这四件事。</p>
+  </div>
+
+  <footer>
+    <p><b>数据来源</b><br>
+    · AJGA 官方计分系统 — Qualifier 逐洞 Scorecard（需 AJGA Player/Coach 登录账号）<br>
+    · <a href="https://www.ajga.org/tournaments/2025/qualifier-AJGA-Northwestern-Holding-Junior-Open/leaderboard" target="_blank">2025 Qualifier Leaderboard</a>
+    · <a href="https://www.ajga.org/tournaments/2021/qualifier-ajga-dana-incorporated-junior-open/leaderboard" target="_blank">2021</a>
+    · <a href="https://www.ajga.org/tournaments/2020/qualifier-ajga-dana-incorporated-junior-open/leaderboard" target="_blank">2020</a>
+    · <a href="https://www.ajga.org/tournaments/2019/ajga-qualifier-for-the-ajga-dana-incorporated-junior-open/leaderboard" target="_blank">2019</a><br>
+    · <a href="https://www.sylvaniacc.org/Golf_Course" target="_blank">Sylvania Country Club 官网 · 球场历史(Ten Mile Creek)</a>
+    · Google Maps 卫星图(球场/水系实测)
+    · <a href="https://www.provisualizer.com/courses/sylvania.php" target="_blank">ProVisualizer 球场码数图</a></p>
+    <p class="note">第六节"距离建模推断"为估算模型，非本赛事实测击球数据，仅供训练方向参考。</p>
+    <p>报告生成日期：2026-07-09　|　分析对象：女子组，Sylvania Country Club Qualifier Round，4 年合计 89 人次</p>
+  </footer>
+
+</div>
+
+<script>
+const PAR=[4,5,3,5,4,3,4,5,3,3,4,4,4,3,4,5,5,4];
+const YDG=[346,450,159,501,328,165,320,509,142,153,325,341,365,151,363,414,478,371];
+const AVG=[5.09,5.685,3.663,5.404,4.247,3.438,4.674,5.371,3.427,3.36,4.371,4.584,4.539,3.449,4.539,5.09,5.36,4.921];
+const OVER=[1.09,0.685,0.663,0.404,0.247,0.438,0.674,0.371,0.427,0.36,0.371,0.584,0.539,0.449,0.539,0.09,0.36,0.921];
+const DIST=[{"eagle":0,"birdie":1,"par":20,"bogey":42,"dbogey":26},{"eagle":0,"birdie":8,"par":44,"bogey":16,"dbogey":21},{"eagle":0,"birdie":3,"par":36,"bogey":40,"dbogey":10},{"eagle":0,"birdie":7,"par":45,"bogey":33,"dbogey":4},{"eagle":0,"birdie":11,"par":48,"bogey":27,"dbogey":3},{"eagle":0,"birdie":3,"par":49,"bogey":32,"dbogey":5},{"eagle":0,"birdie":3,"par":34,"bogey":43,"dbogey":9},{"eagle":0,"birdie":5,"par":56,"bogey":19,"dbogey":9},{"eagle":0,"birdie":3,"par":51,"bogey":29,"dbogey":6},{"eagle":0,"birdie":6,"par":52,"bogey":25,"dbogey":6},{"eagle":0,"birdie":7,"par":52,"bogey":22,"dbogey":8},{"eagle":0,"birdie":1,"par":47,"bogey":29,"dbogey":12},{"eagle":1,"birdie":2,"par":43,"bogey":34,"dbogey":9},{"eagle":0,"birdie":4,"par":47,"bogey":32,"dbogey":6},{"eagle":0,"birdie":4,"par":42,"bogey":36,"dbogey":7},{"eagle":1,"birdie":19,"par":45,"bogey":20,"dbogey":4},{"eagle":1,"birdie":6,"par":50,"bogey":26,"dbogey":6},{"eagle":0,"birdie":0,"par":31,"bogey":40,"dbogey":18}];
+const N=89;
+
+function diffBars(){
+  const arr=AVG.map((a,h)=>({h:h+1,par:PAR[h],ydg:YDG[h],avg:a,over:OVER[h]}));
+  const ranked=[...arr].sort((a,b)=>b.over-a.over);
+  const rank={}; ranked.forEach((o,i)=>rank[o.h]=i+1);
+  const maxAbs=Math.max(...arr.map(o=>Math.abs(o.over)));
+  function bar(o,type){
+    const w=Math.abs(o.over)/maxAbs*50;
+    const side = o.over>=0 ? `left:50%;width:${w}%` : `right:50%;width:${w}%`;
+    return `<div class="holebar ${type}">
+      <div class="hl">第${o.h}洞 · Par${o.par} · ${o.ydg}y</div>
+      <div class="track"><div class="mid-line"></div><div class="fill" style="${side}"></div></div>
+      <div class="val ${o.over>=0?'bad':'good'}">${o.over>=0?'+':''}${o.over.toFixed(2)}</div>
+    </div>`;
+  }
+  document.getElementById('hardBars').innerHTML = ranked.slice(0,5).map(o=>bar(o,'hard')).join('');
+  document.getElementById('easyBars').innerHTML = ranked.slice(-5).reverse().map(o=>bar(o,'easy')).join('');
+
+  const tb=document.querySelector('#diffTable tbody');
+  tb.innerHTML = arr.map(o=>{
+    const cls = rank[o.h]<=5?'bad':(rank[o.h]>=15?'good':'');
+    const d=DIST[o.h-1];
+    const birdieP=(d.eagle+d.birdie)/N*100, parP=d.par/N*100, bogeyP=d.bogey/N*100, dbP=d.dbogey/N*100;
+    const barHtml=`<div class="barmini">
+      <span style="width:${birdieP}%;background:#2ecc71"></span>
+      <span style="width:${parP}%;background:#4a5b6e"></span>
+      <span style="width:${bogeyP}%;background:#ffb648"></span>
+      <span style="width:${dbP}%;background:#ff5c5c"></span>
+    </div>`;
+    return `<tr><td><b>${o.h}</b></td><td>${o.par}</td><td>${o.ydg}</td><td>${o.avg.toFixed(2)}</td>
+      <td class="${o.over>=0?'bad':'good'}">${o.over>=0?'+':''}${o.over.toFixed(2)}</td>
+      <td class="${cls}">#${rank[o.h]}</td><td class="name">${barHtml}</td></tr>`;
+  }).join('');
+}
+
+diffBars();
+</script>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shelburne Golf &amp; Country Club · CJGA 女子组球场分析</title>
+<style>
+  :root{
+    --bg:#0f1419; --panel:#1a212b; --panel2:#222c38; --line:#2e3a48;
+    --ink:#e8edf2; --ink2:#9fb0c0; --ink3:#6b7c8c;
+    --green:#2ecc71; --green-bg:rgba(46,204,113,.14);
+    --red:#ff5c5c; --red-bg:rgba(255,92,92,.14);
+    --amber:#ffb648; --amber-bg:rgba(255,182,72,.14);
+    --blue:#4aa3ff; --accent:#c0392b;
+    --par:#7d8ea0;
+    --maxw:1100px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:32px 20px 80px}
+  header.hero{border-bottom:1px solid var(--line);padding-bottom:24px;margin-bottom:32px}
+  .tag{display:inline-block;background:var(--accent);color:#fff;font-size:12px;font-weight:700;
+    letter-spacing:.05em;padding:4px 10px;border-radius:4px;margin-bottom:14px}
+  h1{font-size:26px;margin:0 0 8px;line-height:1.3}
+  .sub{color:var(--ink2);font-size:15px}
+  .meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+  .chip{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 14px;font-size:13px}
+  .chip b{color:var(--ink);font-size:15px}
+  .chip span{color:var(--ink3);display:block;font-size:11px;letter-spacing:.04em;text-transform:uppercase}
+  h2{font-size:21px;margin:44px 0 16px;padding-left:12px;border-left:4px solid var(--accent)}
+  h3{font-size:16px;margin:24px 0 10px;color:var(--ink)}
+  p{color:var(--ink2);font-size:14.5px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:16px 0}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin:6px 0}
+  th,td{padding:8px 6px;text-align:center;border-bottom:1px solid var(--line)}
+  th{color:var(--ink3);font-weight:600;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase}
+  td.name,th.name{text-align:left;white-space:nowrap}
+  .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  tbody tr:hover{background:var(--panel2)}
+  .good{color:var(--green)}.bad{color:var(--red)}.warn{color:var(--amber)}
+  .holebar{display:flex;align-items:center;gap:10px;margin:5px 0;font-size:13px}
+  .holebar .hl{width:128px;color:var(--ink2);flex-shrink:0;font-size:12.5px}
+  .holebar .track{flex:1;height:20px;background:var(--panel2);border-radius:4px;position:relative;overflow:hidden}
+  .holebar .fill{position:absolute;top:0;bottom:0;border-radius:4px}
+  .holebar .val{width:64px;text-align:right;flex-shrink:0;font-variant-numeric:tabular-nums;font-size:12.5px}
+  .hard .fill{background:linear-gradient(90deg,#ff7a45,#ff5c5c)}
+  .easy .fill{background:linear-gradient(90deg,#2ecc71,#27d17c)}
+  .mid-line{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink3);left:50%;opacity:.5}
+  ul{color:var(--ink2);font-size:14px;padding-left:20px}
+  li{margin:6px 0}
+  .key{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin:12px 0}
+  .key b{color:var(--amber)}
+  .warnbox{background:rgba(255,182,72,.10);border:1px solid rgba(255,182,72,.4);border-radius:10px;padding:14px 18px;margin:12px 0}
+  .warnbox b{color:var(--amber)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:720px){.grid2{grid-template-columns:1fr}h1{font-size:21px}}
+  footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);color:var(--ink3);font-size:12.5px}
+  footer a{color:var(--blue);text-decoration:none}
+  .note{font-size:12.5px;color:var(--ink3);font-style:italic}
+  .takeaway{background:linear-gradient(135deg,rgba(192,57,43,.16),rgba(74,163,255,.10));
+    border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin:18px 0}
+  .takeaway h3{margin-top:0;color:var(--ink)}
+  .barmini{display:inline-flex;height:14px;border-radius:3px;overflow:hidden;width:100%;min-width:80px}
+  .barmini span{display:block;height:100%}
+  .legend2{display:flex;flex-wrap:wrap;gap:12px;font-size:11.5px;color:var(--ink3);margin-top:8px}
+  .legend2 i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <span class="tag">CJGA · 球场层面分析</span>
+    <h1>Shelburne Golf &amp; Country Club · 青少年女子组</h1>
+    <div class="sub">CJGA Junior Worlds Qualifier at Shelburne Presented by Humber Polytechnic ｜ Shelburne Golf &amp; Country Club, Melancthon, ON</div>
+    <div class="meta">
+      <div class="chip"><span>球场设置(女子 Junior/Bantam 组)</span><b>Par 71 · 5,632 yd</b></div>
+      <div class="chip"><span>覆盖年份</span><b>2025(唯一有数据的一年)</b></div>
+      <div class="chip"><span>样本量</span><b>10 人 · 20 轮</b></div>
+      <div class="chip"><span>赛制</span><b>2 轮 36 洞 Stroke Play</b></div>
+      <div class="chip"><span>数据来源</span><b>CJGA OnPar.golf 官方计分系统</b></div>
+    </div>
+  </header>
+
+  <div class="warnbox">
+    <p style="margin:0"><b>⚠️ 样本规模提醒（务必先读）</b>：这份报告的可信度和 Sylvania CC 那两份（89 轮 / 510 轮）不在一个量级。CJGA 在 Shelburne 目前只查到 <b>2025 单年</b>数据，女子组 Junior(U19)+Bantam(U15) 两个年龄组合计只有 <b>10 人、20 轮</b>。样本量小意味着"难度排名"里的名次差距可能只是几个人的偶然发挥，不是稳固的球场规律——请把这份报告当作"方向性参考"，而不是像 Sylvania 报告那样的"高置信度结论"。</p>
+  </div>
+
+  <p class="note">说明：CJGA 使用 OnPar.golf 计分系统，赛事逐洞成绩公开可查（无需登录）。本报告数据来自 2025 年 5 月 31 日-6 月 1 日 "CJGA Junior Worlds Qualifier at Shelburne"，覆盖 Junior Girls(U19) 7 人 + Bantam Girls(U15) 3 人，两组球道 Par/码数完全一致（同一套发球台），已合并为单一数据集；总杆已与官方榜单逐一核对吻合。该系统同时记录了 FIR(打上球道)/GIR(标准杆上果岭) 字段，但抽查发现这两项字段全员均为 0/未记录，判断为该赛事未启用该统计功能，本报告未使用这两项数据。</p>
+
+  <!-- ========== 一、总览 ========== -->
+  <h2>一、10 人总览</h2>
+  <div class="card scroll">
+    <table>
+      <thead><tr><th>名次</th><th>R1+R2 总杆</th><th>较 Par(142)</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>167</td><td class="bad">+25</td></tr>
+        <tr><td>2</td><td>170</td><td class="bad">+28</td></tr>
+        <tr><td>3</td><td>172</td><td class="bad">+30</td></tr>
+        <tr><td>4</td><td>176</td><td class="bad">+34</td></tr>
+        <tr><td>5</td><td>177</td><td class="bad">+35</td></tr>
+        <tr><td>6</td><td>184</td><td class="bad">+42</td></tr>
+        <tr><td>7</td><td>185</td><td class="bad">+43</td></tr>
+        <tr><td>8</td><td>189</td><td class="bad">+47</td></tr>
+        <tr><td>9</td><td>190</td><td class="bad">+48</td></tr>
+        <tr><td>10</td><td>201</td><td class="bad">+59</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="key">
+    <p style="margin:0 0 8px"><b>和 Sylvania CC 完全不同的画像</b></p>
+    <ul style="margin:0">
+      <li>场均总杆 <b>181.1（36洞，Par142，约合每轮 90.5 杆，+19.5）</b>——这比 Sylvania Qualifier 的场均 +7~+10 高出一大截。不代表这批选手水平差，更可能是<b>发展阶段的地区级选拔赛</b>（CJGA Tier 2）本身面向更广泛的青少年群体，而非 AJGA 那种全国性精英选拔。</li>
+      <li>冠军总杆 167（+25），最后一名 201（+59），差距 34 杆——组内水平跨度非常大，这也是小样本报告里"场均"意义有限的原因之一。</li>
+    </ul>
+  </div>
+
+  <!-- ========== 二、球场难度地图 ========== -->
+  <h2>二、球场难度地图（谨慎解读，样本仅 20 轮）</h2>
+  <p>下图为各洞场均相对 Par 的偏离；样本合并 Junior Girls + Bantam Girls 共 10 人 20 轮。</p>
+
+  <div class="grid2">
+    <div class="card">
+      <h3 class="bad">🔴 最难 5 洞</h3>
+      <div id="hardBars"></div>
+    </div>
+    <div class="card">
+      <h3 class="good">🟢 相对最易 5 洞</h3>
+      <div id="easyBars"></div>
+    </div>
+  </div>
+
+  <div class="card scroll">
+    <h3>全 18 洞难度明细 + 成绩分布</h3>
+    <table id="diffTable">
+      <thead><tr><th>洞</th><th>Par</th><th>场均</th><th>较 Par</th><th>难度排名</th><th class="name">成绩分布(鸟/Par/柏忌/双柏忌+，n=20)</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div class="legend2">
+      <span><i style="background:#2ecc71"></i>小鸟或更好</span>
+      <span><i style="background:#4a5b6e"></i>标准杆</span>
+      <span><i style="background:#ffb648"></i>柏忌</span>
+      <span><i style="background:#ff5c5c"></i>双柏忌+</span>
+    </div>
+  </div>
+
+  <div class="key">
+    <p style="margin:0 0 8px"><b>看到什么（附样本量提醒）</b></p>
+    <ul style="margin:0">
+      <li><b>没有一个洞平均杆数低于 Par</b>——18 个洞的"较 Par"全部为正（+0.35 到 +1.60），和 Sylvania 两份报告里"至少有 1-2 个明显送分洞"的格局完全不同。要么是这批选手整体水平偏发展期，要么是球场本身（狭窄球道走廊 + 多处池塘，见第四节卫星图）确实比 Sylvania 更难抓分——两种可能都成立，20 轮样本不足以区分。</li>
+      <li><b>9 号洞（Par3）是唯一"看起来友善"的洞</b>：较 Par 仅 +0.35，20 轮里 11 次打上标准杆、1 次小鸟、0 次双柏忌以上——是当前样本里唯一有稳定送分迹象的洞，但仅凭 20 轮下结论仍偏薄弱。</li>
+      <li><b>15 号（Par5）、5 号（Par4）、12 号（Par5）是当前样本最难的三洞</b>，较 Par 均超过 +1.35。15/12 号都是 Par5，且都出现了较高的双柏忌率（45%、55%），提示可能与球道走廊狭窄或池塘位置有关（见第四节）。</li>
+    </ul>
+  </div>
+
+  <!-- ========== 三、给训练/赛前的建议 ========== -->
+  <h2>三、初步训练建议（基于当前有限样本）</h2>
+  <div class="card scroll">
+    <table>
+      <thead><tr><th class="name">观察</th><th class="name">证据(n=20，谨慎参考)</th><th class="name">建议</th></tr></thead>
+      <tbody>
+        <tr><td class="name"><b>两个 Par5(12号/15号)双柏忌率异常高</b></td><td class="name">12号55%双柏忌+，15号45%双柏忌+</td><td class="name">Par5 在这个球场可能不是常规意义的"送分洞"——赛前需要专门核实这两洞是否有水塘/树林走廊影响两杆布局，不要默认 Par5=进攻机会</td></tr>
+        <tr><td class="name"><b>9 号 Par3 是当前唯一稳定送分信号</b></td><td class="name">较Par仅+0.35，0次双柏忌</td><td class="name">重点练好这一洞的标准杆把握，是当前样本里最具确定性的"该拿分"的洞</td></tr>
+        <tr><td class="name"><b>整体双柏忌率偏高（多洞超过30%）</b></td><td class="name">对比Sylvania Qualifier多数洞双柏忌率在5-15%区间</td><td class="name">如果这批数据能代表球场真实难度，止损能力(避免大数字)应优先于抓鸟——但仍需更多年份数据验证是球场原因还是选手水平原因</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ========== 四、水障碍视觉证据 ========== -->
+  <h2>四、球场官网自述"六个泉水池塘"—— 卫星图核实</h2>
+  <p>俱乐部官网原文提到:"...six spring-fed ponds providing a challenge to all levels of golfers"（六个泉水补给的池塘为所有水平的球员带来挑战），也提到球场位于 Niagara Escarpment 西缘、地形起伏。去卫星图核实了一下。</p>
+
+  <div class="card">
+    <img src="20260709-assets/shelburne-clubhouse-pond.jpg" alt="Shelburne GCC 会所区卫星图" style="width:100%;border-radius:8px;display:block;margin-bottom:10px">
+    <p style="margin:4px 0 0">会所紧邻至少一处池塘，球场整体嵌在树林走廊中，与 Sylvania CC 那种开阔平坦的俄亥俄州公园式球场（parkland）明显不同——这里的球道更多是"树林夹道 + 局部水塘"的丘陵林地式（parkland-woodland）布局。</p>
+  </div>
+
+  <div class="card">
+    <img src="20260709-assets/shelburne-course-ponds.jpg" alt="Shelburne GCC 球场内部卫星图" style="width:100%;border-radius:8px;display:block;margin-bottom:10px">
+    <p style="margin:4px 0 0">球场内部可见多处独立池塘散布在不同球道之间，球道普遍较窄、被树林分隔。这张图右半部分因卫星图拼接问题分辨率偏低，未能精确到"哪个洞的哪一侧有水"的逐洞级别，但足以确认<b style="color:var(--ink)">水障碍是真实、分散在多个洞的结构性因素</b>，不是集中在一两个洞。</p>
+  </div>
+
+  <div class="key">
+    <p style="margin:0"><b>结论</b>：和 Sylvania CC「水只集中打在 1/18/2 号洞」不同，Shelburne 的水障碍看起来<b>分散在多个球道</b>，这可能也是"18 个洞较 Par 全部为正、没有明显送分洞"这一现象的物理成因之一——但受限于卫星图分辨率和数据量，这只是合理推测，不是精确结论。</p>
+  </div>
+
+  <div class="takeaway">
+    <h3>一句话总结（附信心水平说明）</h3>
+    <p style="color:var(--ink);font-size:15px;margin:0">当前数据显示 Shelburne GCC 女子组难度分布<b style="color:var(--amber)">比 Sylvania CC 更均匀、没有明显送分洞</b>，9 号 Par3 是唯一相对友善的洞，两个 Par5(12/15号) 反而是双柏忌高发区——这和"水障碍分散在多个球道"的卫星图证据相互印证，方向是合理的。但必须再强调一次：<b style="color:var(--amber)">这只基于单年 20 轮数据</b>，随时可能被更多数据推翻。如果未来 CJGA 在该球场举办更多年份的赛事，或你能找到其他年份/其他分区的比赛结果，建议重新采集数据、扩大样本后再复核这份报告的结论。</p>
+  </div>
+
+  <footer>
+    <p><b>数据来源</b><br>
+    · <a href="https://cjga.onpar.golf/tournaments/2016" target="_blank">CJGA Junior Worlds Qualifier at Shelburne · 2025 Leaderboard</a>（Junior Girls U19 + Bantam Girls U15）<br>
+    · Google Maps 卫星图（球场/水系实测）<br>
+    · <a href="https://www.shelburnegolf.com/" target="_blank">Shelburne Golf &amp; Country Club 官网</a></p>
+    <p class="note">补充：同期还有 CJGA Linkster Junior Worlds Qualifier at Shelburne（更低年龄组 U13，短发球台 Par71/4283y，6 人 1 轮），因发球台不同未并入主数据集，仅供参考：场均 91.3 杆，最低 78 杆。</p>
+    <p>报告生成日期：2026-07-17　|　分析对象：女子组（Junior U19 + Bantam U15），Shelburne Golf &amp; Country Club，2025 单年 10 人 / 20 轮</p>
+  </footer>
+
+</div>
+
+<script>
+const PAR=[4,4,3,5,4,3,4,5,3,5,3,5,4,3,5,4,4,3];
+const AVG=[5.35,5.25,4.2,6.35,5.45,4.1,4.95,5.85,3.35,5.95,3.6,6.4,5.1,3.85,6.6,5.2,5.15,3.85];
+const OVER=[1.35,1.25,1.2,1.35,1.45,1.1,0.95,0.85,0.35,0.95,0.6,1.4,1.1,0.85,1.6,1.2,1.15,0.85];
+const DIST=[{"eagle":0,"birdie":1,"par":2,"bogey":7,"dbogey":10},{"eagle":0,"birdie":1,"par":5,"bogey":7,"dbogey":7},{"eagle":0,"birdie":1,"par":3,"bogey":10,"dbogey":6},{"eagle":0,"birdie":0,"par":5,"bogey":7,"dbogey":8},{"eagle":0,"birdie":0,"par":1,"bogey":11,"dbogey":8},{"eagle":0,"birdie":0,"par":4,"bogey":11,"dbogey":5},{"eagle":0,"birdie":0,"par":6,"bogey":10,"dbogey":4},{"eagle":0,"birdie":1,"par":4,"bogey":12,"dbogey":3},{"eagle":0,"birdie":1,"par":11,"bogey":8,"dbogey":0},{"eagle":1,"birdie":0,"par":7,"bogey":6,"dbogey":6},{"eagle":0,"birdie":0,"par":9,"bogey":10,"dbogey":1},{"eagle":0,"birdie":0,"par":4,"bogey":5,"dbogey":11},{"eagle":0,"birdie":0,"par":7,"bogey":8,"dbogey":5},{"eagle":0,"birdie":0,"par":7,"bogey":10,"dbogey":3},{"eagle":0,"birdie":1,"par":2,"bogey":8,"dbogey":9},{"eagle":0,"birdie":0,"par":3,"bogey":10,"dbogey":7},{"eagle":0,"birdie":0,"par":7,"bogey":7,"dbogey":6},{"eagle":0,"birdie":1,"par":6,"bogey":10,"dbogey":3}];
+const N=20;
+
+function diffBars(){
+  const arr=AVG.map((a,h)=>({h:h+1,par:PAR[h],avg:a,over:OVER[h]}));
+  const ranked=[...arr].sort((a,b)=>b.over-a.over);
+  const rank={}; ranked.forEach((o,i)=>rank[o.h]=i+1);
+  const maxAbs=Math.max(...arr.map(o=>Math.abs(o.over)));
+  function bar(o,type){
+    const w=Math.abs(o.over)/maxAbs*50;
+    const side = o.over>=0 ? `left:50%;width:${w}%` : `right:50%;width:${w}%`;
+    return `<div class="holebar ${type}">
+      <div class="hl">第${o.h}洞 · Par${o.par}</div>
+      <div class="track"><div class="mid-line"></div><div class="fill" style="${side}"></div></div>
+      <div class="val ${o.over>=0?'bad':'good'}">${o.over>=0?'+':''}${o.over.toFixed(2)}</div>
+    </div>`;
+  }
+  document.getElementById('hardBars').innerHTML = ranked.slice(0,5).map(o=>bar(o,'hard')).join('');
+  document.getElementById('easyBars').innerHTML = ranked.slice(-5).reverse().map(o=>bar(o,'easy')).join('');
+
+  const tb=document.querySelector('#diffTable tbody');
+  tb.innerHTML = arr.map(o=>{
+    const cls = rank[o.h]<=5?'bad':(rank[o.h]>=15?'good':'');
+    const d=DIST[o.h-1];
+    const birdieP=(d.eagle+d.birdie)/N*100, parP=d.par/N*100, bogeyP=d.bogey/N*100, dbP=d.dbogey/N*100;
+    const barHtml=`<div class="barmini">
+      <span style="width:${birdieP}%;background:#2ecc71"></span>
+      <span style="width:${parP}%;background:#4a5b6e"></span>
+      <span style="width:${bogeyP}%;background:#ffb648"></span>
+      <span style="width:${dbP}%;background:#ff5c5c"></span>
+    </div>`;
+    return `<tr><td><b>${o.h}</b></td><td>${o.par}</td><td>${o.avg.toFixed(2)}</td>
+      <td class="${o.over>=0?'bad':'good'}">${o.over>=0?'+':''}${o.over.toFixed(2)}</td>
+      <td class="${cls}">#${rank[o.h]}</td><td class="name">${barHtml}</td></tr>`;
+  }).join('');
+}
+
+diffBars();
+</script>
+</body>
+</html>

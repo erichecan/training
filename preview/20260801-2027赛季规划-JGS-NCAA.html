@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2027 赛季规划 · JGS 排名 × AJGA × NCAA 路线</title>
+<style>
+  :root{
+    --bg:#0f1419; --panel:#1a212b; --panel2:#222c38; --line:#2e3a48;
+    --ink:#e8edf2; --ink2:#9fb0c0; --ink3:#6b7c8c;
+    --green:#2ecc71; --green-bg:rgba(46,204,113,.14);
+    --red:#ff5c5c; --red-bg:rgba(255,92,92,.14);
+    --amber:#ffb648; --amber-bg:rgba(255,182,72,.14);
+    --blue:#4aa3ff; --accent:#c0392b;
+    --maxw:1100px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+    line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:32px 20px 80px}
+  header.hero{border-bottom:1px solid var(--line);padding-bottom:24px;margin-bottom:32px}
+  .tag{display:inline-block;background:var(--accent);color:#fff;font-size:12px;font-weight:700;
+    letter-spacing:.05em;padding:4px 10px;border-radius:4px;margin-bottom:14px}
+  h1{font-size:26px;margin:0 0 8px;line-height:1.3}
+  .sub{color:var(--ink2);font-size:15px}
+  .meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+  .chip{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 14px;font-size:13px}
+  .chip b{color:var(--ink);font-size:15px}
+  .chip span{color:var(--ink3);display:block;font-size:11px;letter-spacing:.04em;text-transform:uppercase}
+  h2{font-size:21px;margin:44px 0 16px;padding-left:12px;border-left:4px solid var(--accent)}
+  h3{font-size:16px;margin:24px 0 10px;color:var(--ink)}
+  p{color:var(--ink2);font-size:14.5px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:16px 0}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin:6px 0}
+  th,td{padding:8px 8px;text-align:center;border-bottom:1px solid var(--line)}
+  th{color:var(--ink3);font-weight:600;font-size:11.5px;letter-spacing:.04em;text-transform:uppercase}
+  td.name,th.name{text-align:left}
+  .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  tbody tr:hover{background:var(--panel2)}
+  .good{color:var(--green)}.bad{color:var(--red)}.warn{color:var(--amber)}
+  ul,ol{color:var(--ink2);font-size:14px;padding-left:20px}
+  li{margin:6px 0}
+  .key{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin:12px 0}
+  .key b{color:var(--amber)}
+  .warnbox{background:rgba(255,182,72,.10);border:1px solid rgba(255,182,72,.4);border-radius:10px;padding:14px 18px;margin:12px 0}
+  .warnbox b{color:var(--amber)}
+  .urgent{background:rgba(255,92,92,.10);border:1px solid rgba(255,92,92,.45);border-radius:10px;padding:14px 18px;margin:12px 0}
+  .urgent b{color:var(--red)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:720px){.grid2{grid-template-columns:1fr}h1{font-size:21px}}
+  footer{margin-top:50px;padding-top:20px;border-top:1px solid var(--line);color:var(--ink3);font-size:12.5px}
+  footer a{color:var(--blue);text-decoration:none}
+  .note{font-size:12.5px;color:var(--ink3);font-style:italic}
+  .takeaway{background:linear-gradient(135deg,rgba(192,57,43,.16),rgba(74,163,255,.10));
+    border:1px solid var(--line);border-radius:12px;padding:20px 22px;margin:18px 0}
+  .takeaway h3{margin-top:0;color:var(--ink)}
+  .timeline td{text-align:left;vertical-align:top}
+  .timeline td:first-child{white-space:nowrap;color:var(--ink);font-weight:600}
+  .hl-red{color:var(--red);font-weight:700}
+  .star{color:var(--amber);font-weight:700}
+  td.l,th.l{text-align:left}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <span class="tag">赛季规划 · v2(调研数据已填入)</span>
+    <h1>2027 赛季规划 — JGS 排名 × AJGA × NCAA 招募路线</h1>
+    <div class="sub">目标:进入 NCAA 校队并拿到奖学金 ｜ 2026-08-01 · 数据来自 ajga.org / juniorgolfscoreboard.com / NCSA / NCAA 官方页实时抓取 ｜ v3 触发点:2026 年 11 月 AJGA 公布 2027 赛程</div>
+    <div class="meta">
+      <div class="chip"><span>Class of</span><b>2029</b></div>
+      <div class="chip"><span>Scoring Average</span><b>72–76</b></div>
+      <div class="chip"><span>D1 教练可联系日</span><b class="hl-red">2027-06-15</b></div>
+      <div class="chip"><span>出行半径</span><b>车程 ≤8 小时</b></div>
+      <div class="chip"><span>画像</span><b>距离偏短 · 离散小 · 可预测</b></div>
+    </div>
+  </header>
+
+  <div class="takeaway">
+    <h3>一句话定性</h3>
+    <p style="margin:0"><b style="color:var(--ink)">2027 不是"提升排名年",是"成绩簿定价年"。</b>
+    NCAA D1 教练可主动联系(含口头 offer)= 高二结束后的 6 月 15 日 → 对 Class of 2029 就是 <b class="hl-red">2027-06-15</b>(NCSA 官方确认);官方访校 2027-08-01 起开放。
+    她 72–76 的平均分已在 D1 对话区间——资本要用来打含金量,不是堆场次。</p>
+  </div>
+
+  <div class="urgent"><b>⛔ 本周就要做的一件事:</b>Canadian Junior Girls Championship 2026 就在 <b>8 月 11–14 日、TPC Toronto Osprey Valley(Caledon,家门口 ~1h)</b>,
+  女子组 PBE 星值全表最高(冠军 12★/Top5 8★/Top10 4★/Top15 1★)且上 JGS/WAGR——<b>立刻确认是否已报名/报名是否截止</b>(Golf Canada 官网)。错过这场,秋季攒星主力就换到 8 月末的 Ontario U17 和 9 月的 MJT National。</div>
+
+  <h2>1 · 校准:她现在在哪,要去哪(JGS 2026-07-31 实测)</h2>
+  <p>JGS 公式:<b style="color:var(--ink)">65% scoring differential</b>(滚动 365 天,取<b style="color:var(--ink)">最好的 75% 轮次</b>,每轮 = 杆数 − USGA course rating)+ 25% field 强度 + 10% 名次。无 head-to-head。
+  上榜要求:365 天内 ≥4 场多日赛、≥8 轮;赛事须 USGA 评级球场、≥36 洞、≥4,500 码。加拿大赛事原生收录。Class of 2029 女子共 747 人上榜。</p>
+  <div class="scroll"><table>
+    <thead><tr><th class="l">位置(2029 班内)</th><th>Differential 门槛</th><th>≈最好轮次平均</th><th class="l">参照</th></tr></thead>
+    <tbody>
+      <tr><td class="l">Top 10</td><td>≤ −4.36</td><td>67–69</td><td class="l">加拿大最强 2029:Maggie Zhang(BC)#9,−4.58</td></tr>
+      <tr><td class="l">Top 50</td><td>≤ −1.65</td><td>70–72</td><td class="l">—</td></tr>
+      <tr><td class="l">Top 100</td><td>≤ −0.35</td><td>71.5–73.5</td><td class="l">安省对标:Andrea Lai(St. Thomas)#87,−0.65</td></tr>
+      <tr><td class="l"><b class="warn">她现在(72–76)</b></td><td>≈ −0.5 ~ +2.5</td><td>—</td><td class="l"><b>约 100–400 名区间;平均压到 72–73 即逼近 Top 100–150</b></td></tr>
+    </tbody>
+  </table></div>
+  <div class="key"><b>NCSA 招募基准:</b>scoring average ≤75 = 高端 D1 讨论区间;≤80 = 中低端 D1;≤85 = D2/顶级 NAIA。教练只看 ≥6,000 码、≥36 洞多日赛,首选参考就是 JGS。
+  <b>House 和解新格局(2025-06):</b>opt-in 学校取消 6.0 奖学金上限改 roster limit 9 人,但极少满额、roster 收缩约 10% → 目标名单下探到排名 100–150 的项目并纳入 D2。女子 D1 国际球员占比 20.1%,跨境招募是常态。</div>
+
+  <h2>2 · 选赛三关(每场必答)</h2>
+  <div class="grid2">
+    <div class="card"><h3>① 收录关</h3><p>JGS/WAGR 收不收?(≥36 洞、USGA 评级场、≥4,500y、≥5 人完赛)不收录的只用于练兵。</p></div>
+    <div class="card"><h3>② 球场关</h3><p>≤6,000y 优先;避开强制长 carry;par 5 能舒服三上;rating 别太低(压 differential 价值)。</p></div>
+    <div class="card"><h3>③ 下行关</h3><p>比较<b style="color:var(--ink)">最坏情况</b>:打爆的代价(排名、报名费、旅途、信心)可承受吗?</p></div>
+    <div class="key" style="margin:0;align-self:center"><b>缓冲机制:</b>JGS 只取最好 75% 轮次——偶发爆轮有丢弃空间,但前提是好轮次基数够大。</div>
+  </div>
+
+  <h2>3 · PBE 星规则(ajga.org 官方,2026-08 版)</h2>
+  <div class="card"><ul>
+    <li><b style="color:var(--ink)">入场 = 优先级排序</b>:Fully Exempt(全国大赛顶级名次)&gt; 星多者优先。没有"够 N 颗必进",星越多越稳。</li>
+    <li><b style="color:var(--ink)">星有效期两年</b>:当年赚的星用到<b class="star">次年年底</b> → 2026 秋赚的星 2027 全年有效,秋季攒星直接为 2027 服务。</li>
+    <li>2022 年起进正赛<b>不扣星</b>;会员注册/续费本身送 1★。</li>
+    <li><b class="bad">Junior All-Star 年龄线:赛事年 1 月 1 日不得超过 14 岁</b> → 她 2027 无论生日都只剩 <b style="color:var(--ink)">Open + Qualifier</b> 两条路。</li>
+    <li>Qualifier:$95、单轮、非会员可报、晋级抵扣正赛 $295、正赛前一天同场进行——每场目标 Open 都同步报它兜底。</li>
+  </ul></div>
+
+  <h2>4 · 2026 秋冬攒星作战(星值为 PBE Schedule 逐场实测,女子组)</h2>
+  <p><b class="warn">关键事实:AJGA 秋季(9–12 月)在 MI/OH/NY/PA/ON 零赛事(官网逐月核验),安省/魁北克全年零 AJGA。</b>
+  秋季攒星全靠下表的第三方 PBE 认证赛——好消息是安省本土就有一条完整换星链,大部分车程 1–2 小时。</p>
+  <div class="scroll"><table>
+    <thead><tr><th>日期(2026)</th><th class="l">赛事</th><th class="l">地点(车程)</th><th class="l">女子组星值</th><th class="l">备注</th></tr></thead>
+    <tbody>
+      <tr style="background:var(--red-bg)"><td><b>08-11~14</b></td><td class="l"><b>Canadian Junior Girls Championship</b></td><td class="l">TPC Toronto Osprey Valley, Caledon ON(1h)</td><td class="l"><b class="star">冠军 12★ / Top5 8★ / Top10 4★ / Top15 1★</b></td><td class="l">全表最高星矿+JGS/WAGR;<b class="bad">立刻查报名</b></td></tr>
+      <tr><td>08-15~16</td><td class="l">MJT Order of Merit @ Century Pines</td><td class="l">Troy ON(1h)</td><td class="l">冠军 2★ / Top5 1★</td><td class="l">36 洞</td></tr>
+      <tr><td>08-22~23</td><td class="l">MJT Order of Merit @ Lakeridge Links</td><td class="l">Brooklin ON(1h)</td><td class="l">Overall Girls 冠军 2★ / Top3 1★</td><td class="l">36 洞</td></tr>
+      <tr style="background:var(--amber-bg)"><td><b>08-31~09-02</b></td><td class="l"><b>Ontario U17 Championship</b></td><td class="l">Tangle Creek, Thornton ON(1.5h)</td><td class="l">U17 Girls 冠军 2★ / Top3 1★</td><td class="l">省锦标赛 54 洞,JGS 含金量高;报名截止约 8 月中</td></tr>
+      <tr><td>09-05~06</td><td class="l">Callaway/Meijer Tour @ Forest Akers West</td><td class="l">Lansing MI(4.5h)</td><td class="l">Girls 14-18 冠军 2★ / Top3 1★</td><td class="l">备选</td></tr>
+      <tr style="background:var(--amber-bg)"><td><b>09-11~13</b></td><td class="l"><b>MJT National Tour Challenge</b>(Canada Life)</td><td class="l">Sawmill GC, Fenwick ON(1.5h)</td><td class="l"><b class="star">Overall Girls 冠军 4★</b> / Top10% 1★</td><td class="l">MJT 全国级 54 洞</td></tr>
+      <tr><td>09-26~27</td><td class="l">MJT Order of Merit @ Don Valley</td><td class="l">多伦多市内</td><td class="l">冠军 2★ / Top3 1★</td><td class="l">零差旅</td></tr>
+      <tr><td>10-06~08</td><td class="l">Ontario Super Camp Invitational</td><td class="l">Bond Head ON(1h)</td><td class="l">U19 Girls 冠军 4★ / Top10% 1★</td><td class="l">邀请制,获邀必打</td></tr>
+      <tr><td>10-17~18</td><td class="l">GolfWeek Junior Tour @ Darby Creek</td><td class="l">Marysville OH(6.5h)</td><td class="l">Girls 15-19 冠军 4★ / Top10% 1★</td><td class="l">与 NCR 连打或二选一</td></tr>
+      <tr style="background:var(--amber-bg)"><td><b>10-24~25</b></td><td class="l"><b>GolfWeek JT Elite @ NCR CC</b></td><td class="l">Dayton OH(6.5h)</td><td class="l"><b class="star">冠军 8★ / Top3 4★ / Top5 1★</b></td><td class="l">秋季车程内最大星矿,NCR North 老牌锦标赛场</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">World Junior Girls(09-30~10-03,Brampton ON)为国家队邀请制,不可自由报名——可现场观赛对标。</p>
+  <div class="key"><b>攒星目标:到 11 月底手握 ≥8★</b>(会员 1★ + 本土 2–3 场前三 + 一场 4★/8★ 级收获)。星 2027 全年有效。
+  <b>冬歇(12–2 月):</b>室内保挥杆 + 距离小幅增益(每 +5 码都在扩大排名友好场范围);<b class="warn">2026-11 初</b>盯 AJGA 2027 赛程发布(2026 赛程为 2025-11-03 上线),第一时间报名。</div>
+  <div class="warnbox"><b>攒星防坑:</b>MJT/省赛多为 36–54 洞、大多同时计入 JGS → 攒星和排名<b>无法完全解耦</b>,选场仍要过球场关。好在安省秋季赛普遍 &lt;6,000y、对她画像有利;逐场在 JGS 收录名单核对后再定。</div>
+
+  <h2>5 · 2027 拟报名计划(以 2026 赛程为模板,11 月赛程公布后钉死)</h2>
+  <h3>AJGA 主线 — 报 Open,每场同步报 Qualifier 兜底($95)</h3>
+  <div class="scroll"><table>
+    <thead><tr><th>拟档期</th><th class="l">赛事(2026 模板)</th><th class="l">地点(车程)</th><th class="l">选它的理由</th></tr></thead>
+    <tbody>
+      <tr><td>4 月下旬</td><td class="l">AJGA Junior at Indiana + Q</td><td class="l">Indiana, PA(5h)</td><td class="l">开季热身,field 相对弱</td></tr>
+      <tr><td>6 月中</td><td class="l">Rolex Girls Junior Championship(邀请制)</td><td class="l">2026 在 Fort Wayne, IN(6h)</td><td class="l">女子专场旗舰,以 2026 秋+2027 春战绩冲邀请</td></tr>
+      <tr><td>6 月底~7 月初</td><td class="l">Coca-Cola Junior @ The Highlands + Q</td><td class="l">Harbor Springs, MI(7h)</td><td class="l">可配家庭行程</td></tr>
+      <tr style="background:var(--green-bg)"><td><b>7 月中</b></td><td class="l"><b>AJGA Northwestern Holding Junior Open + Q</b></td><td class="l"><b>Sylvania CC, OH(4.5h)</b></td><td class="l"><b>已有 4 年逐洞数据分析,球场熟</b></td></tr>
+      <tr><td>7 月下旬</td><td class="l">Eastside Golf Championship @ Forest Lake + Q</td><td class="l">Bloomfield Hills, MI(4h)</td><td class="l">近;Q 在 Fieldstone GC</td></tr>
+      <tr style="background:var(--green-bg)"><td><b>8 月中</b></td><td class="l"><b>Randy Wise Junior Open + Q</b></td><td class="l"><b>Linden, MI(4h)</b></td><td class="l"><b>女子 tee 6,026y,球场关最优</b></td></tr>
+      <tr><td>8 月中下(备选)</td><td class="l">Nemacolin Junior / AJGA Albany + Q</td><td class="l">PA(6h)/ NY(6.5h)</td><td class="l">视暑期余量二选一</td></tr>
+      <tr><td class="bad">避开</td><td class="l">the Memorial Junior @ OSU Scarlet</td><td class="l">Columbus, OH(7h)</td><td class="l">场长难度大,球场关不过</td></tr>
+    </tbody>
+  </table></div>
+  <h3>加拿大主线 — 同时攒星 + JGS/WAGR</h3>
+  <div class="scroll"><table>
+    <thead><tr><th>拟档期</th><th class="l">赛事</th><th class="l">说明</th></tr></thead>
+    <tbody>
+      <tr><td>5–6 月</td><td class="l">Golf Ontario 春季系列 + NextGen 安省站</td><td class="l">2027 日程待公布,作热身与保底轮次</td></tr>
+      <tr><td>6 月</td><td class="l">U.S. Girls' Junior Qualifying(近程站)</td><td class="l">USGA 含金量,72–76 有一战之力</td></tr>
+      <tr><td>7 月上</td><td class="l">Ontario Junior(U19)Girls Championship</td><td class="l">省锦标赛</td></tr>
+      <tr style="background:var(--amber-bg)"><td><b>8 月上</b></td><td class="l"><b>Canadian Junior Girls Championship 2027</b></td><td class="l">全国锦标赛,12★ 级 + WAGR</td></tr>
+      <tr><td>8 月底</td><td class="l">Ontario U17 Championship</td><td class="l">收官</td></tr>
+    </tbody>
+  </table></div>
+  <p>全年量级:AJGA 正赛进 3–5 场 + 加拿大 5–6 场 ≈ <b style="color:var(--ink)">30–40 个计分轮</b>,满足 JGS ≥4 赛 8 轮要求且留复盘间隔。报名费参考:AJGA Open $295 / Qualifier $95(可抵扣)/ Junior All-Star $285(2027 已不适用)。</p>
+
+  <h2>6 · 逐月时间线(比赛线 × Recruiting 线)</h2>
+  <div class="scroll"><table class="timeline">
+    <thead><tr><th class="name">时段</th><th class="name">比赛线</th><th class="name">Recruiting 线</th></tr></thead>
+    <tbody>
+      <tr><td>2026-08~10</td><td>秋季攒星:CJG(8/11)→ U17(8/31)→ MJT National(9/11)→ NCR Elite(10/24),目标 ≥8★</td><td>完善 JGS profile;拍 90 秒 swing video</td></tr>
+      <tr><td>2026-11~12</td><td><b class="warn">11 月初 AJGA 公布 2027 赛程 → 第一时间报名,钉死日历(v3)</b></td><td>目标学校 20 所:冲 5/稳 10/保 5(下探至 100–150 名 + D2)</td></tr>
+      <tr><td>2027-01~03</td><td>室内技术期 + 体能;盯早春报名窗口</td><td>首轮教练邮件:成绩 + 视频 + 未来参赛表;注册 Eligibility Center($160)</td></tr>
+      <tr><td>2027-04~05</td><td>PA 开季赛 + 安省早春赛,把状态打出来</td><td>出分后二轮邮件</td></tr>
+      <tr><td class="hl-red">2027-06-15</td><td>—</td><td class="hl-red">D1 contact date:可主动联系、电话、口头 offer</td></tr>
+      <tr><td>2027-06~08</td><td><b>核心窗口</b>:Sylvania / Forest Lake / Randy Wise + ON Junior Girls + Canadian Junior Girls</td><td>每场赛后向有回应的教练更新</td></tr>
+      <tr><td>2027-08-01 起</td><td>秋季收官 + 全年复盘</td><td><b>官方访校开放</b>,排期走访</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>7 · Recruiting 要件清单</h2>
+  <div class="card"><ul>
+    <li>☐ JGS profile 完整、逐场核对收录</li>
+    <li>☐ 90 秒 swing video(开球/铁杆/短杆/推杆,双机位),YouTube 不公开链接</li>
+    <li>☐ 目标学校 20 所(学术匹配同样过滤;GPA/课程也是招募材料)</li>
+    <li>☐ 教练邮件模板:自我介绍 + 关键数据(scoring avg、JGS 链接)+ 未来 3 个月参赛表 + 视频</li>
+    <li>☐ NCAA Eligibility Center 注册(国际生 $160;D1/D2 学业+业余双认证,D3 也要业余认证)</li>
+    <li>☐ 业余身份:入学前奖金限制已取消(Brantmeier 和解),仍保留参赛/奖金凭证</li>
+  </ul></div>
+  <div class="key"><b>核心认知:</b>教练不会自己发现她。排名只是让教练回邮件的敲门砖——比赛日历和 recruiting 日历是并行的两条线。</div>
+
+  <h2>8 · 风险与对策</h2>
+  <div class="scroll"><table>
+    <thead><tr><th class="l">风险</th><th class="l">对策</th></tr></thead>
+    <tbody>
+      <tr><td class="l">星不够,2027 报不进目标 Open</td><td class="l">秋季按第 4 节攒到 ≥8★;每场 Open 同步报 Qualifier 兜底</td></tr>
+      <tr><td class="l">Canadian Junior Girls 报名已截止</td><td class="l">本周即查;若错过,把 U17(8/31)+ MJT National(9/11)提为主攻</td></tr>
+      <tr><td class="l">早春无状态(多伦多冬季无法户外)</td><td class="l">室内 launch monitor 保挥杆;4 月 PA 开季赛热身,避免 6 月才首秀</td></tr>
+      <tr><td class="l">为攒星打不利球场</td><td class="l">选赛三关一票否决;MJT 选 &lt;6,000y 场次</td></tr>
+      <tr><td class="l">排名够但没人联系</td><td class="l">Recruiting 线按月推进,不等排名"到位"才动</td></tr>
+    </tbody>
+  </table></div>
+
+  <footer>
+    2027 赛季规划 v2 · 2026-08-01 · 配套 Markdown:docs/20260801-2027赛季规划-JGS与NCAA路线.md<br>
+    数据来源(2026-08-01 抓取):ajga.org(schedule / fees / PBE step-2 &amp; step-6 / PBE Schedule 星值逐场 AJAX 实测)· juniorgolfscoreboard.com(2029 女子排名 2026-07-31 快照)· ncsasports.org(招募基准/规则日历)· AJGA House v. NCAA 专页 · NCAA Eligibility Center 国际生 FAQ<br>
+    v3 触发点:2026-11 AJGA 公布 2027 赛程后钉死参赛日历。
+  </footer>
+
+</div>
+</body>
+</html>
